@@ -129,9 +129,6 @@ namespace odb
       virtual transaction_impl*
       begin_transaction ();
 
-      virtual transaction_impl*
-      begin_transaction (session&);
-
     public:
       shared_ptr<connection_type>
       connection ();

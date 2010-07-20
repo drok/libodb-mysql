@@ -25,7 +25,6 @@ namespace odb
       typedef mysql::connection connection_type;
 
       transaction_impl (database_type&);
-      transaction_impl (database_type&, session_type&);
 
       virtual
       ~transaction_impl ();

@@ -25,16 +25,6 @@ namespace odb
     }
 
     transaction_impl::
-    transaction_impl (database_type& db, session_type& s)
-        : odb::transaction_impl (db, s), connection_ (db.connection ())
-    {
-      MYSQL* h (connection_->handle ());
-
-      if (mysql_real_query (h, "begin", 5) != 0)
-        throw database_exception (h);
-    }
-
-    transaction_impl::
     ~transaction_impl ()
     {
     }
