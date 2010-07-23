@@ -6,6 +6,8 @@
 #ifndef ODB_MYSQL_VERSION_HXX
 #define ODB_MYSQL_VERSION_HXX
 
+#include <mysql/mysql_version.h>
+
 #include <odb/version.hxx>
 
 // Version format is AABBCCDD where
@@ -29,6 +31,12 @@
 //
 #if ODB_VERSION != 9901
 #  error incompatible odb interface version detected
+#endif
+
+// Check that we have a compatible MySQL version (5.0.3 or later).
+//
+#if !defined(MYSQL_VERSION_ID) || MYSQL_VERSION_ID < 50003
+#  error incompatible MySQL version detected
 #endif
 
 // libodb-mysql version: odb interface version plus the bugfix
