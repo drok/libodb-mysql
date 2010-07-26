@@ -11,6 +11,8 @@
 #include <odb/forward.hxx>
 #include <odb/shared-ptr.hxx>
 
+#include <odb/mysql/statement.hxx>
+
 namespace odb
 {
   namespace mysql
@@ -18,6 +20,8 @@ namespace odb
     class connection: public shared_base
     {
     public:
+      typedef mysql::statement_cache statement_cache_type;
+
       connection (database&);
 
       virtual
@@ -30,6 +34,12 @@ namespace odb
         return handle_;
       }
 
+      statement_cache_type&
+      statement_cache ()
+      {
+        return statement_cache_;
+      }
+
     private:
       connection (const connection&);
       connection& operator= (const connection&);
@@ -37,6 +47,7 @@ namespace odb
     private:
       MYSQL mysql_;
       MYSQL* handle_;
+      statement_cache_type statement_cache_;
     };
   }
 }

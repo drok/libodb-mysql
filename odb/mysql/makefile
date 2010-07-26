@@ -11,7 +11,8 @@ connection-factory.cxx \
 database.cxx           \
 exceptions.cxx         \
 transaction.cxx        \
-transaction-impl.cxx
+transaction-impl.cxx   \
+statement.cxx
 
 cxx_obj   := $(addprefix $(out_base)/,$(cxx_tun:.cxx=.o))
 cxx_od    := $(cxx_obj:.o=.o.d)
