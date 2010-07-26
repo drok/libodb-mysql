@@ -19,6 +19,7 @@ namespace odb
     struct database_exception: odb::database_exception
     {
       database_exception (MYSQL*);
+      database_exception (MYSQL_STMT*);
       ~database_exception () throw ();
 
       unsigned int
