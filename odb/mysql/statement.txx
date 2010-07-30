@@ -6,48 +6,25 @@
 #include <cstddef> // std::size_t
 #include <cstring> // std::memset
 
-#include <odb/mysql/exceptions.hxx>
-
 namespace odb
 {
   namespace mysql
   {
-    template <typename T>
-    insert_statement<T>::
-    ~insert_statement ()
-    {
-    }
+    // object_statements
+    //
 
     template <typename T>
-    insert_statement<T>::
-    insert_statement (connection& conn,
-                      const std::string& query,
-                      image_type& image)
-        : statement (conn), image_ (image)
+    object_statements<T>::
+    object_statements (connection& conn)
+        : object_statements_base (conn),
+          image_binding_ (image_bind_, object_traits::column_count),
+          id_image_binding_ (image_bind_ + object_traits::column_count, 1)
     {
-      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
-        throw database_exception (stmt_);
+      std::memset (image_bind_, 0, sizeof (image_bind_));
+      std::memset (image_error_, 0, sizeof (image_error_));
 
-      std::memset (bind_, 0, sizeof (bind_));
-    }
-
-    template <typename T>
-    void insert_statement<T>::
-    execute ()
-    {
-      if (mysql_stmt_reset (stmt_))
-        throw database_exception (stmt_);
-
-      object_traits::bind (bind_, image_);
-
-      if (mysql_stmt_bind_param (stmt_, bind_))
-        throw database_exception (stmt_);
-
-      if (mysql_stmt_execute (stmt_))
-        throw database_exception (stmt_);
-
-      if (mysql_stmt_affected_rows (stmt_) != 1)
-        throw object_already_persistent ();
+      for (std::size_t i (0); i < object_traits::column_count; ++i)
+        image_bind_[i].error = image_error_ + i;
     }
   }
 }

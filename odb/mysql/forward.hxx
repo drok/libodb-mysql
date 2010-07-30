@@ -14,6 +14,10 @@ namespace odb
     class connection;
     class connection_factory;
     class transaction;
+    class binding;
+
+    template <typename T>
+    class object_statements;
   }
 }
 
