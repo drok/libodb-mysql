@@ -20,6 +20,11 @@ namespace odb
       if (mysql_init (handle_) == 0)
         throw std::bad_alloc ();
 
+      // Force the CLIENT_FOUND_ROWS flag so that UPDATE returns the
+      // number of found rows, not the number of changed rows. This
+      // is necessary to distinguish between the object-not-persistent
+      // and nothing-changed conditions.
+      //
       if (mysql_real_connect (handle_,
                               db.host (),
                               db.user (),
@@ -27,7 +32,7 @@ namespace odb
                               db.db (),
                               db.port (),
                               db.socket (),
-                              db.client_flags ()) == 0)
+                              db.client_flags () | CLIENT_FOUND_ROWS) == 0)
       {
         database_exception e (handle_);
         mysql_close (handle_);
