@@ -17,6 +17,8 @@
 #include <odb/traits.hxx>
 #include <odb/shared-ptr.hxx>
 
+#include <odb/mysql/version.hxx>
+
 namespace odb
 {
   namespace mysql

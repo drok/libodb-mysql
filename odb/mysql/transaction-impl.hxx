@@ -9,6 +9,7 @@
 #include <odb/shared-ptr.hxx>
 #include <odb/transaction.hxx>
 
+#include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 
 namespace odb

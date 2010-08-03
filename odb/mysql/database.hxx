@@ -6,14 +6,15 @@
 #ifndef ODB_MYSQL_DATABASE_HXX
 #define ODB_MYSQL_DATABASE_HXX
 
+#include <mysql/mysql.h>
+
 #include <string>
 #include <memory> // std::auto_ptr
-
-#include <mysql/mysql.h>
 
 #include <odb/shared-ptr.hxx>
 #include <odb/database.hxx>
 
+#include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>

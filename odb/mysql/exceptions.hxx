@@ -12,6 +12,8 @@
 
 #include <odb/exceptions.hxx>
 
+#include <odb/mysql/version.hxx>
+
 namespace odb
 {
   namespace mysql

@@ -8,6 +8,7 @@
 
 #include <odb/shared-ptr.hxx>
 
+#include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/connection.hxx>
 

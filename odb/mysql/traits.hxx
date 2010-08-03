@@ -6,24 +6,29 @@
 #ifndef ODB_MYSQL_TRAITS_HXX
 #define ODB_MYSQL_TRAITS_HXX
 
+#include <mysql/mysql.h> // MYSQL_TIME, used in custom specializations.
+
 #include <string>
 #include <cstddef> // std::size_t
 #include <cstring> // std::memcpy
 
 #include <odb/traits.hxx>
 
+#include <odb/mysql/version.hxx>
+
 namespace odb
 {
   namespace mysql
   {
     template <typename T>
-    struct value_traits: odb::value_traits<T>
+    class value_traits: public odb::value_traits<T>
     {
     };
 
     template <>
-    struct value_traits<std::string>
+    class value_traits<std::string>
     {
+    public:
       typedef std::string value_type;
 
       static void
