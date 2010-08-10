@@ -40,6 +40,14 @@ namespace odb
 
     template <typename T>
     void result_impl<T>::
+    current (T& x)
+    {
+      if (state_ == query_statement::success)
+        traits::init (x, statements_.image ());
+    }
+
+    template <typename T>
+    void result_impl<T>::
     next ()
     {
       cur_ = pointer_type ();

@@ -34,6 +34,9 @@ namespace odb
       pointer_type
       current (bool release);
 
+      virtual void
+      current (T&);
+
       void
       next ();
 
