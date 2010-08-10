@@ -5,8 +5,6 @@
 
 #include <mysql/mysqld_error.h> // ER_DUP_ENTRY
 
-#include <new> // std::bad_alloc
-
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/exceptions.hxx>
@@ -22,18 +20,15 @@ namespace odb
 
     statement::
     statement (connection& conn)
-        : conn_ (conn)
+        : conn_ (conn), stmt_ (conn_.alloc_stmt_handle ())
     {
-      stmt_ = mysql_stmt_init (conn_.handle ());
 
-      if (stmt_ == 0)
-        throw bad_alloc ();
     }
 
     statement::
     ~statement ()
     {
-      mysql_stmt_close (stmt_);
+      conn_.free_stmt_handle (stmt_);
     }
 
     void statement::

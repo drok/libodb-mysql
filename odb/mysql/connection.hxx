@@ -8,6 +8,8 @@
 
 #include <mysql/mysql.h>
 
+#include <vector>
+
 #include <odb/forward.hxx>
 #include <odb/shared-ptr.hxx>
 
@@ -52,17 +54,34 @@ namespace odb
       active (statement* s)
       {
         active_ = s;
+
+        if (s == 0 && stmt_handles_.size () > 0)
+          free_stmt_handles ();
       }
+
+    public:
+      MYSQL_STMT*
+      alloc_stmt_handle ();
+
+      void
+      free_stmt_handle (MYSQL_STMT*);
 
     private:
       connection (const connection&);
       connection& operator= (const connection&);
 
     private:
+      void
+      free_stmt_handles ();
+
+    private:
       MYSQL mysql_;
       MYSQL* handle_;
       statement* active_;
       statement_cache_type statement_cache_;
+
+      typedef std::vector<MYSQL_STMT*> stmt_handles;
+      stmt_handles stmt_handles_;
     };
   }
 }

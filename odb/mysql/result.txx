@@ -11,7 +11,6 @@ namespace odb
     result_impl<T>::
     ~result_impl ()
     {
-      statement_->free_result ();
     }
 
     template <typename T>
