@@ -41,6 +41,19 @@ namespace odb
         return statement_cache_;
       }
 
+    public:
+      statement*
+      active ()
+      {
+        return active_;
+      }
+
+      void
+      active (statement* s)
+      {
+        active_ = s;
+      }
+
     private:
       connection (const connection&);
       connection& operator= (const connection&);
@@ -48,6 +61,7 @@ namespace odb
     private:
       MYSQL mysql_;
       MYSQL* handle_;
+      statement* active_;
       statement_cache_type statement_cache_;
     };
   }

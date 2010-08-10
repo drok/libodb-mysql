@@ -15,7 +15,7 @@ namespace odb
   {
     connection::
     connection (database& db)
-        : handle_ (&mysql_), statement_cache_ (*this)
+        : handle_ (&mysql_), active_ (0), statement_cache_ (*this)
     {
       if (mysql_init (handle_) == 0)
         throw std::bad_alloc ();

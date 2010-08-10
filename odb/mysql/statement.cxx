@@ -36,6 +36,133 @@ namespace odb
       mysql_stmt_close (stmt_);
     }
 
+    void statement::
+    cancel ()
+    {
+    }
+
+    // query_statement
+    //
+
+    query_statement::
+    ~query_statement ()
+    {
+      if (conn_.active () == this)
+      {
+        try
+        {
+          free_result ();
+        }
+        catch (...)
+        {
+        }
+      }
+    }
+
+    query_statement::
+    query_statement (connection& conn,
+                     const string& query,
+                     binding& image,
+                     MYSQL_BIND* parameters)
+        : statement (conn),
+          image_ (image),
+          image_version_ (0),
+          parameters_ (parameters)
+    {
+      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
+        throw database_exception (stmt_);
+    }
+
+    void query_statement::
+    execute ()
+    {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
+      if (mysql_stmt_reset (stmt_))
+        throw database_exception (stmt_);
+
+      if (image_version_ != image_.version)
+      {
+        if (mysql_stmt_bind_result (stmt_, image_.bind))
+          throw database_exception (stmt_);
+
+        image_version_ = image_.version;
+      }
+
+      if (parameters_ != 0)
+      {
+        // @@ versioning
+        //
+        if (mysql_stmt_bind_param (stmt_, parameters_))
+          throw database_exception (stmt_);
+      }
+
+      if (mysql_stmt_execute (stmt_))
+        throw database_exception (stmt_);
+
+      conn_.active (this);
+    }
+
+    query_statement::result query_statement::
+    fetch ()
+    {
+      int r (mysql_stmt_fetch (stmt_));
+
+      switch (r)
+      {
+      case 0:
+        {
+          return success;
+        }
+      case 1:
+        {
+          throw database_exception (stmt_);
+        }
+      case MYSQL_NO_DATA:
+        {
+          return no_data;
+        }
+      case MYSQL_DATA_TRUNCATED:
+        {
+          return truncated;
+        }
+      }
+    }
+
+    void query_statement::
+    refetch ()
+    {
+      // Re-fetch columns that were truncated.
+      //
+      for (size_t i (0); i < image_.count; ++i)
+      {
+        if (*image_.bind[i].error)
+        {
+          *image_.bind[i].error = 0;
+
+          if (mysql_stmt_fetch_column (
+                stmt_, image_.bind + i, static_cast<unsigned int> (i), 0))
+            throw database_exception (stmt_);
+        }
+      }
+    }
+
+    void query_statement::
+    free_result ()
+    {
+      if (mysql_stmt_free_result (stmt_))
+        throw database_exception (stmt_);
+
+      conn_.active (0);
+    }
+
+    void query_statement::
+    cancel ()
+    {
+      free_result ();
+    }
+
     // insert_statement
     //
 
@@ -57,6 +184,9 @@ namespace odb
     void insert_statement::
     execute ()
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 
@@ -92,6 +222,16 @@ namespace odb
     select_statement::
     ~select_statement ()
     {
+      if (conn_.active () == this)
+      {
+        try
+        {
+          free_result ();
+        }
+        catch (...)
+        {
+        }
+      }
     }
 
     select_statement::
@@ -112,6 +252,9 @@ namespace odb
     select_statement::result select_statement::
     execute ()
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 
@@ -133,6 +276,8 @@ namespace odb
 
       if (mysql_stmt_execute (stmt_))
         throw database_exception (stmt_);
+
+      conn_.active (this);
 
       int r (mysql_stmt_fetch (stmt_));
 
@@ -181,7 +326,16 @@ namespace odb
     {
       if (mysql_stmt_free_result (stmt_))
         throw database_exception (stmt_);
+
+      conn_.active (0);
     }
+
+    void select_statement::
+    cancel ()
+    {
+      free_result ();
+    }
+
 
     // update_statement
     //
@@ -209,6 +363,9 @@ namespace odb
     void update_statement::
     execute ()
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 
@@ -259,6 +416,9 @@ namespace odb
     void delete_statement::
     execute ()
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 

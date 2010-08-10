@@ -32,6 +32,9 @@ namespace odb
     void transaction_impl::
     commit ()
     {
+      if (statement* a = connection_->active ())
+        a->cancel ();
+
       MYSQL* h (connection_->handle ());
 
       if (mysql_real_query (h, "commit", 6) != 0)
@@ -41,6 +44,9 @@ namespace odb
     void transaction_impl::
     rollback ()
     {
+      if (statement* a = connection_->active ())
+        a->cancel ();
+
       MYSQL* h (connection_->handle ());
 
       if (mysql_real_query (h, "rollback", 8) != 0)

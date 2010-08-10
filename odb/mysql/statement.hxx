@@ -48,12 +48,61 @@ namespace odb
       virtual
       ~statement () = 0;
 
+      // Cancel the statement execution (e.g., result fetching) so
+      // that another statement can be executed on the connection.
+      //
+      virtual void
+      cancel ();
+
     protected:
       statement (connection&);
 
     protected:
       connection& conn_;
       MYSQL_STMT* stmt_;
+    };
+
+    class query_statement: public statement
+    {
+    public:
+      virtual
+      ~query_statement ();
+
+      query_statement (connection& conn,
+                       const std::string& query,
+                       binding& image,
+                       MYSQL_BIND* parameters);
+      enum result
+      {
+        success,
+        no_data,
+        truncated
+      };
+
+      void
+      execute ();
+
+      result
+      fetch ();
+
+      void
+      refetch ();
+
+      void
+      free_result ();
+
+      virtual void
+      cancel ();
+
+    private:
+      query_statement (const query_statement&);
+      query_statement& operator= (const query_statement&);
+
+    private:
+      binding& image_;
+      std::size_t image_version_;
+
+      MYSQL_BIND* parameters_;
     };
 
     class insert_statement: public statement
@@ -107,6 +156,8 @@ namespace odb
       void
       free_result ();
 
+      void
+      cancel ();
 
     private:
       select_statement (const select_statement&);
@@ -277,6 +328,10 @@ namespace odb
 
         return *del_;
       }
+
+    private:
+      object_statements (const object_statements&);
+      object_statements& operator= (const object_statements&);
 
     private:
       // The last element is the id parameter. The update statement
