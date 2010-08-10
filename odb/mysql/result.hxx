@@ -31,8 +31,8 @@ namespace odb
       result_impl (shared_ptr<query_statement> statement,
                    object_statements<T>& statements);
 
-      pointer_type
-      current (bool release);
+      virtual void
+      current ();
 
       virtual void
       current (T&);
@@ -41,10 +41,8 @@ namespace odb
       next ();
 
     private:
-      pointer_type cur_;
       shared_ptr<query_statement> statement_;
       object_statements<T>& statements_;
-      query_statement::result state_;
     };
   }
 }

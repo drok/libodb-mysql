@@ -23,26 +23,22 @@ namespace odb
     }
 
     template <typename T>
-    typename result_impl<T>::pointer_type result_impl<T>::
-    current (bool release)
+    void result_impl<T>::
+    current ()
     {
-      if (!pointer_ops::null_ptr (cur_))
-        return cur_;
-
-      if (state_ == query_statement::success)
+      if (!this->end_)
       {
-        cur_ = traits::create ();
-        traits::init (pointer_ops::get_ref (cur_), statements_.image ());
+        this->current_ = traits::create ();
+        traits::init (pointer_ops::get_ref (this->current_),
+                      statements_.image ());
       }
-
-      return cur_;
     }
 
     template <typename T>
     void result_impl<T>::
     current (T& x)
     {
-      if (state_ == query_statement::success)
+      if (!this->end_)
         traits::init (x, statements_.image ());
     }
 
@@ -50,20 +46,31 @@ namespace odb
     void result_impl<T>::
     next ()
     {
-      cur_ = pointer_type ();
-      state_ = statement_->fetch ();
+      this->current_ = pointer_type ();
+      query_statement::result r (statement_->fetch ());
 
-      if (state_ == query_statement::truncated)
+      switch (r)
       {
-        typename traits::image_type& i (statements_.image ());
-
-        if (traits::grow (i, statements_.image_error ()))
+      case query_statement::truncated:
         {
-          traits::bind (statements_.image_binding (), i);
-          statement_->refetch ();
-        }
+          typename traits::image_type& i (statements_.image ());
 
-        state_ == query_statement::success;
+          if (traits::grow (i, statements_.image_error ()))
+          {
+            traits::bind (statements_.image_binding (), i);
+            statement_->refetch ();
+          }
+          // Fall throught.
+        }
+      case query_statement::success:
+        {
+          break;
+        }
+      case query_statement::no_data:
+        {
+          this->end_ = true;
+          break;
+        }
       }
     }
   }
