@@ -42,9 +42,32 @@ namespace odb
       return *this;
     }
 
+    query& query::
+    operator+= (const query& q)
+    {
+      size_t n (clause_.size ());
+
+      if (n != 0 && clause_[n - 1] != ' ' &&
+          !q.clause_.empty () && q.clause_[0] != ' ')
+        clause_ += ' ';
+
+      clause_ += q.clause_;
+
+      parameters_.insert (
+        parameters_.end (), q.parameters_.begin (), q.parameters_.end ());
+
+      binding_.insert (
+        binding_.end (), q.binding_.begin (), q.binding_.end ());
+    }
+
     void query::
     add (shared_ptr<query_param> p)
     {
+      size_t n (clause_.size ());
+
+      if (n != 0 && clause_[n - 1] != ' ')
+        clause_ += ' ';
+
       clause_ += '?';
 
       parameters_.push_back (p);

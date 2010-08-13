@@ -7,22 +7,100 @@ namespace odb
 {
   namespace mysql
   {
-    template <typename T>
-    query& query::
-    operator+= (val_bind<T> v)
+    // query
+    //
+
+    template <image_id_type ID>
+    query::
+    query (const query_column<bool, ID>& c)
+        : clause_ (c.name ())
     {
-      add (
-        shared_ptr<query_param> (
-          new (shared) query_param_impl<T, value_traits<T>::image_id> (v)));
+      clause_ += " IS TRUE";
     }
 
-    template <typename T>
-    query& query::
-    operator+= (ref_bind<T> r)
+    // query_column
+    //
+    template <typename T, image_id_type ID>
+    query query_column<T, ID>::
+    in (const T& v1, const T& v2) const
     {
-      add (
-        shared_ptr<query_param> (
-          new (shared) query_param_impl<T, value_traits<T>::image_id> (r)));
+      query q (name_);
+      q += "IN (";
+      q.append<T, ID> (val_bind<T> (v1));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v2));
+      q += ")";
+      return q;
+    }
+
+    template <typename T, image_id_type ID>
+    query query_column<T, ID>::
+    in (const T& v1, const T& v2, const T& v3) const
+    {
+      query q (name_);
+      q += "IN (";
+      q.append<T, ID> (val_bind<T> (v1));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v2));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v3));
+      q += ")";
+      return q;
+    }
+
+    template <typename T, image_id_type ID>
+    query query_column<T, ID>::
+    in (const T& v1, const T& v2, const T& v3, const T& v4) const
+    {
+      query q (name_);
+      q += "IN (";
+      q.append<T, ID> (val_bind<T> (v1));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v2));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v3));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v4));
+      q += ")";
+      return q;
+    }
+
+    template <typename T, image_id_type ID>
+    query query_column<T, ID>::
+    in (const T& v1, const T& v2, const T& v3, const T& v4, const T& v5) const
+    {
+      query q (name_);
+      q += "IN (";
+      q.append<T, ID> (val_bind<T> (v1));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v2));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v3));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v4));
+      q += ",";
+      q.append<T, ID> (val_bind<T> (v5));
+      q += ")";
+      return q;
+    }
+
+    template <typename T, image_id_type ID>
+    template <typename I>
+    query query_column<T, ID>::
+    in_range (I begin, I end) const
+    {
+      query q (name_);
+      q += "IN (";
+
+      for (I i (begin); i != end; ++i)
+      {
+        if (i != begin)
+          q += ",";
+
+        q.append<T, ID> (val_bind<T> (*i));
+      }
+      q += ")";
+      return q;
     }
   }
 }

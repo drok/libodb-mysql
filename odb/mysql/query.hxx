@@ -12,6 +12,7 @@
 #include <vector>
 #include <cstddef> // std::size_t
 
+#include <odb/query.hxx>
 #include <odb/shared-ptr.hxx>
 
 #include <odb/mysql/version.hxx>
@@ -26,6 +27,7 @@ namespace odb
     class val_bind
     {
     public:
+      explicit
       val_bind (const T& v): val (v) {}
 
       const T& val;
@@ -35,6 +37,7 @@ namespace odb
     class ref_bind
     {
     public:
+      explicit
       ref_bind (const T& r): ref (r) {}
 
       const T& ref;
@@ -67,6 +70,11 @@ namespace odb
       const void* value_;
     };
 
+    //
+    //
+    template <typename T, image_id_type ID>
+    struct query_column;
+
     class query
     {
     public:
@@ -79,6 +87,23 @@ namespace odb
           : clause_ (q)
       {
       }
+
+      template <typename T>
+      explicit
+      query (val_bind<T> v)
+      {
+        append<T, value_traits<T>::image_id> (v);
+      }
+
+      template <typename T>
+      explicit
+      query (ref_bind<T> r)
+      {
+        append<T, value_traits<T>::image_id> (r);
+      }
+
+      template <image_id_type ID>
+      query (const query_column<bool, ID>&);
 
       query (const query&);
 
@@ -109,26 +134,44 @@ namespace odb
 
     public:
       query&
-      operator+= (const query& q)
-      {
-        clause_ += ' ';
-        clause_ += q.clause_;
-      }
+      operator+= (const query&);
 
       query&
       operator+= (const std::string& q)
       {
-        clause_ += ' ';
+        size_t n (clause_.size ());
+
+        if (n != 0 && clause_[n - 1] != ' ' && !q.empty () && q[0] != ' ')
+          clause_ += ' ';
+
         clause_ += q;
+        return *this;
       }
 
       template <typename T>
       query&
-      operator+= (val_bind<T>);
+      operator+= (val_bind<T> v)
+      {
+        append<T, value_traits<T>::image_id> (v);
+        return *this;
+      }
 
       template <typename T>
       query&
-      operator+= (ref_bind<T>);
+      operator+= (ref_bind<T> r)
+      {
+        append<T, value_traits<T>::image_id> (r);
+        return *this;
+      }
+
+    public:
+      template <typename T, image_id_type ID>
+      void
+      append (val_bind<T>);
+
+      template <typename T, image_id_type ID>
+      void
+      append (ref_bind<T>);
 
     private:
       void
@@ -241,6 +284,708 @@ namespace odb
       r += s;
       return r;
     }
+
+    inline query
+    operator&& (const query& x, const query& y)
+    {
+      query r ("(");
+      r += x;
+      r += ") AND (";
+      r += y;
+      r += ")";
+      return r;
+    }
+
+    inline query
+    operator|| (const query& x, const query& y)
+    {
+      query r ("(");
+      r += x;
+      r += ") OR (";
+      r += y;
+      r += ")";
+      return r;
+    }
+
+    inline query
+    operator! (const query& x)
+    {
+      query r ("!(");
+      r += x;
+      r += ")";
+      return r;
+    }
+
+    // query_column
+    //
+
+    template <typename T, typename T2>
+    class copy_bind: public val_bind<T>
+    {
+    public:
+      explicit
+      copy_bind (const T2& v): val_bind<T> (val), val (v) {}
+
+      const T val;
+    };
+
+    template <typename T>
+    const T&
+    type_instance ();
+
+    template <typename T, image_id_type ID>
+    struct query_column
+    {
+      explicit
+      query_column (const char* name)
+          : name_ (name)
+      {
+      }
+
+      const char*
+      name () const
+      {
+        return name_;
+      }
+
+      // is_null, is_not_null
+      //
+    public:
+      query
+      is_null () const
+      {
+        query q (name_);
+        q += "IS NULL";
+        return q;
+      }
+
+      query
+      is_not_null () const
+      {
+        query q (name_);
+        q += "IS NOT NULL";
+        return q;
+      }
+
+      // in
+      //
+    public:
+      query
+      in (const T&, const T&) const;
+
+      query
+      in (const T&, const T&, const T&) const;
+
+      query
+      in (const T&, const T&, const T&, const T&) const;
+
+      query
+      in (const T&, const T&, const T&, const T&, const T&) const;
+
+      template <typename I>
+      query
+      in_range (I begin, I end) const;
+
+      // =
+      //
+    public:
+      query
+      equal (const T& v) const
+      {
+        return equal (val_bind<T> (v));
+      }
+
+      query
+      equal (val_bind<T> v) const
+      {
+        query q (name_);
+        q += "=";
+        q.append<T, ID> (v);
+        return q;
+      }
+
+      template <typename T2>
+      query
+      equal (val_bind<T2> v) const
+      {
+        copy_bind<T, T2> c (v.val);
+        return equal<T> (c);
+      }
+
+      query
+      equal (ref_bind<T> r) const
+      {
+        query q (name_);
+        q += "=";
+        q.append<T, ID> (r);
+        return q;
+      }
+
+      friend query
+      operator== (const query_column& c, const T& v)
+      {
+        return c.equal (v);
+      }
+
+      friend query
+      operator== (const T& v, const query_column& c)
+      {
+        return c.equal (v);
+      }
+
+      friend query
+      operator== (const query_column& c, val_bind<T> v)
+      {
+        return c.equal (v);
+      }
+
+      friend query
+      operator== (val_bind<T> v, const query_column& c)
+      {
+        return c.equal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator== (const query_column& c, val_bind<T2> v)
+      {
+        return c.equal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator== (val_bind<T2> v, const query_column& c)
+      {
+        return c.equal (v);
+      }
+
+      friend query
+      operator== (const query_column& c, ref_bind<T> r)
+      {
+        return c.equal (r);
+      }
+
+      friend query
+      operator== (ref_bind<T> r, const query_column& c)
+      {
+        return c.equal (r);
+      }
+
+      // !=
+      //
+    public:
+      query
+      unequal (const T& v) const
+      {
+        return unequal (val_bind<T> (v));
+      }
+
+      query
+      unequal (val_bind<T> v) const
+      {
+        query q (name_);
+        q += "!=";
+        q.append<T, ID> (v);
+        return q;
+      }
+
+      template <typename T2>
+      query
+      unequal (val_bind<T2> v) const
+      {
+        copy_bind<T, T2> c (v.val);
+        return unequal<T> (c);
+      }
+
+      query
+      unequal (ref_bind<T> r) const
+      {
+        query q (name_);
+        q += "!=";
+        q.append<T, ID> (r);
+        return q;
+      }
+
+      friend query
+      operator!= (const query_column& c, const T& v)
+      {
+        return c.unequal (v);
+      }
+
+      friend query
+      operator!= (const T& v, const query_column& c)
+      {
+        return c.unequal (v);
+      }
+
+      friend query
+      operator!= (const query_column& c, val_bind<T> v)
+      {
+        return c.unequal (v);
+      }
+
+      friend query
+      operator!= (val_bind<T> v, const query_column& c)
+      {
+        return c.unequal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator!= (const query_column& c, val_bind<T2> v)
+      {
+        return c.unequal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator!= (val_bind<T2> v, const query_column& c)
+      {
+        return c.unequal (v);
+      }
+
+      friend query
+      operator!= (const query_column& c, ref_bind<T> r)
+      {
+        return c.unequal (r);
+      }
+
+      friend query
+      operator!= (ref_bind<T> r, const query_column& c)
+      {
+        return c.unequal (r);
+      }
+
+      // <
+      //
+    public:
+      query
+      less (const T& v) const
+      {
+        return less (val_bind<T> (v));
+      }
+
+      query
+      less (val_bind<T> v) const
+      {
+        query q (name_);
+        q += "<";
+        q.append<T, ID> (v);
+        return q;
+      }
+
+      template <typename T2>
+      query
+      less (val_bind<T2> v) const
+      {
+        copy_bind<T, T2> c (v.val);
+        return less<T> (c);
+      }
+
+      query
+      less (ref_bind<T> r) const
+      {
+        query q (name_);
+        q += "<";
+        q.append<T, ID> (r);
+        return q;
+      }
+
+      friend query
+      operator< (const query_column& c, const T& v)
+      {
+        return c.less (v);
+      }
+
+      friend query
+      operator< (const T& v, const query_column& c)
+      {
+        return c.greater (v);
+      }
+
+      friend query
+      operator< (const query_column& c, val_bind<T> v)
+      {
+        return c.less (v);
+      }
+
+      friend query
+      operator< (val_bind<T> v, const query_column& c)
+      {
+        return c.greater (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator< (const query_column& c, val_bind<T2> v)
+      {
+        return c.less (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator< (val_bind<T2> v, const query_column& c)
+      {
+        return c.greater (v);
+      }
+
+      friend query
+      operator< (const query_column& c, ref_bind<T> r)
+      {
+        return c.less (r);
+      }
+
+      friend query
+      operator< (ref_bind<T> r, const query_column& c)
+      {
+        return c.greater (r);
+      }
+
+      // >
+      //
+    public:
+      query
+      greater (const T& v) const
+      {
+        return greater (val_bind<T> (v));
+      }
+
+      query
+      greater (val_bind<T> v) const
+      {
+        query q (name_);
+        q += ">";
+        q.append<T, ID> (v);
+        return q;
+      }
+
+      template <typename T2>
+      query
+      greater (val_bind<T2> v) const
+      {
+        copy_bind<T, T2> c (v.val);
+        return greater<T> (c);
+      }
+
+      query
+      greater (ref_bind<T> r) const
+      {
+        query q (name_);
+        q += ">";
+        q.append<T, ID> (r);
+        return q;
+      }
+
+      friend query
+      operator> (const query_column& c, const T& v)
+      {
+        return c.greater (v);
+      }
+
+      friend query
+      operator> (const T& v, const query_column& c)
+      {
+        return c.less (v);
+      }
+
+      friend query
+      operator> (const query_column& c, val_bind<T> v)
+      {
+        return c.greater (v);
+      }
+
+      friend query
+      operator> (val_bind<T> v, const query_column& c)
+      {
+        return c.less (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator> (const query_column& c, val_bind<T2> v)
+      {
+        return c.greater (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator> (val_bind<T2> v, const query_column& c)
+      {
+        return c.less (v);
+      }
+
+      friend query
+      operator> (const query_column& c, ref_bind<T> r)
+      {
+        return c.greater (r);
+      }
+
+      friend query
+      operator> (ref_bind<T> r, const query_column& c)
+      {
+        return c.less (r);
+      }
+
+      // <=
+      //
+    public:
+      query
+      less_equal (const T& v) const
+      {
+        return less_equal (val_bind<T> (v));
+      }
+
+      query
+      less_equal (val_bind<T> v) const
+      {
+        query q (name_);
+        q += "<=";
+        q.append<T, ID> (v);
+        return q;
+      }
+
+      template <typename T2>
+      query
+      less_equal (val_bind<T2> v) const
+      {
+        copy_bind<T, T2> c (v.val);
+        return less_equal<T> (c);
+      }
+
+      query
+      less_equal (ref_bind<T> r) const
+      {
+        query q (name_);
+        q += "<=";
+        q.append<T, ID> (r);
+        return q;
+      }
+
+      friend query
+      operator<= (const query_column& c, const T& v)
+      {
+        return c.less_equal (v);
+      }
+
+      friend query
+      operator<= (const T& v, const query_column& c)
+      {
+        return c.greater_equal (v);
+      }
+
+      friend query
+      operator<= (const query_column& c, val_bind<T> v)
+      {
+        return c.less_equal (v);
+      }
+
+      friend query
+      operator<= (val_bind<T> v, const query_column& c)
+      {
+        return c.greater_equal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator<= (const query_column& c, val_bind<T2> v)
+      {
+        return c.less_equal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator<= (val_bind<T2> v, const query_column& c)
+      {
+        return c.greater_equal (v);
+      }
+
+      friend query
+      operator<= (const query_column& c, ref_bind<T> r)
+      {
+        return c.less_equal (r);
+      }
+
+      friend query
+      operator<= (ref_bind<T> r, const query_column& c)
+      {
+        return c.greater_equal (r);
+      }
+
+      // >=
+      //
+    public:
+      query
+      greater_equal (const T& v) const
+      {
+        return greater_equal (val_bind<T> (v));
+      }
+
+      query
+      greater_equal (val_bind<T> v) const
+      {
+        query q (name_);
+        q += ">=";
+        q.append<T, ID> (v);
+        return q;
+      }
+
+      template <typename T2>
+      query
+      greater_equal (val_bind<T2> v) const
+      {
+        copy_bind<T, T2> c (v.val);
+        return greater_equal<T> (c);
+      }
+
+      query
+      greater_equal (ref_bind<T> r) const
+      {
+        query q (name_);
+        q += ">=";
+        q.append<T, ID> (r);
+        return q;
+      }
+
+      friend query
+      operator>= (const query_column& c, const T& v)
+      {
+        return c.greater_equal (v);
+      }
+
+      friend query
+      operator>= (const T& v, const query_column& c)
+      {
+        return c.less_equal (v);
+      }
+
+      friend query
+      operator>= (const query_column& c, val_bind<T> v)
+      {
+        return c.greater_equal (v);
+      }
+
+      friend query
+      operator>= (val_bind<T> v, const query_column& c)
+      {
+        return c.less_equal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator>= (const query_column& c, val_bind<T2> v)
+      {
+        return c.greater_equal (v);
+      }
+
+      template <typename T2>
+      friend query
+      operator>= (val_bind<T2> v, const query_column& c)
+      {
+        return c.less_equal (v);
+      }
+
+      friend query
+      operator>= (const query_column& c, ref_bind<T> r)
+      {
+        return c.greater_equal (r);
+      }
+
+      friend query
+      operator>= (ref_bind<T> r, const query_column& c)
+      {
+        return c.less_equal (r);
+      }
+
+      // Column comparison.
+      //
+    public:
+      template <typename T2, image_id_type I2>
+      query
+      operator== (const query_column<T2, I2>& c) const
+      {
+        // We can compare columns only if we can compare their C++ types.
+        //
+        (void) (sizeof (type_instance<T> () == type_instance<T2> ()));
+
+        query q (name_);
+        q += "=";
+        q += c.name ();
+        return q;
+      }
+
+      template <typename T2, image_id_type I2>
+      query
+      operator!= (const query_column<T2, I2>& c) const
+      {
+        // We can compare columns only if we can compare their C++ types.
+        //
+        (void) (sizeof (type_instance<T> () != type_instance<T2> ()));
+
+        query q (name_);
+        q += "!=";
+        q += c.name ();
+        return q;
+      }
+
+      template <typename T2, image_id_type I2>
+      query
+      operator< (const query_column<T2, I2>& c) const
+      {
+        // We can compare columns only if we can compare their C++ types.
+        //
+        (void) (sizeof (type_instance<T> () < type_instance<T2> ()));
+
+        query q (name_);
+        q += "<";
+        q += c.name ();
+        return q;
+      }
+
+      template <typename T2, image_id_type I2>
+      query
+      operator> (const query_column<T2, I2>& c) const
+      {
+        // We can compare columns only if we can compare their C++ types.
+        //
+        (void) (sizeof (type_instance<T> () > type_instance<T2> ()));
+
+        query q (name_);
+        q += ">";
+        q += c.name ();
+        return q;
+      }
+
+      template <typename T2, image_id_type I2>
+      query
+      operator<= (const query_column<T2, I2>& c) const
+      {
+        // We can compare columns only if we can compare their C++ types.
+        //
+        (void) (sizeof (type_instance<T> () <= type_instance<T2> ()));
+
+        query q (name_);
+        q += "<=";
+        q += c.name ();
+        return q;
+      }
+
+      template <typename T2, image_id_type I2>
+      query
+      operator>= (const query_column<T2, I2>& c) const
+      {
+        // We can compare columns only if we can compare their C++ types.
+        //
+        (void) (sizeof (type_instance<T> () >= type_instance<T2> ()));
+
+        query q (name_);
+        q += ">=";
+        q += c.name ();
+        return q;
+      }
+
+    private:
+      const char* name_;
+    };
 
     //
     //
@@ -823,6 +1568,56 @@ namespace odb
   }
 }
 
+// odb::query specialization for MySQL.
+//
+namespace odb
+{
+  template <typename T>
+  class query<T, mysql::query>: public object_traits<T>::query_type
+  {
+  public:
+    // We don't define any typedefs here since they may clash with
+    // column names defined by our base type.
+    //
+
+    query ()
+    {
+    }
+
+    explicit
+    query (const std::string& q)
+        : object_traits<T>::query_type (q)
+    {
+    }
+
+    template <typename T2>
+    explicit
+    query (mysql::val_bind<T2> v)
+        : object_traits<T>::query_type (mysql::query (v))
+    {
+    }
+
+    template <typename T2>
+    explicit
+    query (mysql::ref_bind<T2> r)
+        : object_traits<T>::query_type (mysql::query (r))
+    {
+    }
+
+    query (const mysql::query& q)
+        : object_traits<T>::query_type (q)
+    {
+    }
+
+    template <mysql::image_id_type ID>
+    query (const mysql::query_column<bool, ID>& qc)
+        : object_traits<T>::query_type (qc)
+    {
+    }
+  };
+}
+
+#include <odb/mysql/query.ixx>
 #include <odb/mysql/query.txx>
 
 #endif // ODB_MYSQL_QUERY_HXX
