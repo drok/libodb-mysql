@@ -45,84 +45,110 @@ namespace odb
     };
 
     template <typename T>
-    class value_traits: public odb::value_traits<T>
+    class generic_value_traits
+    {
+    public:
+      typedef T type;
+      typedef T value_type;
+
+      template <typename I>
+      static void
+      set_value (T& v, I i, bool is_null)
+      {
+        if (!is_null)
+          v = T (i);
+        else
+          v = T ();
+      }
+
+      template <typename I>
+      static void
+      set_image (I& i, bool& is_null, T v)
+      {
+        is_null = false;
+        i = I (v);
+      }
+    };
+
+    template <typename T>
+    class value_traits: public generic_value_traits<T>
     {
     };
 
     // Integral types.
     //
     template <>
-    class value_traits<bool>: public odb::value_traits<bool>
+    class value_traits<bool>: public generic_value_traits<bool>
     {
     public:
       static const image_id_type image_id = id_tiny;
     };
 
     template <>
-    class value_traits<signed char>: public odb::value_traits<signed char>
+    class value_traits<signed char>: public generic_value_traits<signed char>
     {
     public:
       static const image_id_type image_id = id_tiny;
     };
 
     template <>
-    class value_traits<unsigned char>: public odb::value_traits<unsigned char>
+    class value_traits<unsigned char>: public generic_value_traits<unsigned char>
     {
     public:
       static const image_id_type image_id = id_utiny;
     };
 
     template <>
-    class value_traits<short>: public odb::value_traits<short>
+    class value_traits<short>: public generic_value_traits<short>
     {
     public:
       static const image_id_type image_id = id_short;
     };
 
     template <>
-    class value_traits<unsigned short>: public odb::value_traits<unsigned short>
+    class value_traits<unsigned short>: public generic_value_traits<unsigned short>
     {
     public:
       static const image_id_type image_id = id_ushort;
     };
 
     template <>
-    class value_traits<int>: public odb::value_traits<int>
+    class value_traits<int>: public generic_value_traits<int>
     {
     public:
       static const image_id_type image_id = id_long;
     };
 
     template <>
-    class value_traits<unsigned int>: public odb::value_traits<unsigned int>
+    class value_traits<unsigned int>: public generic_value_traits<unsigned int>
     {
     public:
       static const image_id_type image_id = id_ulong;
     };
 
     template <>
-    class value_traits<long>: public odb::value_traits<long>
+    class value_traits<long>: public generic_value_traits<long>
     {
     public:
       static const image_id_type image_id = id_longlong;
     };
 
     template <>
-    class value_traits<unsigned long>: public odb::value_traits<unsigned long>
+    class value_traits<unsigned long>: public generic_value_traits<unsigned long>
     {
     public:
       static const image_id_type image_id = id_ulonglong;
     };
 
     template <>
-    class value_traits<long long>: public odb::value_traits<long long>
+    class value_traits<long long>: public generic_value_traits<long long>
     {
     public:
       static const image_id_type image_id = id_longlong;
     };
 
     template <>
-    class value_traits<unsigned long long>: public odb::value_traits<unsigned long long>
+    class value_traits<unsigned long long>: public generic_value_traits<unsigned long long>
     {
     public:
       static const image_id_type image_id = id_ulonglong;
@@ -131,14 +157,14 @@ namespace odb
     // Float types.
     //
     template <>
-    class value_traits<float>: public odb::value_traits<float>
+    class value_traits<float>: public generic_value_traits<float>
     {
     public:
       static const image_id_type image_id = id_float;
     };
 
     template <>
-    class value_traits<double>: public odb::value_traits<double>
+    class value_traits<double>: public generic_value_traits<double>
     {
     public:
       static const image_id_type image_id = id_double;
@@ -150,11 +176,12 @@ namespace odb
     class value_traits<std::string>
     {
     public:
+      typedef std::string type;
       typedef std::string value_type;
       static const image_id_type image_id = id_string;
 
       static void
-      set_value (value_type& v, const char* s, std::size_t n, bool is_null)
+      set_value (std::string& v, const char* s, std::size_t n, bool is_null)
       {
         if (!is_null)
           v.assign (s, n);
@@ -167,7 +194,7 @@ namespace odb
                  std::size_t c,
                  std::size_t& n,
                  bool& is_null,
-                 const value_type& v)
+                 const std::string& v)
       {
         is_null = false;
         n = v.size ();
@@ -183,7 +210,7 @@ namespace odb
       set_image (buffer& b,
                  std::size_t& n,
                  bool& is_null,
-                 const value_type& v)
+                 const std::string& v)
       {
         is_null = false;
         n = v.size ();
@@ -204,6 +231,7 @@ namespace odb
     class value_traits<const char*>
     {
     public:
+      typedef const char* type;
       typedef const char* value_type;
       static const image_id_type image_id = id_string;
 
@@ -212,7 +240,7 @@ namespace odb
                  std::size_t c,
                  std::size_t& n,
                  bool& is_null,
-                 value_type v)
+                 const char* v)
       {
         is_null = false;
         n = std::strlen (v);
@@ -228,7 +256,7 @@ namespace odb
       set_image (buffer& b,
                  std::size_t& n,
                  bool& is_null,
-                 const value_type& v)
+                 const char* v)
       {
         is_null = false;
         n = std::strlen (v);
