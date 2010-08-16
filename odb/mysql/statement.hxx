@@ -69,7 +69,7 @@ namespace odb
       ~query_statement ();
 
       query_statement (connection& conn,
-                       const std::string& query,
+                       const std::string& statement,
                        binding& image,
                        MYSQL_BIND* parameters);
       enum result
@@ -105,38 +105,38 @@ namespace odb
       MYSQL_BIND* parameters_;
     };
 
-    class insert_statement: public statement
+    class persist_statement: public statement
     {
     public:
       virtual
-      ~insert_statement ();
+      ~persist_statement ();
 
-      insert_statement (connection& conn,
-                        const std::string& query,
-                        binding& image);
+      persist_statement (connection& conn,
+                         const std::string& statement,
+                         binding& image);
 
       void
       execute ();
 
     private:
-      insert_statement (const insert_statement&);
-      insert_statement& operator= (const insert_statement&);
+      persist_statement (const persist_statement&);
+      persist_statement& operator= (const persist_statement&);
 
     private:
       binding& image_;
       std::size_t version_;
     };
 
-    class select_statement: public statement
+    class find_statement: public statement
     {
     public:
       virtual
-      ~select_statement ();
+      ~find_statement ();
 
-      select_statement (connection& conn,
-                        const std::string& query,
-                        binding& id,
-                        binding& image);
+      find_statement (connection& conn,
+                      const std::string& statement,
+                      binding& id,
+                      binding& image);
       enum result
       {
         success,
@@ -160,8 +160,8 @@ namespace odb
       cancel ();
 
     private:
-      select_statement (const select_statement&);
-      select_statement& operator= (const select_statement&);
+      find_statement (const find_statement&);
+      find_statement& operator= (const find_statement&);
 
     private:
       binding& id_;
@@ -171,22 +171,22 @@ namespace odb
       std::size_t image_version_;
     };
 
-    class update_statement: public statement
+    class store_statement: public statement
     {
     public:
       virtual
-      ~update_statement ();
+      ~store_statement ();
 
-      update_statement (connection& conn,
-                        const std::string& query,
-                        binding& id,
-                        binding& image);
+      store_statement (connection& conn,
+                       const std::string& statement,
+                       binding& id,
+                       binding& image);
       void
       execute ();
 
     private:
-      update_statement (const update_statement&);
-      update_statement& operator= (const update_statement&);
+      store_statement (const store_statement&);
+      store_statement& operator= (const store_statement&);
 
     private:
       binding& id_;
@@ -196,22 +196,22 @@ namespace odb
       std::size_t image_version_;
     };
 
-    class delete_statement: public statement
+    class erase_statement: public statement
     {
     public:
       virtual
-      ~delete_statement ();
+      ~erase_statement ();
 
-      delete_statement (connection& conn,
-                        const std::string& query,
-                        binding& id);
+      erase_statement (connection& conn,
+                       const std::string& statement,
+                       binding& id);
 
       void
       execute ();
 
     private:
-      delete_statement (const delete_statement&);
-      delete_statement& operator= (const delete_statement&);
+      erase_statement (const erase_statement&);
+      erase_statement& operator= (const erase_statement&);
 
     private:
       binding& id_;
@@ -245,6 +245,11 @@ namespace odb
       typedef typename object_traits::image_type image_type;
       typedef typename object_traits::id_image_type id_image_type;
 
+      typedef mysql::persist_statement persist_statement_type;
+      typedef mysql::find_statement find_statement_type;
+      typedef mysql::store_statement store_statement_type;
+      typedef mysql::erase_statement erase_statement_type;
+
       object_statements (connection&);
 
       image_type&
@@ -277,56 +282,56 @@ namespace odb
         return id_image_binding_;
       }
 
-      insert_statement&
-      insert ()
+      persist_statement_type&
+      persist_statement ()
       {
-        if (insert_ == 0)
-          insert_.reset (
-            new (shared) insert_statement (
-              conn_, object_traits::insert_query, image_binding_));
+        if (persist_ == 0)
+          persist_.reset (
+            new (shared) persist_statement_type (
+              conn_, object_traits::persist_statement, image_binding_));
 
-        return *insert_;
+        return *persist_;
       }
 
-      select_statement&
-      select ()
+      find_statement_type&
+      find_statement ()
       {
-        if (select_ == 0)
-          select_.reset (
-            new (shared) select_statement (
+        if (find_ == 0)
+          find_.reset (
+            new (shared) find_statement_type (
               conn_,
-              object_traits::select_query,
+              object_traits::find_statement,
               id_image_binding_,
               image_binding_));
 
-        return *select_;
+        return *find_;
       }
 
-      update_statement&
-      update ()
+      store_statement_type&
+      store_statement ()
       {
-        if (update_ == 0)
-          update_.reset (
-            new (shared) update_statement (
+        if (store_ == 0)
+          store_.reset (
+            new (shared) store_statement_type (
               conn_,
-              object_traits::update_query,
+              object_traits::store_statement,
               id_image_binding_,
               image_binding_));
 
-        return *update_;
+        return *store_;
       }
 
-      delete_statement&
-      delete_ ()
+      erase_statement_type&
+      erase_statement ()
       {
-        if (del_ == 0)
-          del_.reset (
-            new (shared) delete_statement (
+        if (erase_ == 0)
+          erase_.reset (
+            new (shared) erase_statement_type (
               conn_,
-              object_traits::delete_query,
+              object_traits::erase_statement,
               id_image_binding_));
 
-        return *del_;
+        return *erase_;
       }
 
     private:
@@ -334,7 +339,7 @@ namespace odb
       object_statements& operator= (const object_statements&);
 
     private:
-      // The last element is the id parameter. The update statement
+      // The last element is the id parameter. The store statement
       // depends on this being one contiguous arrays.
       //
       MYSQL_BIND image_bind_[object_traits::column_count + 1];
@@ -346,10 +351,10 @@ namespace odb
       id_image_type id_image_;
       binding id_image_binding_;
 
-      odb::shared_ptr<insert_statement> insert_;
-      odb::shared_ptr<select_statement> select_;
-      odb::shared_ptr<update_statement> update_;
-      odb::shared_ptr<delete_statement> del_;
+      odb::shared_ptr<persist_statement_type> persist_;
+      odb::shared_ptr<find_statement_type> find_;
+      odb::shared_ptr<store_statement_type> store_;
+      odb::shared_ptr<erase_statement_type> erase_;
     };
 
     struct type_info_comparator

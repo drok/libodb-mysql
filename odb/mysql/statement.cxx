@@ -56,7 +56,7 @@ namespace odb
 
     query_statement::
     query_statement (connection& conn,
-                     const string& query,
+                     const string& s,
                      binding& image,
                      MYSQL_BIND* parameters)
         : statement (conn),
@@ -64,7 +64,7 @@ namespace odb
           image_version_ (0),
           parameters_ (parameters)
     {
-      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
+      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
 
@@ -158,25 +158,23 @@ namespace odb
       free_result ();
     }
 
-    // insert_statement
+    // persist_statement
     //
 
-    insert_statement::
-    ~insert_statement ()
+    persist_statement::
+    ~persist_statement ()
     {
     }
 
-    insert_statement::
-    insert_statement (connection& conn,
-                      const string& query,
-                      binding& image)
+    persist_statement::
+    persist_statement (connection& conn, const string& s, binding& image)
         : statement (conn), image_ (image), version_ (0)
     {
-      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
+      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
 
-    void insert_statement::
+    void persist_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
@@ -211,11 +209,11 @@ namespace odb
       */
     }
 
-    // select_statement
+    // find_statement
     //
 
-    select_statement::
-    ~select_statement ()
+    find_statement::
+    ~find_statement ()
     {
       if (conn_.active () == this)
       {
@@ -229,22 +227,22 @@ namespace odb
       }
     }
 
-    select_statement::
-    select_statement (connection& conn,
-                      const string& query,
-                      binding& id,
-                      binding& image)
+    find_statement::
+    find_statement (connection& conn,
+                    const string& s,
+                    binding& id,
+                    binding& image)
         : statement (conn),
           id_ (id),
           id_version_ (0),
           image_ (image),
           image_version_ (0)
     {
-      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
+      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
 
-    select_statement::result select_statement::
+    find_statement::result find_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
@@ -298,7 +296,7 @@ namespace odb
       }
     }
 
-    void select_statement::
+    void find_statement::
     refetch ()
     {
       // Re-fetch columns that were truncated.
@@ -316,7 +314,7 @@ namespace odb
       }
     }
 
-    void select_statement::
+    void find_statement::
     free_result ()
     {
       if (mysql_stmt_free_result (stmt_))
@@ -325,7 +323,7 @@ namespace odb
       conn_.active (0);
     }
 
-    void select_statement::
+    void find_statement::
     cancel ()
     {
       free_result ();
@@ -335,27 +333,27 @@ namespace odb
     // update_statement
     //
 
-    update_statement::
-    ~update_statement ()
+    store_statement::
+    ~store_statement ()
     {
     }
 
-    update_statement::
-    update_statement (connection& conn,
-                      const string& query,
-                      binding& id,
-                      binding& image)
+    store_statement::
+    store_statement (connection& conn,
+                     const string& s,
+                     binding& id,
+                     binding& image)
         : statement (conn),
           id_ (id),
           id_version_ (0),
           image_ (image),
           image_version_ (0)
     {
-      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
+      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
 
-    void update_statement::
+    void store_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
@@ -390,25 +388,23 @@ namespace odb
         throw database_exception (stmt_);
     }
 
-    // delete_statement
+    // erase_statement
     //
 
-    delete_statement::
-    ~delete_statement ()
+    erase_statement::
+    ~erase_statement ()
     {
     }
 
-    delete_statement::
-    delete_statement (connection& conn,
-                      const string& query,
-                      binding& id)
+    erase_statement::
+    erase_statement (connection& conn, const string& s, binding& id)
         : statement (conn), id_ (id), version_ (0)
     {
-      if (mysql_stmt_prepare (stmt_, query.c_str (), query.size ()) != 0)
+      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
 
-    void delete_statement::
+    void erase_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
