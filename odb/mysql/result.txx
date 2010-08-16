@@ -28,9 +28,9 @@ namespace odb
     {
       if (!this->end_)
       {
-        this->current_ = traits::create ();
-        traits::init (pointer_ops::get_ref (this->current_),
-                      statements_.image ());
+        pointer_type p (traits::create ());
+        current (p);
+        traits::init (pointer_traits::get_ref (p), statements_.image ());
       }
     }
 
@@ -46,7 +46,7 @@ namespace odb
     void result_impl<T>::
     next ()
     {
-      this->current_ = pointer_type ();
+      this->current (pointer_type ());
       query_statement::result r (statement_->fetch ());
 
       switch (r)

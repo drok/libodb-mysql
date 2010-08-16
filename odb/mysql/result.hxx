@@ -23,7 +23,7 @@ namespace odb
     public:
       typedef object_traits<T> traits;
       typedef typename traits::pointer_type pointer_type;
-      typedef typename traits::pointer_ops pointer_ops;
+      typedef typename traits::pointer_traits pointer_traits;
 
       virtual
       ~result_impl ();
@@ -39,6 +39,8 @@ namespace odb
 
       void
       next ();
+
+      using odb::result_impl<T>::current;
 
     private:
       shared_ptr<query_statement> statement_;
