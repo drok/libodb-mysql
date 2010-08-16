@@ -42,7 +42,7 @@ namespace odb
         return message_;
       }
 
-      virtual char const*
+      virtual const char*
       what () const throw ();
 
     private:

@@ -51,7 +51,7 @@ namespace odb
       what_ = ostr.str ();
     }
 
-    char const* database_exception::
+    const char* database_exception::
     what () const throw ()
     {
       return what_.c_str ();
