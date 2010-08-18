@@ -31,9 +31,7 @@ namespace odb
       sqlstate_ = mysql_sqlstate (h);
       message_ = mysql_error (h);
 
-      ostringstream ostr;
-      ostr << error_ << " (" << sqlstate_ << "): " << message_;
-      what_ = ostr.str ();
+      init ();
     }
 
     database_exception::
@@ -46,6 +44,25 @@ namespace odb
       sqlstate_ = mysql_stmt_sqlstate (h);
       message_ = mysql_stmt_error (h);
 
+      init ();
+    }
+
+    database_exception::
+    database_exception (unsigned int e, const string& s, const string& m)
+        : error_ (e)
+    {
+      if (error_ == CR_OUT_OF_MEMORY)
+        throw bad_alloc ();
+
+      sqlstate_ = s;
+      message_ = m;
+
+      init ();
+    }
+
+    void database_exception::
+    init ()
+    {
       ostringstream ostr;
       ostr << error_ << " (" << sqlstate_ << "): " << message_;
       what_ = ostr.str ();

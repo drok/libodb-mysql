@@ -22,6 +22,10 @@ namespace odb
     {
       database_exception (MYSQL*);
       database_exception (MYSQL_STMT*);
+      database_exception (unsigned int,
+                          const std::string& sqlstate,
+                          const std::string& message);
+
       ~database_exception () throw ();
 
       unsigned int
@@ -44,6 +48,10 @@ namespace odb
 
       virtual const char*
       what () const throw ();
+
+    private:
+      void
+      init ();
 
     private:
       unsigned int error_;
