@@ -31,8 +31,12 @@ $(call import,\
   $(scf_root)/import/libodb/stub.make,\
   l: odb.l,cpp-options: odb.l.cpp-options)
 
+#$(call import,\
+#  $(scf_root)/import/libmysqlclient/stub.make,\
+#  l: mysql.l,cpp-options: mysql.l.cpp-options)
+
 $(call import,\
-  $(scf_root)/import/libmysqlclient/stub.make,\
+  $(scf_root)/import/libmysqlclient_r/stub.make,\
   l: mysql.l,cpp-options: mysql.l.cpp-options)
 
 # Build.
