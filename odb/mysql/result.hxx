@@ -7,11 +7,12 @@
 #define ODB_MYSQL_RESULT_HXX
 
 #include <odb/result.hxx>
-#include <odb/shared-ptr.hxx>
 
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/statement.hxx>
+
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
@@ -28,7 +29,7 @@ namespace odb
       virtual
       ~result_impl ();
 
-      result_impl (shared_ptr<query_statement> statement,
+      result_impl (details::shared_ptr<query_statement> statement,
                    object_statements<T>& statements);
 
       virtual void
@@ -43,7 +44,7 @@ namespace odb
       using odb::result_impl<T>::current;
 
     private:
-      shared_ptr<query_statement> statement_;
+      details::shared_ptr<query_statement> statement_;
       object_statements<T>& statements_;
     };
   }

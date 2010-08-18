@@ -15,9 +15,10 @@
 
 #include <odb/forward.hxx>
 #include <odb/traits.hxx>
-#include <odb/shared-ptr.hxx>
 
 #include <odb/mysql/version.hxx>
+
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
@@ -42,7 +43,7 @@ namespace odb
       binding& operator= (const binding&);
     };
 
-    class statement: public shared_base
+    class statement: public details::shared_base
     {
     public:
       virtual
@@ -221,7 +222,7 @@ namespace odb
     // Statement cache.
     //
 
-    class object_statements_base: public shared_base
+    class object_statements_base: public details::shared_base
     {
     public:
       virtual
@@ -287,7 +288,7 @@ namespace odb
       {
         if (persist_ == 0)
           persist_.reset (
-            new (shared) persist_statement_type (
+            new (details::shared) persist_statement_type (
               conn_, object_traits::persist_statement, image_binding_));
 
         return *persist_;
@@ -298,7 +299,7 @@ namespace odb
       {
         if (find_ == 0)
           find_.reset (
-            new (shared) find_statement_type (
+            new (details::shared) find_statement_type (
               conn_,
               object_traits::find_statement,
               id_image_binding_,
@@ -312,7 +313,7 @@ namespace odb
       {
         if (store_ == 0)
           store_.reset (
-            new (shared) store_statement_type (
+            new (details::shared) store_statement_type (
               conn_,
               object_traits::store_statement,
               id_image_binding_,
@@ -326,7 +327,7 @@ namespace odb
       {
         if (erase_ == 0)
           erase_.reset (
-            new (shared) erase_statement_type (
+            new (details::shared) erase_statement_type (
               conn_,
               object_traits::erase_statement,
               id_image_binding_));
@@ -351,10 +352,10 @@ namespace odb
       id_image_type id_image_;
       binding id_image_binding_;
 
-      odb::shared_ptr<persist_statement_type> persist_;
-      odb::shared_ptr<find_statement_type> find_;
-      odb::shared_ptr<store_statement_type> store_;
-      odb::shared_ptr<erase_statement_type> erase_;
+      details::shared_ptr<persist_statement_type> persist_;
+      details::shared_ptr<find_statement_type> find_;
+      details::shared_ptr<store_statement_type> store_;
+      details::shared_ptr<erase_statement_type> erase_;
     };
 
     struct type_info_comparator
@@ -391,8 +392,8 @@ namespace odb
         if (i != map_.end ())
           return static_cast<object_statements<T>&> (*i->second);
 
-        shared_ptr<object_statements<T> > p (
-          new (shared) object_statements<T> (conn_));
+        details::shared_ptr<object_statements<T> > p (
+          new (details::shared) object_statements<T> (conn_));
 
         map_.insert (map::value_type (&typeid (T), p));
         return *p;
@@ -400,7 +401,7 @@ namespace odb
 
     private:
       typedef std::map<const std::type_info*,
-                       shared_ptr<object_statements_base>,
+                       details::shared_ptr<object_statements_base>,
                        type_info_comparator> map;
 
       connection& conn_;

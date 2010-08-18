@@ -15,7 +15,7 @@ namespace odb
 
     template <typename T>
     result_impl<T>::
-    result_impl (shared_ptr<query_statement> statement,
+    result_impl (details::shared_ptr<query_statement> statement,
                  object_statements<T>& statements)
         : statement_ (statement), statements_ (statements)
     {

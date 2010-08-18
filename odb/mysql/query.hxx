@@ -13,13 +13,13 @@
 #include <cstddef> // std::size_t
 
 #include <odb/query.hxx>
-#include <odb/shared-ptr.hxx>
 
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/traits.hxx>
 
 #include <odb/details/buffer.hxx>
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
@@ -45,7 +45,7 @@ namespace odb
       const T& ref;
     };
 
-    struct query_param: shared_base
+    struct query_param: details::shared_base
     {
       virtual
       ~query_param ();
@@ -177,10 +177,10 @@ namespace odb
 
     private:
       void
-      add (shared_ptr<query_param>);
+      add (details::shared_ptr<query_param>);
 
     private:
-      typedef std::vector<shared_ptr<query_param> > parameters_type;
+      typedef std::vector<details::shared_ptr<query_param> > parameters_type;
 
       std::string clause_;
       parameters_type parameters_;

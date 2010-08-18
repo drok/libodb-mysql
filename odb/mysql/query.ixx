@@ -12,8 +12,8 @@ namespace odb
     append (val_bind<T> v)
     {
       add (
-        shared_ptr<query_param> (
-          new (shared) query_param_impl<T, ID> (v)));
+        details::shared_ptr<query_param> (
+          new (details::shared) query_param_impl<T, ID> (v)));
     }
 
     template <typename T, image_id_type ID>
@@ -21,8 +21,8 @@ namespace odb
     append (ref_bind<T> r)
     {
       add (
-        shared_ptr<query_param> (
-          new (shared) query_param_impl<T, ID> (r)));
+        details::shared_ptr<query_param> (
+          new (details::shared) query_param_impl<T, ID> (r)));
     }
   }
 }

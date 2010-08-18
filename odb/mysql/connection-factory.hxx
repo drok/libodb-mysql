@@ -9,14 +9,13 @@
 #include <vector>
 #include <cstddef> // std::size_t
 
-#include <odb/shared-ptr.hxx>
-
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/connection.hxx>
 
 #include <odb/details/mutex.hxx>
 #include <odb/details/condition.hxx>
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
@@ -25,7 +24,7 @@ namespace odb
     class connection_factory
     {
     public:
-      virtual shared_ptr<connection>
+      virtual details::shared_ptr<connection>
       connect () = 0;
 
     public:
@@ -46,7 +45,7 @@ namespace odb
       {
       }
 
-      virtual shared_ptr<connection>
+      virtual details::shared_ptr<connection>
       connect ();
 
       virtual void
@@ -88,7 +87,7 @@ namespace odb
         // @@ check min_ <= max_
       }
 
-      virtual shared_ptr<connection>
+      virtual details::shared_ptr<connection>
       connect ();
 
       virtual void
@@ -121,7 +120,7 @@ namespace odb
       };
 
       friend class pooled_connection;
-      typedef std::vector<shared_ptr<pooled_connection> > connections;
+      typedef std::vector<details::shared_ptr<pooled_connection> > connections;
 
     private:
       void

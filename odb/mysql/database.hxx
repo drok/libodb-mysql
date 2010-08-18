@@ -11,7 +11,6 @@
 #include <string>
 #include <memory> // std::auto_ptr
 
-#include <odb/shared-ptr.hxx>
 #include <odb/database.hxx>
 
 #include <odb/mysql/version.hxx>
@@ -19,6 +18,8 @@
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
 #include <odb/mysql/transaction-impl.hxx>
+
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
@@ -131,7 +132,7 @@ namespace odb
       begin_transaction ();
 
     public:
-      shared_ptr<connection_type>
+      details::shared_ptr<connection_type>
       connection ();
 
     public:

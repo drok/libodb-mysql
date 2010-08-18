@@ -11,16 +11,17 @@
 #include <vector>
 
 #include <odb/forward.hxx>
-#include <odb/shared-ptr.hxx>
 
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/statement.hxx>
+
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
   namespace mysql
   {
-    class connection: public shared_base
+    class connection: public details::shared_base
     {
     public:
       typedef mysql::statement_cache statement_cache_type;

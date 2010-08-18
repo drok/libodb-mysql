@@ -7,7 +7,7 @@ namespace odb
 {
   namespace mysql
   {
-    inline shared_ptr<database::connection_type> database::
+    inline details::shared_ptr<database::connection_type> database::
     connection ()
     {
       return factory_->connect ();

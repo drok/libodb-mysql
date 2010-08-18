@@ -61,7 +61,7 @@ namespace odb
     }
 
     void query::
-    add (shared_ptr<query_param> p)
+    add (details::shared_ptr<query_param> p)
     {
       size_t n (clause_.size ());
 

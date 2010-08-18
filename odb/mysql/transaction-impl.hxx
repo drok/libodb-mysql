@@ -6,11 +6,12 @@
 #ifndef ODB_MYSQL_TRANSACTION_IMPL_HXX
 #define ODB_MYSQL_TRANSACTION_IMPL_HXX
 
-#include <odb/shared-ptr.hxx>
 #include <odb/transaction.hxx>
 
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
+
+#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
@@ -40,7 +41,7 @@ namespace odb
       connection ();
 
     private:
-      shared_ptr<connection_type> connection_;
+      details::shared_ptr<connection_type> connection_;
     };
   }
 }
