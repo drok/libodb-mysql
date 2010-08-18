@@ -40,7 +40,7 @@ namespace odb
           factory_ (factory)
     {
       if (factory_.get () == 0)
-        factory_.reset (new new_connection_factory ());
+        factory_.reset (new connection_pool_factory ());
 
       factory_->database (*this);
     }
@@ -66,7 +66,7 @@ namespace odb
           factory_ (factory)
     {
       if (factory_.get () == 0)
-        factory_.reset (new new_connection_factory ());
+        factory_.reset (new connection_pool_factory ());
 
       factory_->database (*this);
     }
@@ -92,7 +92,7 @@ namespace odb
           factory_ (factory)
     {
       if (factory_.get () == 0)
-        factory_.reset (new new_connection_factory ());
+        factory_.reset (new connection_pool_factory ());
 
       factory_->database (*this);
     }
@@ -118,7 +118,7 @@ namespace odb
           factory_ (factory)
     {
       if (factory_.get () == 0)
-        factory_.reset (new new_connection_factory ());
+        factory_.reset (new connection_pool_factory ());
 
       factory_->database (*this);
     }
@@ -144,7 +144,7 @@ namespace odb
           factory_ (factory)
     {
       if (factory_.get () == 0)
-        factory_.reset (new new_connection_factory ());
+        factory_.reset (new connection_pool_factory ());
 
       factory_->database (*this);
     }
