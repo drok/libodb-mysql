@@ -16,6 +16,8 @@
 
 #include <odb/mysql/version.hxx>
 
+#include <odb/details/buffer.hxx>
+
 namespace odb
 {
   namespace mysql
@@ -207,7 +209,7 @@ namespace odb
       }
 
       static void
-      set_image (buffer& b,
+      set_image (details::buffer& b,
                  std::size_t& n,
                  bool& is_null,
                  const std::string& v)
@@ -253,7 +255,7 @@ namespace odb
       }
 
       static void
-      set_image (buffer& b,
+      set_image (details::buffer& b,
                  std::size_t& n,
                  bool& is_null,
                  const char* v)

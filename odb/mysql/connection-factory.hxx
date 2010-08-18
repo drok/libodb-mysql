@@ -85,6 +85,7 @@ namespace odb
             db_ (0),
             cond_ (mutex_)
       {
+        // @@ check min_ <= max_
       }
 
       virtual shared_ptr<connection>

@@ -19,6 +19,8 @@
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/traits.hxx>
 
+#include <odb/details/buffer.hxx>
+
 namespace odb
 {
   namespace mysql
@@ -1524,7 +1526,7 @@ namespace odb
       }
 
     private:
-      buffer buffer_;
+      details::buffer buffer_;
       unsigned long size_;
     };
 
@@ -1562,7 +1564,7 @@ namespace odb
       }
 
     private:
-      buffer buffer_;
+      details::buffer buffer_;
       unsigned long size_;
     };
   }
