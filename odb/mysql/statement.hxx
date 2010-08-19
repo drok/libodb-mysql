@@ -119,6 +119,12 @@ namespace odb
       void
       execute ();
 
+      unsigned long long
+      id ()
+      {
+        return mysql_stmt_insert_id (stmt_);
+      }
+
     private:
       persist_statement (const persist_statement&);
       persist_statement& operator= (const persist_statement&);
