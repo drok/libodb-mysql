@@ -39,6 +39,10 @@ namespace odb
 
       if (mysql_real_query (h, "commit", 6) != 0)
         throw database_exception (h);
+
+      // Release the connection.
+      //
+      connection_.reset ();
     }
 
     void transaction_impl::
@@ -51,6 +55,10 @@ namespace odb
 
       if (mysql_real_query (h, "rollback", 8) != 0)
         throw database_exception (h);
+
+      // Release the connection.
+      //
+      connection_.reset ();
     }
   }
 }
