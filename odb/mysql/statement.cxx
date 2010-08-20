@@ -3,7 +3,7 @@
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <mysql/mysqld_error.h> // ER_DUP_ENTRY
+#include <mysql/mysqld_error.h> // ER_DUP_ENTRY, ER_LOCK_DEADLOCK
 
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
@@ -94,7 +94,14 @@ namespace odb
       }
 
       if (mysql_stmt_execute (stmt_))
-        throw database_exception (stmt_);
+      {
+        unsigned int e (mysql_stmt_errno (stmt_));
+
+        if (e == ER_LOCK_DEADLOCK)
+          throw deadlock ();
+        else
+          throw database_exception (stmt_);
+      }
 
       conn_.active (this);
     }
@@ -193,20 +200,22 @@ namespace odb
 
       if (mysql_stmt_execute (stmt_))
       {
-        unsigned int e (mysql_stmt_errno (stmt_));
-
-        if (e == ER_DUP_ENTRY)
-          throw object_already_persistent ();
-        else
-          throw database_exception (stmt_);
+        switch (mysql_stmt_errno (stmt_))
+        {
+        case ER_DUP_ENTRY:
+          {
+            throw object_already_persistent ();
+          }
+        case ER_LOCK_DEADLOCK:
+          {
+            throw deadlock ();
+          }
+        default:
+          {
+            throw database_exception (stmt_);
+          }
+        }
       }
-
-      /*
-        @@ Should I throw unknown error or some such?
-
-      if (mysql_stmt_affected_rows (stmt_) != 1)
-        throw object_already_persistent ();
-      */
     }
 
     // find_statement
@@ -268,7 +277,14 @@ namespace odb
       }
 
       if (mysql_stmt_execute (stmt_))
-        throw database_exception (stmt_);
+      {
+        unsigned int e (mysql_stmt_errno (stmt_));
+
+        if (e == ER_LOCK_DEADLOCK)
+          throw deadlock ();
+        else
+          throw database_exception (stmt_);
+      }
 
       conn_.active (this);
 
@@ -375,7 +391,14 @@ namespace odb
       }
 
       if (mysql_stmt_execute (stmt_))
-        throw database_exception (stmt_);
+      {
+        unsigned int e (mysql_stmt_errno (stmt_));
+
+        if (e == ER_LOCK_DEADLOCK)
+          throw deadlock ();
+        else
+          throw database_exception (stmt_);
+      }
 
       my_ulonglong r (mysql_stmt_affected_rows (stmt_));
 
@@ -422,7 +445,14 @@ namespace odb
       }
 
       if (mysql_stmt_execute (stmt_))
-        throw database_exception (stmt_);
+      {
+        unsigned int e (mysql_stmt_errno (stmt_));
+
+        if (e == ER_LOCK_DEADLOCK)
+          throw deadlock ();
+        else
+          throw database_exception (stmt_);
+      }
 
       my_ulonglong r (mysql_stmt_affected_rows (stmt_));
 
