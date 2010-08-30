@@ -58,6 +58,8 @@ namespace odb
 
       binding_.insert (
         binding_.end (), q.binding_.begin (), q.binding_.end ());
+
+      return *this;
     }
 
     void query::

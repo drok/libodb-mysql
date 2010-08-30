@@ -6,19 +6,32 @@
 #ifndef ODB_MYSQL_EXCEPTIONS_HXX
 #define ODB_MYSQL_EXCEPTIONS_HXX
 
-#include <string>
+#include <odb/pre.hxx>
 
-#include <mysql/mysql.h>
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#else
+#  include <mysql/mysql.h>
+#endif
+
+#include <string>
 
 #include <odb/exceptions.hxx>
 
 #include <odb/mysql/version.hxx>
 
+#include <odb/mysql/details/export.hxx>
+
 namespace odb
 {
   namespace mysql
   {
-    struct database_exception: odb::database_exception
+    struct LIBODB_MYSQL_EXPORT database_exception: odb::database_exception
     {
       database_exception (MYSQL*);
       database_exception (MYSQL_STMT*);
@@ -61,5 +74,7 @@ namespace odb
     };
   }
 }
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_EXCEPTIONS_HXX

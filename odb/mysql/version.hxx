@@ -6,7 +6,15 @@
 #ifndef ODB_MYSQL_VERSION_HXX
 #define ODB_MYSQL_VERSION_HXX
 
-#include <mysql/mysql_version.h>
+#include <odb/pre.hxx>
+
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  include <mysql_version.h>
+#else
+#  include <mysql/mysql_version.h>
+#endif
 
 #include <odb/version.hxx>
 
@@ -44,5 +52,7 @@
 //
 #define LIBODB_MYSQL_VERSION     999901
 #define LIBODB_MYSQL_VERSION_STR "1.0.0.a1"
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_VERSION_HXX

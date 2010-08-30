@@ -3,14 +3,25 @@
 // copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <mysql/mysql.h>
-#include <mysql/errmsg.h> // CR_UNKNOWN_ERROR
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#  include <errmsg.h>       // CR_UNKNOWN_ERROR
+#else
+#  include <mysql/mysql.h>
+#  include <mysql/errmsg.h>
+#endif
 
 #include <odb/mysql/connection-factory.hxx>
 #include <odb/mysql/exceptions.hxx>
 
 #include <odb/details/tls.hxx>
 #include <odb/details/lock.hxx>
+#include <odb/details/config.hxx> // ODB_THREADS_NONE
 
 using namespace std;
 
@@ -24,6 +35,7 @@ namespace odb
     {
       struct mysql_init
       {
+#ifndef ODB_THREADS_NONE
         mysql_init ()
         {
           if (my_thread_init ())
@@ -37,6 +49,7 @@ namespace odb
         {
           my_thread_end ();
         }
+#endif
       };
 
       static ODB_TLS_OBJECT (mysql_init) mysql_init_;

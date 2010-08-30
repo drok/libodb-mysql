@@ -6,6 +6,8 @@
 #ifndef ODB_MYSQL_FORWARD_HXX
 #define ODB_MYSQL_FORWARD_HXX
 
+#include <odb/pre.hxx>
+
 namespace odb
 {
   namespace mysql
@@ -21,5 +23,7 @@ namespace odb
     class object_statements;
   }
 }
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_FORWARD_HXX

@@ -1,0 +1,16 @@
+# file      : libodb-mysql.pc.in
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libodb-mysql
+Description: Object persistence compiler for C++, MySQL runtime
+URL: http://www.codesynthesis.com/products/odb/
+Version: @VERSION@
+Libs: -L${libdir} -lodb-mysql
+Cflags: -I${includedir}

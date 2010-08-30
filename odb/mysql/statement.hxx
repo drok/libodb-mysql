@@ -6,7 +6,18 @@
 #ifndef ODB_MYSQL_STATEMENT_HXX
 #define ODB_MYSQL_STATEMENT_HXX
 
-#include <mysql/mysql.h>
+#include <odb/pre.hxx>
+
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#else
+#  include <mysql/mysql.h>
+#endif
 
 #include <map>
 #include <string>
@@ -20,13 +31,15 @@
 
 #include <odb/details/shared-ptr.hxx>
 
+#include <odb/mysql/details/export.hxx>
+
 namespace odb
 {
   namespace mysql
   {
     class connection;
 
-    class binding
+    class LIBODB_MYSQL_EXPORT binding
     {
     public:
       binding (MYSQL_BIND* b, std::size_t n)
@@ -43,7 +56,7 @@ namespace odb
       binding& operator= (const binding&);
     };
 
-    class statement: public details::shared_base
+    class LIBODB_MYSQL_EXPORT statement: public details::shared_base
     {
     public:
       virtual
@@ -63,7 +76,7 @@ namespace odb
       MYSQL_STMT* stmt_;
     };
 
-    class query_statement: public statement
+    class LIBODB_MYSQL_EXPORT query_statement: public statement
     {
     public:
       virtual
@@ -106,7 +119,7 @@ namespace odb
       MYSQL_BIND* parameters_;
     };
 
-    class persist_statement: public statement
+    class LIBODB_MYSQL_EXPORT persist_statement: public statement
     {
     public:
       virtual
@@ -134,7 +147,7 @@ namespace odb
       std::size_t version_;
     };
 
-    class find_statement: public statement
+    class LIBODB_MYSQL_EXPORT find_statement: public statement
     {
     public:
       virtual
@@ -178,7 +191,7 @@ namespace odb
       std::size_t image_version_;
     };
 
-    class store_statement: public statement
+    class LIBODB_MYSQL_EXPORT store_statement: public statement
     {
     public:
       virtual
@@ -203,7 +216,7 @@ namespace odb
       std::size_t image_version_;
     };
 
-    class erase_statement: public statement
+    class LIBODB_MYSQL_EXPORT erase_statement: public statement
     {
     public:
       virtual
@@ -228,7 +241,8 @@ namespace odb
     // Statement cache.
     //
 
-    class object_statements_base: public details::shared_base
+    class LIBODB_MYSQL_EXPORT object_statements_base:
+      public details::shared_base
     {
     public:
       virtual
@@ -364,7 +378,7 @@ namespace odb
       details::shared_ptr<erase_statement_type> erase_;
     };
 
-    struct type_info_comparator
+    struct LIBODB_MYSQL_EXPORT type_info_comparator
     {
       bool
       operator() (const std::type_info* x, const std::type_info* y) const
@@ -381,7 +395,7 @@ namespace odb
       }
     };
 
-    class statement_cache
+    class LIBODB_MYSQL_EXPORT statement_cache
     {
     public:
       statement_cache (connection& conn)
@@ -417,5 +431,7 @@ namespace odb
 }
 
 #include <odb/mysql/statement.txx>
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_STATEMENT_HXX

@@ -3,7 +3,16 @@
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <mysql/errmsg.h> // CR_OUT_OF_MEMORY
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <errmsg.h>       // CR_OUT_OF_MEMORY
+#else
+#  include <mysql/errmsg.h>
+#endif
 
 #include <new>     // std::bad_alloc
 #include <sstream>

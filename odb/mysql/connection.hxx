@@ -6,7 +6,18 @@
 #ifndef ODB_MYSQL_CONNECTION_HXX
 #define ODB_MYSQL_CONNECTION_HXX
 
-#include <mysql/mysql.h>
+#include <odb/pre.hxx>
+
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#else
+#  include <mysql/mysql.h>
+#endif
 
 #include <vector>
 
@@ -17,11 +28,13 @@
 
 #include <odb/details/shared-ptr.hxx>
 
+#include <odb/mysql/details/export.hxx>
+
 namespace odb
 {
   namespace mysql
   {
-    class connection: public details::shared_base
+    class LIBODB_MYSQL_EXPORT connection: public details::shared_base
     {
     public:
       typedef mysql::statement_cache statement_cache_type;
@@ -86,5 +99,7 @@ namespace odb
     };
   }
 }
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_CONNECTION_HXX

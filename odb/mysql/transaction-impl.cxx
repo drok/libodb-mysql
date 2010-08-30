@@ -3,7 +3,16 @@
 // copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <mysql/mysql.h>
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#else
+#  include <mysql/mysql.h>
+#endif
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>

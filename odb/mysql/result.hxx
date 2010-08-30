@@ -6,6 +6,8 @@
 #ifndef ODB_MYSQL_RESULT_HXX
 #define ODB_MYSQL_RESULT_HXX
 
+#include <odb/pre.hxx>
+
 #include <odb/result.hxx>
 
 #include <odb/mysql/version.hxx>
@@ -51,5 +53,7 @@ namespace odb
 }
 
 #include <odb/mysql/result.txx>
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_RESULT_HXX

@@ -6,7 +6,18 @@
 #ifndef ODB_MYSQL_DATABASE_HXX
 #define ODB_MYSQL_DATABASE_HXX
 
-#include <mysql/mysql.h>
+#include <odb/pre.hxx>
+
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#else
+#  include <mysql/mysql.h>
+#endif
 
 #include <string>
 #include <memory> // std::auto_ptr
@@ -21,11 +32,13 @@
 
 #include <odb/details/shared-ptr.hxx>
 
+#include <odb/mysql/details/export.hxx>
+
 namespace odb
 {
   namespace mysql
   {
-    class database: public odb::database
+    class LIBODB_MYSQL_EXPORT database: public odb::database
     {
     public:
       typedef mysql::connection connection_type;
@@ -155,5 +168,7 @@ namespace odb
 }
 
 #include <odb/mysql/database.ixx>
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_DATABASE_HXX

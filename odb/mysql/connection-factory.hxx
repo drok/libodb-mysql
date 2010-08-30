@@ -6,6 +6,8 @@
 #ifndef ODB_MYSQL_CONNECTION_FACTORY_HXX
 #define ODB_MYSQL_CONNECTION_FACTORY_HXX
 
+#include <odb/pre.hxx>
+
 #include <vector>
 #include <cstddef> // std::size_t
 
@@ -17,11 +19,13 @@
 #include <odb/details/condition.hxx>
 #include <odb/details/shared-ptr.hxx>
 
+#include <odb/mysql/details/export.hxx>
+
 namespace odb
 {
   namespace mysql
   {
-    class connection_factory
+    class LIBODB_MYSQL_EXPORT connection_factory
     {
     public:
       virtual details::shared_ptr<connection>
@@ -37,7 +41,7 @@ namespace odb
       ~connection_factory ();
     };
 
-    class new_connection_factory: public connection_factory
+    class LIBODB_MYSQL_EXPORT new_connection_factory: public connection_factory
     {
     public:
       new_connection_factory ()
@@ -59,7 +63,8 @@ namespace odb
       database_type* db_;
     };
 
-    class connection_pool_factory: public connection_factory
+    class LIBODB_MYSQL_EXPORT connection_pool_factory:
+      public connection_factory
     {
     public:
       // The max_connections argument specifies the maximum number of
@@ -141,5 +146,7 @@ namespace odb
     };
   }
 }
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_CONNECTION_FACTORY_HXX

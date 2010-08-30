@@ -6,7 +6,18 @@
 #ifndef ODB_MYSQL_QUERY_HXX
 #define ODB_MYSQL_QUERY_HXX
 
-#include <mysql/mysql.h>
+#include <odb/pre.hxx>
+
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>
+#else
+#  include <mysql/mysql.h>
+#endif
 
 #include <string>
 #include <vector>
@@ -20,6 +31,8 @@
 
 #include <odb/details/buffer.hxx>
 #include <odb/details/shared-ptr.hxx>
+
+#include <odb/mysql/details/export.hxx>
 
 namespace odb
 {
@@ -45,7 +58,7 @@ namespace odb
       const T& ref;
     };
 
-    struct query_param: details::shared_base
+    struct LIBODB_MYSQL_EXPORT query_param: details::shared_base
     {
       virtual
       ~query_param ();
@@ -77,7 +90,7 @@ namespace odb
     template <typename T, image_id_type ID>
     struct query_column;
 
-    class query
+    class LIBODB_MYSQL_EXPORT query
     {
     public:
       query ()
@@ -187,7 +200,7 @@ namespace odb
       std::vector<MYSQL_BIND> binding_;
     };
 
-    inline query
+    inline LIBODB_MYSQL_EXPORT query
     operator+ (const query& x, const query& y)
     {
       query r (x);
@@ -233,7 +246,7 @@ namespace odb
       return r;
     }
 
-    inline query
+    inline LIBODB_MYSQL_EXPORT query
     operator+ (const query& q, const std::string& s)
     {
       query r (q);
@@ -241,7 +254,7 @@ namespace odb
       return r;
     }
 
-    inline query
+    inline LIBODB_MYSQL_EXPORT query
     operator+ (const std::string& s, const query& q)
     {
       query r (s);
@@ -287,7 +300,7 @@ namespace odb
       return r;
     }
 
-    inline query
+    inline LIBODB_MYSQL_EXPORT query
     operator&& (const query& x, const query& y)
     {
       query r ("(");
@@ -298,7 +311,7 @@ namespace odb
       return r;
     }
 
-    inline query
+    inline LIBODB_MYSQL_EXPORT query
     operator|| (const query& x, const query& y)
     {
       query r ("(");
@@ -309,7 +322,7 @@ namespace odb
       return r;
     }
 
-    inline query
+    inline LIBODB_MYSQL_EXPORT query
     operator! (const query& x)
     {
       query r ("!(");
@@ -1621,5 +1634,7 @@ namespace odb
 
 #include <odb/mysql/query.ixx>
 #include <odb/mysql/query.txx>
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_QUERY_HXX

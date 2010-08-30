@@ -5,7 +5,7 @@
 
 include $(dir $(lastword $(MAKEFILE_LIST)))../../build/bootstrap.make
 
-cxx_tun   :=           \
+cxx :=                 \
 connection.cxx         \
 connection-factory.cxx \
 database.cxx           \
@@ -13,17 +13,19 @@ exceptions.cxx         \
 transaction.cxx        \
 transaction-impl.cxx   \
 statement.cxx          \
-query.cxx
+query.cxx              \
+traits.cxx
 
-cxx_obj   := $(addprefix $(out_base)/,$(cxx_tun:.cxx=.o))
-cxx_od    := $(cxx_obj:.o=.o.d)
+cxx_tun := $(cxx)
+cxx_obj := $(addprefix $(out_base)/,$(cxx_tun:.cxx=.o))
+cxx_od  := $(cxx_obj:.o=.o.d)
 
 odb_mysql.l             := $(out_base)/odb-mysql.l
 odb_mysql.l.cpp-options := $(out_base)/odb-mysql.l.cpp-options
 
-default   := $(out_base)/
-install   := $(out_base)/.install
-clean     := $(out_base)/.clean
+default := $(out_base)/
+dist    := $(out_base)/.dist
+clean   := $(out_base)/.clean
 
 # Import.
 #
@@ -53,12 +55,21 @@ $(call include-dep,$(cxx_od))
 #
 $(out_base)/: $(odb_mysql.l)
 
-# Install.
+# Dist.
 #
-$(install): $(odb_mysql.l)
-	$(call install-lib,$<,$(install_lib_dir)/$(ld_lib_prefix)odb-mysql$(ld_lib_suffix))
-	$(call install-dir,$(src_base),$(install_inc_dir)/odb/mysql,\
-'(' -name '*.hxx' -o -name '*.ixx' -o -name '*.txx' ')')
+$(dist): export sources := $(cxx)
+$(dist): export headers = $(subst $(src_base)/,,$(shell find $(src_base) \
+-name '*.hxx' -o -name '*.ixx' -o -name '*.txx'))
+$(dist): export extra_dist := libodb-mysql-vc9.vcproj \
+libodb-mysql-vc10.vcxproj libodb-mysql-vc10.vcxproj.filters
+$(dist): export interface_version = $(shell sed -e \
+'s/^\([0-9]*\.[0-9]*\).*/\1/' $(src_root)/version)
+
+$(dist):
+	$(call dist-data,$(sources) $(headers))
+	$(call meta-vc9proj,$(src_base)/libodb-mysql-vc9.vcproj)
+	$(call meta-vc10proj,$(src_base)/libodb-mysql-vc10.vcxproj)
+	$(call meta-automake)
 
 # Clean.
 #
@@ -69,6 +80,11 @@ $(clean): $(odb_mysql.l).o.clean    \
 
 # How to.
 #
+$(call include,$(bld_root)/dist.make)
+$(call include,$(bld_root)/meta/vc9proj.make)
+$(call include,$(bld_root)/meta/vc10proj.make)
+$(call include,$(bld_root)/meta/automake.make)
+
 $(call include,$(bld_root)/cxx/o-l.make)
 $(call include,$(bld_root)/cxx/cxx-o.make)
 $(call include,$(bld_root)/cxx/cxx-d.make)

@@ -6,17 +6,29 @@
 #ifndef ODB_MYSQL_TRAITS_HXX
 #define ODB_MYSQL_TRAITS_HXX
 
-#include <mysql/mysql.h> // MYSQL_TIME, used in custom specializations.
+#include <odb/pre.hxx>
+
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysql.h>       // MYSQL_TIME, used in custom specializations.
+#else
+#  include <mysql/mysql.h>
+#endif
 
 #include <string>
 #include <cstddef> // std::size_t
-#include <cstring> // std::memcpy, std::strlen
 
 #include <odb/traits.hxx>
 
 #include <odb/mysql/version.hxx>
 
 #include <odb/details/buffer.hxx>
+
+#include <odb/mysql/details/export.hxx>
 
 namespace odb
 {
@@ -175,7 +187,7 @@ namespace odb
     // String type.
     //
     template <>
-    class value_traits<std::string>
+    class LIBODB_MYSQL_EXPORT value_traits<std::string>
     {
     public:
       typedef std::string type;
@@ -192,37 +204,17 @@ namespace odb
       }
 
       static void
-      set_image (char* s,
+      set_image (char*,
                  std::size_t c,
                  std::size_t& n,
                  bool& is_null,
-                 const std::string& v)
-      {
-        is_null = false;
-        n = v.size ();
-
-        if (n > c)
-          n = c;
-
-        if (n != 0)
-          std::memcpy (s, v.c_str (), n);
-      }
+                 const std::string&);
 
       static void
-      set_image (details::buffer& b,
+      set_image (details::buffer&,
                  std::size_t& n,
                  bool& is_null,
-                 const std::string& v)
-      {
-        is_null = false;
-        n = v.size ();
-
-        if (n > b.capacity ())
-          b.capacity (n);
-
-        if (n != 0)
-          std::memcpy (b.data (), v.c_str (), n);
-      }
+                 const std::string&);
     };
 
     // Specialization for const char* which only supports initialization
@@ -230,7 +222,7 @@ namespace odb
     // we can pass such values to the queries.
     //
     template <>
-    class value_traits<const char*>
+    class LIBODB_MYSQL_EXPORT value_traits<const char*>
     {
     public:
       typedef const char* type;
@@ -238,39 +230,21 @@ namespace odb
       static const image_id_type image_id = id_string;
 
       static void
-      set_image (char* s,
+      set_image (char*,
                  std::size_t c,
                  std::size_t& n,
                  bool& is_null,
-                 const char* v)
-      {
-        is_null = false;
-        n = std::strlen (v);
-
-        if (n > c)
-          n = c;
-
-        if (n != 0)
-          std::memcpy (s, v, n);
-      }
+                 const char*);
 
       static void
-      set_image (details::buffer& b,
+      set_image (details::buffer&,
                  std::size_t& n,
                  bool& is_null,
-                 const char* v)
-      {
-        is_null = false;
-        n = std::strlen (v);
-
-        if (n > b.capacity ())
-          b.capacity (n);
-
-        if (n != 0)
-          std::memcpy (b.data (), v, n);
-      }
+                 const char*);
     };
   }
 }
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_TRAITS_HXX

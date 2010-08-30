@@ -6,6 +6,8 @@
 #ifndef ODB_MYSQL_TRANSACTION_IMPL_HXX
 #define ODB_MYSQL_TRANSACTION_IMPL_HXX
 
+#include <odb/pre.hxx>
+
 #include <odb/transaction.hxx>
 
 #include <odb/mysql/version.hxx>
@@ -13,11 +15,13 @@
 
 #include <odb/details/shared-ptr.hxx>
 
+#include <odb/mysql/details/export.hxx>
+
 namespace odb
 {
   namespace mysql
   {
-    class transaction_impl: public odb::transaction_impl
+    class LIBODB_MYSQL_EXPORT transaction_impl: public odb::transaction_impl
     {
     protected:
       friend class database;
@@ -47,5 +51,7 @@ namespace odb
 }
 
 #include <odb/mysql/transaction-impl.ixx>
+
+#include <odb/post.hxx>
 
 #endif // ODB_MYSQL_TRANSACTION_IMPL_HXX

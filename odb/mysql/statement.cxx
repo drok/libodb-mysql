@@ -3,7 +3,16 @@
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <mysql/mysqld_error.h> // ER_DUP_ENTRY, ER_LOCK_DEADLOCK
+#include <odb/mysql/details/config.hxx>
+
+#ifdef LIBODB_MYSQL_INCLUDE_SHORT
+#  ifdef _WIN32
+#    include <winsock2.h>
+#  endif
+#  include <mysqld_error.h>       // ER_DUP_ENTRY, ER_LOCK_DEADLOCK
+#else
+#  include <mysql/mysqld_error.h>
+#endif
 
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
@@ -117,10 +126,6 @@ namespace odb
         {
           return success;
         }
-      case 1:
-        {
-          throw database_exception (stmt_);
-        }
       case MYSQL_NO_DATA:
         {
           return no_data;
@@ -128,6 +133,10 @@ namespace odb
       case MYSQL_DATA_TRUNCATED:
         {
           return truncated;
+        }
+      default:
+        {
+          throw database_exception (stmt_);
         }
       }
     }
@@ -296,10 +305,6 @@ namespace odb
         {
           return success;
         }
-      case 1:
-        {
-          throw database_exception (stmt_);
-        }
       case MYSQL_NO_DATA:
         {
           free_result ();
@@ -308,6 +313,10 @@ namespace odb
       case MYSQL_DATA_TRUNCATED:
         {
           return truncated;
+        }
+      default:
+        {
+          throw database_exception (stmt_);
         }
       }
     }
