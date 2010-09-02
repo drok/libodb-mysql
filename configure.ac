@@ -9,7 +9,7 @@ AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([odb/mysql/version.hxx])
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects dist-bzip2 dist-zip tar-ustar])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign nostdinc subdir-objects dist-bzip2 dist-zip tar-ustar])
 
 LT_INIT([win32-dll])
 
@@ -19,10 +19,6 @@ AC_CANONICAL_HOST
 #
 AC_PROG_CXX
 AC_LANG(C++)
-
-# Required by subdir-objects.
-#
-AM_PROG_CC_C_O
 
 # Create the libtool executable so that we can use it in further tests.
 #
@@ -53,7 +49,7 @@ DISABLE_RPATH
 
 # Output.
 #
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([odb/mysql/config.h])
 AC_CONFIG_FILES([
   __path__(config_files)
 ])
