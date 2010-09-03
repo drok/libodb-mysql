@@ -5,10 +5,11 @@
 
 #include <odb/mysql/details/config.hxx>
 
+#ifdef _WIN32
+#  include <winsock2.h>
+#endif
+
 #ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  ifdef _WIN32
-#    include <winsock2.h>
-#  endif
 #  include <mysqld_error.h>       // ER_DUP_ENTRY, ER_LOCK_DEADLOCK
 #else
 #  include <mysql/mysqld_error.h>

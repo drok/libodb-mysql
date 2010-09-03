@@ -8,14 +8,28 @@
 
 #include <odb/pre.hxx>
 
+#include <odb/mysql/details/config.hxx>
+
 #ifdef LIBODB_MYSQL_STATIC_LIB
 #  define LIBODB_MYSQL_EXPORT
 #else
 #  ifdef _WIN32
-#    ifdef LIBODB_MYSQL_DYNAMIC_LIB
-#      define LIBODB_MYSQL_EXPORT __declspec(dllexport)
+#    ifdef _MSC_VER
+#      ifdef LIBODB_MYSQL_DYNAMIC_LIB
+#        define LIBODB_MYSQL_EXPORT __declspec(dllexport)
+#      else
+#        define LIBODB_MYSQL_EXPORT __declspec(dllimport)
+#      endif
 #    else
-#      define LIBODB_MYSQL_EXPORT __declspec(dllimport)
+#      ifdef LIBODB_MYSQL_DYNAMIC_LIB
+#        ifdef DLL_EXPORT
+#          define LIBODB_MYSQL_EXPORT __declspec(dllexport)
+#        else
+#          define LIBODB_MYSQL_EXPORT
+#        endif
+#      else
+#        define LIBODB_MYSQL_EXPORT __declspec(dllimport)
+#      endif
 #    endif
 #  else
 #    define LIBODB_MYSQL_EXPORT

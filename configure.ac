@@ -35,9 +35,23 @@ LIBMYSQLCLIENT(
   [],
   [AC_MSG_ERROR([lib$libmysqlclient_name is not found; consider using CPPFLAGS/LDFLAGS to specify its location])])
 
+case $libmysqlclient_include in
+  short)
+    AC_DEFINE([LIBODB_MYSQL_INCLUDE_SHORT], [1], ["Short MySQL include."])
+    ;;
+  long)
+    AC_DEFINE([LIBODB_MYSQL_INCLUDE_LONG], [1], ["Long MySQL include."])
+    ;;
+esac
+
 # Check for libodb.
 #
 LIBODB([],[AC_MSG_ERROR([libodb is not found; consider using --with-libodb=DIR])])
+
+# Define LIBODB_MYSQL_STATIC_LIB if we are build static library on certain
+# platforms.
+#
+STATIC_LIB([LIBODB_MYSQL_STATIC_LIB], [Static library interface.])
 
 # Allow the user to specify the pkgconfig directory.
 #
@@ -49,7 +63,7 @@ DISABLE_RPATH
 
 # Output.
 #
-AC_CONFIG_HEADERS([odb/mysql/config.h])
+AC_CONFIG_HEADERS([odb/mysql/config.h odb/mysql/details/config.h])
 AC_CONFIG_FILES([
   __path__(config_files)
 ])

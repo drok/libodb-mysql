@@ -5,10 +5,11 @@
 
 #include <odb/mysql/details/config.hxx>
 
+#ifdef _WIN32
+#  include <winsock2.h>
+#endif
+
 #ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  ifdef _WIN32
-#    include <winsock2.h>
-#  endif
 #  include <mysql.h>
 #  include <errmsg.h>       // CR_UNKNOWN_ERROR
 #else
@@ -38,7 +39,7 @@ namespace odb
 #ifndef ODB_THREADS_NONE
         mysql_init ()
         {
-          if (my_thread_init ())
+          if (mysql_thread_init ())
           {
             throw database_exception (
               CR_UNKNOWN_ERROR, "?????", "thread initialization failed");
@@ -47,7 +48,7 @@ namespace odb
 
         ~mysql_init ()
         {
-          my_thread_end ();
+          mysql_thread_end ();
         }
 #endif
       };

@@ -24,6 +24,9 @@ LIBS="-l$libmysqlclient_name $LIBS"
 
 CXX_LIBTOOL_LINK_IFELSE(
 AC_LANG_SOURCE([[
+#ifdef _WIN32
+#  include <winsock2.h>
+#endif
 #include <mysql/mysql.h>
 
 int
@@ -37,7 +40,37 @@ main ()
   mysql_close (&handle);
 }
 ]]),
-[libmysqlclient_found=yes])
+[
+libmysqlclient_found=yes
+libmysqlclient_include=long
+])
+
+if test x"$libmysqlclient_found" = xno; then
+
+CXX_LIBTOOL_LINK_IFELSE(
+AC_LANG_SOURCE([[
+#ifdef _WIN32
+#  include <winsock2.h>
+#endif
+#include <mysql.h>
+
+int
+main ()
+{
+  MYSQL handle;
+  mysql_init (&handle);
+  mysql_real_connect (&handle, 0, 0, 0, 0, 0, 0, 0);
+  MYSQL_STMT* stmt = mysql_stmt_init (&handle);
+  mysql_stmt_close (stmt);
+  mysql_close (&handle);
+}
+]]),
+[
+libmysqlclient_found=yes
+libmysqlclient_include=short
+])
+
+fi
 
 if test x"$libmysqlclient_found" = xno; then
   LIBS="$save_LIBS"

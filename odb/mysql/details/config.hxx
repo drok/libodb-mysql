@@ -8,9 +8,15 @@
 
 // no pre
 
-#ifndef LIBODB_MYSQL_INCLUDE_SHORT
+#ifdef HAVE_CONFIG_H
+#  include <odb/mysql/details/config.h>
+#endif
+
+#if !defined(LIBODB_MYSQL_INCLUDE_SHORT) && !defined (LIBODB_MYSQL_INCLUDE_LONG)
   #ifdef _WIN32
     #define LIBODB_MYSQL_INCLUDE_SHORT 1
+  #else
+    #define LIBODB_MYSQL_INCLUDE_LONG 1
   #endif
 #endif
 

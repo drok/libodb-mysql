@@ -10,10 +10,11 @@
 
 #include <odb/mysql/details/config.hxx>
 
+#ifdef _WIN32
+#  include <winsock2.h>
+#endif
+
 #ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  ifdef _WIN32
-#    include <winsock2.h>
-#  endif
 #  include <mysql.h>
 #else
 #  include <mysql/mysql.h>

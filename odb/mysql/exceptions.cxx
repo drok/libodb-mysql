@@ -5,10 +5,11 @@
 
 #include <odb/mysql/details/config.hxx>
 
+#ifdef _WIN32
+#  include <winsock2.h>
+#endif
+
 #ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  ifdef _WIN32
-#    include <winsock2.h>
-#  endif
 #  include <errmsg.h>       // CR_OUT_OF_MEMORY
 #else
 #  include <mysql/errmsg.h>
