@@ -8,16 +8,14 @@
 
 // no pre
 
-#ifdef HAVE_CONFIG_H
+#ifdef _MSC_VER
+#  if !defined(LIBODB_MYSQL_INCLUDE_SHORT) && !defined (LIBODB_MYSQL_INCLUDE_LONG)
+#    define LIBODB_MYSQL_INCLUDE_SHORT 1
+#  endif
+#elif defined(ODB_COMPILER)
+#  error libodb-mysql header included in odb-compiled header
+#else
 #  include <odb/mysql/details/config.h>
-#endif
-
-#if !defined(LIBODB_MYSQL_INCLUDE_SHORT) && !defined (LIBODB_MYSQL_INCLUDE_LONG)
-  #ifdef _WIN32
-    #define LIBODB_MYSQL_INCLUDE_SHORT 1
-  #else
-    #define LIBODB_MYSQL_INCLUDE_LONG 1
-  #endif
 #endif
 
 // no post

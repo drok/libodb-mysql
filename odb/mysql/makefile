@@ -44,12 +44,23 @@ $(call import,\
 # Build.
 #
 $(odb_mysql.l): $(cxx_obj) $(odb.l) $(mysql.l)
-$(odb_mysql.l.cpp-options): value := -I$(src_root)
+$(odb_mysql.l.cpp-options): value := -I$(out_root) -I$(src_root)
 $(odb_mysql.l.cpp-options): $(odb.l.cpp-options) $(mysql.l.cpp-options)
 
-$(cxx_obj) $(cxx_od): $(odb_mysql.l.cpp-options)
+$(cxx_obj) $(cxx_od): $(odb_mysql.l.cpp-options) $(out_base)/details/config.h
 
 $(call include-dep,$(cxx_od))
+
+$(out_base)/details/config.h:
+	@echo '// file      : odb/mysql/details/config.h'                >$@
+	@echo '// author    : automatically generated'                  >>$@
+	@echo ''                                                        >>$@
+	@echo '#ifndef ODB_MYSQL_DETAILS_CONFIG_H'                      >>$@
+	@echo '#define ODB_MYSQL_DETAILS_CONFIG_H'                      >>$@
+	@echo ''                                                        >>$@
+	@echo '#define LIBODB_MYSQL_INCLUDE_LONG 1'                     >>$@
+	@echo ''                                                        >>$@
+	@echo '#endif // ODB_MYSQL_DETAILS_CONFIG_H'                    >>$@
 
 # Convenience alias for default target.
 #
@@ -77,6 +88,18 @@ $(clean): $(odb_mysql.l).o.clean    \
   $(odb_mysql.l.cpp-options).clean  \
   $(addsuffix .cxx.clean,$(cxx_obj)) \
   $(addsuffix .cxx.clean,$(cxx_od))
+	$(call message,rm $$1,rm -f $$1,$(out_base)/details/config.h)
+
+# Generated .gitignore.
+#
+ifeq ($(out_base),$(src_base))
+$(odb_mysql.l): | $(out_base)/.gitignore
+
+$(out_base)/.gitignore: files := details/config.h
+$(clean): $(out_base)/.gitignore.clean
+
+$(call include,$(bld_root)/git/gitignore.make)
+endif
 
 # How to.
 #
