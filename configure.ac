@@ -64,7 +64,5 @@ DISABLE_RPATH
 # Output.
 #
 AC_CONFIG_HEADERS([odb/mysql/config.h odb/mysql/details/config.h])
-AC_CONFIG_FILES([
-  __path__(config_files)
-])
+AC_CONFIG_FILES([__path__(config_files)])
 AC_OUTPUT
