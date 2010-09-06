@@ -16,6 +16,16 @@ namespace odb
     {
     }
 
+    inline transaction_impl& transaction::
+    implementation ()
+    {
+      // We can use static_cast here since we have an instance of
+      // mysql::transaction.
+      //
+      return static_cast<transaction_impl&> (
+        odb::transaction::implementation ());
+    }
+
     inline transaction::database_type& transaction::
     database ()
     {
@@ -26,16 +36,6 @@ namespace odb
     connection ()
     {
       return implementation ().connection ();
-    }
-
-    inline transaction_impl& transaction::
-    implementation ()
-    {
-      // We can use static_cast here since we have an instance of
-      // mysql::transaction.
-      //
-      return static_cast<transaction_impl&> (
-        odb::transaction::implementation ());
     }
   }
 }

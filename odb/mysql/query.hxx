@@ -201,7 +201,7 @@ namespace odb
       std::vector<MYSQL_BIND> binding_;
     };
 
-    inline LIBODB_MYSQL_EXPORT query
+    inline query
     operator+ (const query& x, const query& y)
     {
       query r (x);
@@ -247,7 +247,7 @@ namespace odb
       return r;
     }
 
-    inline LIBODB_MYSQL_EXPORT query
+    inline query
     operator+ (const query& q, const std::string& s)
     {
       query r (q);
@@ -255,7 +255,7 @@ namespace odb
       return r;
     }
 
-    inline LIBODB_MYSQL_EXPORT query
+    inline query
     operator+ (const std::string& s, const query& q)
     {
       query r (s);
@@ -301,7 +301,7 @@ namespace odb
       return r;
     }
 
-    inline LIBODB_MYSQL_EXPORT query
+    inline query
     operator&& (const query& x, const query& y)
     {
       query r ("(");
@@ -312,7 +312,7 @@ namespace odb
       return r;
     }
 
-    inline LIBODB_MYSQL_EXPORT query
+    inline query
     operator|| (const query& x, const query& y)
     {
       query r ("(");
@@ -323,7 +323,7 @@ namespace odb
       return r;
     }
 
-    inline LIBODB_MYSQL_EXPORT query
+    inline query
     operator! (const query& x)
     {
       query r ("!(");
