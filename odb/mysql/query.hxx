@@ -414,7 +414,7 @@ namespace odb
       equal (val_bind<T2> v) const
       {
         copy_bind<T, T2> c (v.val);
-        return equal<T> (c);
+        return equal (c);
       }
 
       query
@@ -499,7 +499,7 @@ namespace odb
       unequal (val_bind<T2> v) const
       {
         copy_bind<T, T2> c (v.val);
-        return unequal<T> (c);
+        return unequal (c);
       }
 
       query
@@ -584,7 +584,7 @@ namespace odb
       less (val_bind<T2> v) const
       {
         copy_bind<T, T2> c (v.val);
-        return less<T> (c);
+        return less (c);
       }
 
       query
@@ -669,7 +669,7 @@ namespace odb
       greater (val_bind<T2> v) const
       {
         copy_bind<T, T2> c (v.val);
-        return greater<T> (c);
+        return greater (c);
       }
 
       query
@@ -754,7 +754,7 @@ namespace odb
       less_equal (val_bind<T2> v) const
       {
         copy_bind<T, T2> c (v.val);
-        return less_equal<T> (c);
+        return less_equal (c);
       }
 
       query
@@ -839,7 +839,7 @@ namespace odb
       greater_equal (val_bind<T2> v) const
       {
         copy_bind<T, T2> c (v.val);
-        return greater_equal<T> (c);
+        return greater_equal (c);
       }
 
       query
