@@ -3,18 +3,7 @@
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <odb/mysql/details/config.hxx>
-
-#ifdef _WIN32
-#  include <winsock2.h>
-#endif
-
-#ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  include <mysqld_error.h>       // ER_DUP_ENTRY, ER_LOCK_DEADLOCK
-#else
-#  include <mysql/mysqld_error.h>
-#endif
-
+#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/exceptions.hxx>

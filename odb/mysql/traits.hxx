@@ -8,24 +8,13 @@
 
 #include <odb/pre.hxx>
 
-#include <odb/mysql/details/config.hxx>
-
-#ifdef _WIN32
-#  include <winsock2.h>
-#endif
-
-#ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  include <mysql.h>       // MYSQL_TIME, used in custom specializations.
-#else
-#  include <mysql/mysql.h>
-#endif
-
 #include <string>
 #include <cstddef> // std::size_t
 
 #include <odb/traits.hxx>
 
 #include <odb/mysql/version.hxx>
+#include <odb/mysql/mysql-types.hxx>
 
 #include <odb/details/buffer.hxx>
 

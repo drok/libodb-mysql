@@ -3,21 +3,10 @@
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <odb/mysql/details/config.hxx>
-
-#ifdef _WIN32
-#  include <winsock2.h>
-#endif
-
-#ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  include <errmsg.h>       // CR_OUT_OF_MEMORY
-#else
-#  include <mysql/errmsg.h>
-#endif
-
 #include <new>     // std::bad_alloc
 #include <sstream>
 
+#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/exceptions.hxx>
 
 using namespace std;

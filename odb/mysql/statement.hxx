@@ -8,18 +8,6 @@
 
 #include <odb/pre.hxx>
 
-#include <odb/mysql/details/config.hxx>
-
-#ifdef _WIN32
-#  include <winsock2.h>
-#endif
-
-#ifdef LIBODB_MYSQL_INCLUDE_SHORT
-#  include <mysql.h>
-#else
-#  include <mysql/mysql.h>
-#endif
-
 #include <map>
 #include <string>
 #include <cstddef>  // std::size_t
@@ -28,6 +16,7 @@
 #include <odb/forward.hxx>
 #include <odb/traits.hxx>
 
+#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 
 #include <odb/details/shared-ptr.hxx>
