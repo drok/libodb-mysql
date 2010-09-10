@@ -73,5 +73,12 @@ namespace odb
         }
       }
     }
+
+    template <typename T>
+    void result_impl<T>::
+    cache ()
+    {
+      statement_->cache ();
+    }
   }
 }

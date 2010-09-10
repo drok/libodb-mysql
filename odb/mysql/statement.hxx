@@ -86,6 +86,9 @@ namespace odb
       void
       execute ();
 
+      void
+      cache ();
+
       result
       fetch ();
 
@@ -103,6 +106,8 @@ namespace odb
       query_statement& operator= (const query_statement&);
 
     private:
+      bool cached_;
+
       binding& image_;
       std::size_t image_version_;
 

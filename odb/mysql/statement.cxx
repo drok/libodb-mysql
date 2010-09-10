@@ -41,7 +41,9 @@ namespace odb
     query_statement::
     ~query_statement ()
     {
-      if (conn_.active () == this)
+      statement* as (conn_.active ());
+
+      if (cached_ || as == this)
       {
         try
         {
@@ -51,6 +53,9 @@ namespace odb
         {
         }
       }
+
+      if (as == this)
+        conn_.active (0);
     }
 
     query_statement::
@@ -59,6 +64,7 @@ namespace odb
                      binding& image,
                      MYSQL_BIND* parameters)
         : statement (conn),
+          cached_ (false),
           image_ (image),
           image_version_ (0),
           parameters_ (parameters)
@@ -72,6 +78,9 @@ namespace odb
     {
       if (statement* a = conn_.active ())
         a->cancel ();
+
+      if (cached_)
+        free_result ();
 
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
@@ -103,6 +112,15 @@ namespace odb
       }
 
       conn_.active (this);
+    }
+
+    void query_statement::
+    cache ()
+    {
+      if (mysql_stmt_store_result (stmt_))
+        throw database_exception (stmt_);
+
+      cached_ = true;
     }
 
     query_statement::result query_statement::
@@ -152,16 +170,21 @@ namespace odb
     void query_statement::
     free_result ()
     {
+      cached_ = false;
+
       if (mysql_stmt_free_result (stmt_))
         throw database_exception (stmt_);
-
-      conn_.active (0);
     }
 
     void query_statement::
     cancel ()
     {
-      free_result ();
+      // If we cached the result, don't free it just yet.
+      //
+      if (!cached_)
+        free_result ();
+
+      conn_.active (0);
     }
 
     // persist_statement

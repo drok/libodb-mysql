@@ -40,8 +40,11 @@ namespace odb
       virtual void
       current (T&);
 
-      void
+      virtual void
       next ();
+
+      virtual void
+      cache ();
 
       using odb::result_impl<T>::current;
 
