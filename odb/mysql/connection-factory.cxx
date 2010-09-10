@@ -3,6 +3,8 @@
 // copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <cstdlib> // abort
+
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/connection-factory.hxx>
 #include <odb/mysql/exceptions.hxx>
@@ -21,26 +23,62 @@ namespace odb
   {
     namespace
     {
-      struct mysql_init
+      static bool main_thread_init_;
+
+      struct mysql_thread_init
       {
 #ifndef ODB_THREADS_NONE
-        mysql_init ()
+        mysql_thread_init ()
+            : init_ (false)
         {
-          if (mysql_thread_init ())
+          if (!main_thread_init_)
           {
-            throw database_exception (
-              CR_UNKNOWN_ERROR, "?????", "thread initialization failed");
+            if (::mysql_thread_init ())
+            {
+              throw database_exception (
+                CR_UNKNOWN_ERROR, "?????", "thread initialization failed");
+            }
+
+            init_ = true;
           }
         }
 
-        ~mysql_init ()
+        ~mysql_thread_init ()
         {
-          mysql_thread_end ();
+          if (init_)
+            mysql_thread_end ();
         }
+
+      private:
+        bool init_;
 #endif
       };
 
-      static ODB_TLS_OBJECT (mysql_init) mysql_init_;
+      static ODB_TLS_OBJECT (mysql_thread_init) mysql_thread_init_;
+
+      struct mysql_process_init
+      {
+        mysql_process_init ()
+        {
+          if (mysql_library_init (0 ,0, 0))
+            abort ();
+
+          main_thread_init_ = true;
+          tls_get (mysql_thread_init_);
+          main_thread_init_ = false;
+        }
+
+        ~mysql_process_init ()
+        {
+          // Finalize the main thread now in case TLS destruction
+          // doesn't happen for the main thread.
+          //
+          tls_free (mysql_thread_init_);
+          mysql_library_end ();
+        }
+      };
+
+      static mysql_process_init mysql_process_init_;
     }
 
     //
@@ -59,7 +97,7 @@ namespace odb
     shared_ptr<connection> new_connection_factory::
     connect ()
     {
-      tls_get (mysql_init_);
+      tls_get (mysql_thread_init_);
 
       return shared_ptr<connection> (new (shared) connection (*db_));
     }
@@ -92,7 +130,7 @@ namespace odb
     shared_ptr<connection> connection_pool_factory::
     connect ()
     {
-      tls_get (mysql_init_);
+      tls_get (mysql_thread_init_);
 
       lock l (mutex_);
 
@@ -130,7 +168,7 @@ namespace odb
     void connection_pool_factory::
     database (database_type& db)
     {
-      tls_get (mysql_init_);
+      tls_get (mysql_thread_init_);
 
       db_ = &db;
 
