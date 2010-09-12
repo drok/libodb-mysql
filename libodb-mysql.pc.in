@@ -9,7 +9,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libodb-mysql
-Description: Object persistence compiler for C++, MySQL runtime
+Description: Object-relational mapping (ORM) system for C++, MySQL runtime library
 URL: http://www.codesynthesis.com/products/odb/
 Version: @VERSION@
 Libs: -L${libdir} -lodb-mysql
