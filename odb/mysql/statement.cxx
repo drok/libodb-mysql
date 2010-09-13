@@ -126,6 +126,17 @@ namespace odb
     query_statement::result query_statement::
     fetch ()
     {
+      // If the result was cached the image can grow between calls
+      // to fetch() as a result of other statements execution.
+      //
+      if (cached_ && image_version_ != image_.version)
+      {
+        if (mysql_stmt_bind_result (stmt_, image_.bind))
+          throw database_exception (stmt_);
+
+        image_version_ = image_.version;
+      }
+
       int r (mysql_stmt_fetch (stmt_));
 
       switch (r)
