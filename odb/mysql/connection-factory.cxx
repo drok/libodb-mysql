@@ -3,6 +3,12 @@
 // copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <odb/details/config.hxx> // ODB_THREADS_*
+
+#ifdef ODB_THREADS_POSIX
+#  include <pthread.h>
+#endif
+
 #include <cstdlib> // abort
 
 #include <odb/mysql/mysql.hxx>
@@ -11,7 +17,25 @@
 
 #include <odb/details/tls.hxx>
 #include <odb/details/lock.hxx>
-#include <odb/details/config.hxx> // ODB_THREADS_NONE
+
+// This key is in the mysql client library. We use it to resolve the
+// following problem: Some pthread implementations zero-out slots that
+// don't have destructors during thread termination. As a result, when
+// out destructor gets called and we call mysql_thread_end(), the thread-
+// specific slot used by MySQL may have been reset to 0 and as a result
+// MySQL thinks the data has been freed.
+//
+// To work around this problem we are going to cache the MySQL's slot
+// value and if, during destruction, we see that it is 0, we will restore
+// the original value before calling mysql_thread_end(). This will work
+// fine for as long as the following conditions are met:
+//
+// 1. MySQL don't use the destructor itself.
+// 2. Nobody else tried to call mysql_thread_end() before us.
+//
+#ifdef ODB_THREADS_POSIX
+extern pthread_key_t THR_KEY_mysys;
+#endif
 
 using namespace std;
 
@@ -40,18 +64,31 @@ namespace odb
             }
 
             init_ = true;
+
+#ifdef ODB_THREADS_POSIX
+            value_ = pthread_getspecific (THR_KEY_mysys);
+#endif
           }
         }
 
         ~mysql_thread_init ()
         {
           if (init_)
+          {
+#ifdef ODB_THREADS_POSIX
+            if (pthread_getspecific (THR_KEY_mysys) == 0)
+              pthread_setspecific (THR_KEY_mysys, value_);
+#endif
             mysql_thread_end ();
+          }
         }
 
       private:
         bool init_;
+#ifdef ODB_THREADS_POSIX
+        void* value_;
 #endif
+#endif // ODB_THREADS_NONE
       };
 
       static ODB_TLS_OBJECT (mysql_thread_init) mysql_thread_init_;
