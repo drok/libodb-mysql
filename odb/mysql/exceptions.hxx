@@ -62,6 +62,18 @@ namespace odb
       std::string message_;
       std::string what_;
     };
+
+    struct LIBODB_MYSQL_EXPORT cli_exception: odb::exception
+    {
+      cli_exception (const std::string& what);
+      ~cli_exception () throw ();
+
+      virtual const char*
+      what () const throw ();
+
+    private:;
+      std::string what_;
+    };
   }
 }
 

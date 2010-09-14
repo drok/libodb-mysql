@@ -15,6 +15,10 @@ namespace odb
 {
   namespace mysql
   {
+    //
+    // database_exception
+    //
+
     database_exception::
     ~database_exception () throw ()
     {
@@ -68,6 +72,27 @@ namespace odb
     }
 
     const char* database_exception::
+    what () const throw ()
+    {
+      return what_.c_str ();
+    }
+
+    //
+    // cli_exception
+    //
+
+    cli_exception::
+    cli_exception (const std::string& what)
+        : what_ (what)
+    {
+    }
+
+    cli_exception::
+    ~cli_exception () throw ()
+    {
+    }
+
+    const char* cli_exception::
     what () const throw ()
     {
       return what_.c_str ();

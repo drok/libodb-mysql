@@ -16,8 +16,9 @@ statement.cxx          \
 query.cxx              \
 traits.cxx
 
+cli_tun := details/options.cli
 cxx_tun := $(cxx)
-cxx_obj := $(addprefix $(out_base)/,$(cxx_tun:.cxx=.o))
+cxx_obj := $(addprefix $(out_base)/,$(cxx_tun:.cxx=.o) $(cli_tun:.cli=.o))
 cxx_od  := $(cxx_obj:.o=.o.d)
 
 odb_mysql.l             := $(out_base)/odb-mysql.l
@@ -29,6 +30,10 @@ clean   := $(out_base)/.clean
 
 # Import.
 #
+$(call import,\
+  $(scf_root)/import/cli/stub.make,\
+  cli: cli,cli-rules: cli_rules)
+
 $(call import,\
   $(scf_root)/import/libodb/stub.make,\
   l: odb.l,cpp-options: odb.l.cpp-options)
@@ -49,7 +54,16 @@ $(odb_mysql.l.cpp-options): $(odb.l.cpp-options) $(mysql.l.cpp-options)
 
 $(cxx_obj) $(cxx_od): $(odb_mysql.l.cpp-options) $(out_base)/details/config.h
 
-$(call include-dep,$(cxx_od))
+genf := $(cli_tun:.cli=.hxx) $(cli_tun:.cli=.ixx) $(cli_tun:.cli=.cxx)
+gen  := $(addprefix $(out_base)/,$(genf))
+
+$(gen): $(cli)
+$(gen): cli := $(cli)
+$(gen): cli_options +=                   \
+--generate-specifier                     \
+--generate-file-scanner                  \
+--cli-namespace odb::mysql::details::cli \
+--guard-prefix LIBODB_MYSQL_DETAILS
 
 $(out_base)/details/config.h:
 	@echo '// file      : odb/mysql/details/config.h'                >$@
@@ -62,22 +76,30 @@ $(out_base)/details/config.h:
 	@echo ''                                                        >>$@
 	@echo '#endif // ODB_MYSQL_DETAILS_CONFIG_H'                    >>$@
 
+$(call include-dep,$(cxx_od),$(cxx_obj),$(gen) $(out_base)/details/config.h)
+
 # Convenience alias for default target.
 #
 $(out_base)/: $(odb_mysql.l)
 
 # Dist.
 #
-$(dist): export sources := $(cxx)
-$(dist): export headers = $(subst $(src_base)/,,$(shell find $(src_base) \
+$(dist): sources_dist := $(cxx)
+$(dist): export sources := $(sources_dist) $(cli_tun:.cli=.cxx)
+$(dist): headers_dist = $(subst $(src_base)/,,$(shell find $(src_base) \
 -name '*.hxx' -o -name '*.ixx' -o -name '*.txx'))
-$(dist): export extra_dist := libodb-mysql-vc9.vcproj \
+$(dist): gen_headers := $(cli_tun:.cli=.hxx) $(cli_tun:.cli=.ixx)
+$(dist): export headers = $(sort $(headers_dist) $(gen_headers))
+$(dist): gen_dist := $(gen)
+$(dist): data_dist := $(cli_tun) details/config.h.in
+$(dist): export extra_dist := $(data_dist) libodb-mysql-vc9.vcproj \
 libodb-mysql-vc10.vcxproj libodb-mysql-vc10.vcxproj.filters
 $(dist): export interface_version = $(shell sed -e \
 's/^\([0-9]*\.[0-9]*\).*/\1/' $(src_root)/version)
 
-$(dist):
-	$(call dist-data,$(sources) $(headers) details/config.h.in)
+$(dist): $(gen)
+	$(call dist-data,$(sources_dist) $(headers_dist) $(data_dist))
+	$(call dist-data,$(gen_dist),$(dist_prefix)/odb/mysql/details)
 	$(call meta-vc9proj,$(src_base)/libodb-mysql-vc9.vcproj)
 	$(call meta-vc10proj,$(src_base)/libodb-mysql-vc10.vcxproj)
 	$(call meta-automake)
@@ -87,7 +109,8 @@ $(dist):
 $(clean): $(odb_mysql.l).o.clean    \
   $(odb_mysql.l.cpp-options).clean  \
   $(addsuffix .cxx.clean,$(cxx_obj)) \
-  $(addsuffix .cxx.clean,$(cxx_od))
+  $(addsuffix .cxx.clean,$(cxx_od))  \
+  $(addprefix $(out_base)/,$(cli_tun:.cli=.cxx.cli.clean))
 	$(call message,rm $$1,rm -f $$1,$(out_base)/details/config.h)
 
 # Generated .gitignore.
@@ -95,7 +118,7 @@ $(clean): $(odb_mysql.l).o.clean    \
 ifeq ($(out_base),$(src_base))
 $(odb_mysql.l): | $(out_base)/.gitignore
 
-$(out_base)/.gitignore: files := details/config.h
+$(out_base)/.gitignore: files := details/config.h $(genf)
 $(clean): $(out_base)/.gitignore.clean
 
 $(call include,$(bld_root)/git/gitignore.make)
@@ -108,6 +131,7 @@ $(call include,$(bld_root)/meta/vc9proj.make)
 $(call include,$(bld_root)/meta/vc10proj.make)
 $(call include,$(bld_root)/meta/automake.make)
 
+$(call include,$(cli_rules))
 $(call include,$(bld_root)/cxx/o-l.make)
 $(call include,$(bld_root)/cxx/cxx-o.make)
 $(call include,$(bld_root)/cxx/cxx-d.make)

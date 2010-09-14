@@ -10,6 +10,7 @@
 
 #include <string>
 #include <memory> // std::auto_ptr
+#include <iosfwd> // std::ostream
 
 #include <odb/database.hxx>
 
@@ -34,7 +35,7 @@ namespace odb
       typedef mysql::connection connection_type;
 
     public:
-      // In MySQL NULL and empty string are treated as the same value
+      // In MySQL, NULL and empty string are treated as the same value
       // for all the arguments except passwd and socket.
       //
       database (const char* user,
@@ -87,6 +88,33 @@ namespace odb
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
 
+      // Extract the database parameters from the command line. The
+      // following options are recognized:
+      //
+      // --user
+      // --password
+      // --database
+      // --host
+      // --port
+      // --socket
+      // --options-file
+      //
+      // For more information, see the output of the print_usage() function
+      // below. If erase is true, the above options are removed from the
+      // argv array and the argc is updated accordingly. This constructor
+      // may throw the cli_exception exception.
+      //
+      database (int& argc,
+                char* argv[],
+                bool erase = false,
+                unsigned long client_flags = 0,
+                std::auto_ptr<connection_factory> =
+                  std::auto_ptr<connection_factory> (0));
+
+      static void
+      print_usage (std::ostream&);
+
+
     public:
       const char*
       user () const
@@ -95,7 +123,7 @@ namespace odb
       }
 
       const char*
-      passwd () const
+      password () const
       {
         return passwd_;
       }
@@ -143,13 +171,13 @@ namespace odb
       ~database ();
 
     private:
-      const std::string user_;
-      const std::string passwd_str_;
+      std::string user_;
+      std::string passwd_str_;
       const char* passwd_;
-      const std::string db_;
-      const std::string host_;
+      std::string db_;
+      std::string host_;
       unsigned int port_;
-      const std::string socket_str_;
+      std::string socket_str_;
       const char* socket_;
       unsigned long client_flags_;
       std::auto_ptr<connection_factory> factory_;

@@ -30,7 +30,7 @@ namespace odb
       if (mysql_real_connect (handle_,
                               db.host (),
                               db.user (),
-                              db.passwd (),
+                              db.password (),
                               db.db (),
                               db.port (),
                               db.socket (),

@@ -3,10 +3,15 @@
 // copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <sstream>
+
 #include <odb/transaction.hxx>
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection-factory.hxx>
+#include <odb/mysql/exceptions.hxx>
+
+#include <odb/mysql/details/options.hxx>
 
 using namespace std;
 
@@ -147,6 +152,61 @@ namespace odb
         factory_.reset (new connection_pool_factory ());
 
       factory_->database (*this);
+    }
+
+    database::
+    database (int& argc,
+              char* argv[],
+              bool erase,
+              unsigned long client_flags,
+              std::auto_ptr<connection_factory> factory)
+        : passwd_ (0),
+          socket_ (0),
+          client_flags_ (client_flags),
+          factory_ (factory)
+    {
+      using namespace details;
+
+      try
+      {
+        cli::argv_file_scanner scan (argc, argv, "--options-file", erase);
+        options ops (scan);
+
+        user_ = ops.user ();
+
+        if (ops.password_specified ())
+        {
+          passwd_str_ = ops.password ();
+          passwd_ = passwd_str_.c_str ();
+        }
+
+        db_ = ops.database ();
+        host_ = ops.host ();
+        port_ = ops.port ();
+
+        if (ops.socket_specified ())
+        {
+          socket_str_ = ops.socket ();
+          socket_ = socket_str_.c_str ();
+        }
+      }
+      catch (const cli::exception& e)
+      {
+        ostringstream ostr;
+        ostr << e;
+        throw cli_exception (ostr.str ());
+      }
+
+      if (factory_.get () == 0)
+        factory_.reset (new connection_pool_factory ());
+
+      factory_->database (*this);
+    }
+
+    void database::
+    print_usage (std::ostream& os)
+    {
+      details::options::print_usage (os);
     }
 
     transaction_impl* database::
