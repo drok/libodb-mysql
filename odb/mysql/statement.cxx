@@ -69,6 +69,9 @@ namespace odb
           image_version_ (0),
           parameters_ (parameters)
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
@@ -210,6 +213,9 @@ namespace odb
     persist_statement (connection& conn, const string& s, binding& image)
         : statement (conn), image_ (image), version_ (0)
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
@@ -280,6 +286,9 @@ namespace odb
           image_ (image),
           image_version_ (0)
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
@@ -398,6 +407,9 @@ namespace odb
           image_ (image),
           image_version_ (0)
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
@@ -456,6 +468,9 @@ namespace odb
     erase_statement (connection& conn, const string& s, binding& id)
         : statement (conn), id_ (id), version_ (0)
     {
+      if (statement* a = conn_.active ())
+        a->cancel ();
+
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         throw database_exception (stmt_);
     }
