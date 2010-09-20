@@ -186,22 +186,22 @@ namespace odb
       std::size_t image_version_;
     };
 
-    class LIBODB_MYSQL_EXPORT store_statement: public statement
+    class LIBODB_MYSQL_EXPORT update_statement: public statement
     {
     public:
       virtual
-      ~store_statement ();
+      ~update_statement ();
 
-      store_statement (connection& conn,
-                       const std::string& statement,
-                       binding& id,
-                       binding& image);
+      update_statement (connection& conn,
+                        const std::string& statement,
+                        binding& id,
+                        binding& image);
       void
       execute ();
 
     private:
-      store_statement (const store_statement&);
-      store_statement& operator= (const store_statement&);
+      update_statement (const update_statement&);
+      update_statement& operator= (const update_statement&);
 
     private:
       binding& id_;
@@ -263,7 +263,7 @@ namespace odb
 
       typedef mysql::persist_statement persist_statement_type;
       typedef mysql::find_statement find_statement_type;
-      typedef mysql::store_statement store_statement_type;
+      typedef mysql::update_statement update_statement_type;
       typedef mysql::erase_statement erase_statement_type;
 
       object_statements (connection&);
@@ -323,18 +323,18 @@ namespace odb
         return *find_;
       }
 
-      store_statement_type&
-      store_statement ()
+      update_statement_type&
+      update_statement ()
       {
-        if (store_ == 0)
-          store_.reset (
-            new (details::shared) store_statement_type (
+        if (update_ == 0)
+          update_.reset (
+            new (details::shared) update_statement_type (
               conn_,
-              object_traits::store_statement,
+              object_traits::update_statement,
               id_image_binding_,
               image_binding_));
 
-        return *store_;
+        return *update_;
       }
 
       erase_statement_type&
@@ -355,7 +355,7 @@ namespace odb
       object_statements& operator= (const object_statements&);
 
     private:
-      // The last element is the id parameter. The store statement
+      // The last element is the id parameter. The update statement
       // depends on this being one contiguous arrays.
       //
       MYSQL_BIND image_bind_[object_traits::column_count + 1];
@@ -369,7 +369,7 @@ namespace odb
 
       details::shared_ptr<persist_statement_type> persist_;
       details::shared_ptr<find_statement_type> find_;
-      details::shared_ptr<store_statement_type> store_;
+      details::shared_ptr<update_statement_type> update_;
       details::shared_ptr<erase_statement_type> erase_;
     };
 

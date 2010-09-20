@@ -394,16 +394,16 @@ namespace odb
     // update_statement
     //
 
-    store_statement::
-    ~store_statement ()
+    update_statement::
+    ~update_statement ()
     {
     }
 
-    store_statement::
-    store_statement (connection& conn,
-                     const string& s,
-                     binding& id,
-                     binding& image)
+    update_statement::
+    update_statement (connection& conn,
+                      const string& s,
+                      binding& id,
+                      binding& image)
         : statement (conn),
           id_ (id),
           id_version_ (0),
@@ -417,7 +417,7 @@ namespace odb
         throw database_exception (stmt_);
     }
 
-    void store_statement::
+    void update_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
