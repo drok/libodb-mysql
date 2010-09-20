@@ -120,10 +120,13 @@ namespace odb
     void query_statement::
     cache ()
     {
-      if (mysql_stmt_store_result (stmt_))
-        throw database_exception (stmt_);
+      if (!cached_)
+      {
+        if (mysql_stmt_store_result (stmt_))
+          throw database_exception (stmt_);
 
-      cached_ = true;
+        cached_ = true;
+      }
     }
 
     query_statement::result query_statement::
