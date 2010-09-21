@@ -13,29 +13,14 @@ namespace odb
 {
   namespace mysql
   {
+    using details::buffer;
+
     //
-    // value_traits<string>
+    // value_traits<string, buffer>
     //
 
-    void value_traits<string>::
-    set_image (char* s,
-               size_t c,
-               size_t& n,
-               bool& is_null,
-               const string& v)
-    {
-      is_null = false;
-      n = v.size ();
-
-      if (n > c)
-        n = c;
-
-      if (n != 0)
-        memcpy (s, v.c_str (), n);
-    }
-
-    void value_traits<string>::
-    set_image (details::buffer& b,
+    void value_traits<string, buffer>::
+    set_image (buffer& b,
                size_t& n,
                bool& is_null,
                const string& v)
@@ -51,28 +36,11 @@ namespace odb
     }
 
     //
-    // value_traits<const char*>
+    // value_traits<const char*, buffer>
     //
 
-    void value_traits<const char*>::
-    set_image (char* s,
-               size_t c,
-               size_t& n,
-               bool& is_null,
-               const char* v)
-    {
-      is_null = false;
-      n = strlen (v);
-
-      if (n > c)
-        n = c;
-
-      if (n != 0)
-        memcpy (s, v, n);
-    }
-
-    void value_traits<const char*>::
-    set_image (details::buffer& b,
+    void value_traits<const char*, buffer>::
+    set_image (buffer& b,
                size_t& n,
                bool& is_null,
                const char* v)

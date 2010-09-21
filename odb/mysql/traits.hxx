@@ -48,14 +48,14 @@ namespace odb
       id_blob
     };
 
-    template <typename T>
-    class generic_value_traits
+    template <typename T, typename I>
+    class value_traits
     {
     public:
-      typedef T type;
       typedef T value_type;
+      typedef T query_type;
+      typedef I image_type;
 
-      template <typename I>
       static void
       set_value (T& v, I i, bool is_null)
       {
@@ -65,7 +65,6 @@ namespace odb
           v = T ();
       }
 
-      template <typename I>
       static void
       set_image (I& i, bool& is_null, T v)
       {
@@ -74,163 +73,164 @@ namespace odb
       }
     };
 
-    template <typename T>
-    class value_traits: public generic_value_traits<T>
+    // std::string specialization.
+    //
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<std::string, details::buffer>
     {
+    public:
+      typedef std::string value_type;
+      typedef std::string query_type;
+      typedef details::buffer image_type;
+
+      static void
+      set_value (std::string& v,
+                 const details::buffer& b,
+                 std::size_t n,
+                 bool is_null)
+      {
+        if (!is_null)
+          v.assign (b.data (), n);
+        else
+          v.erase ();
+      }
+
+      static void
+      set_image (details::buffer&,
+                 std::size_t& n,
+                 bool& is_null,
+                 const std::string&);
+    };
+
+    // const char* specialization
+    //
+    // Specialization for const char* which only supports initialization
+    // of an image from the value but not the other way around. This way
+    // we can pass such values to the queries.
+    //
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<const char*, details::buffer>
+    {
+    public:
+      typedef const char* value_type;
+      typedef const char* query_type;
+      typedef details::buffer image_type;
+
+      static void
+      set_image (details::buffer&,
+                 std::size_t& n,
+                 bool& is_null,
+                 const char*);
+    };
+
+    //
+    // image_traits
+    //
+
+    template <typename T>
+    struct default_image_id;
+
+    template <typename T>
+    class image_traits
+    {
+    public:
+      static const image_id_type image_id = default_image_id<T>::image_id;
     };
 
     // Integral types.
     //
     template <>
-    class value_traits<bool>: public generic_value_traits<bool>
+    struct default_image_id<bool>
     {
-    public:
       static const image_id_type image_id = id_tiny;
     };
 
     template <>
-    class value_traits<signed char>: public generic_value_traits<signed char>
+    struct default_image_id<signed char>
     {
-    public:
       static const image_id_type image_id = id_tiny;
     };
 
     template <>
-    class value_traits<unsigned char>: public generic_value_traits<unsigned char>
+    struct default_image_id<unsigned char>
     {
-    public:
       static const image_id_type image_id = id_utiny;
     };
 
     template <>
-    class value_traits<short>: public generic_value_traits<short>
+    struct default_image_id<short>
     {
-    public:
       static const image_id_type image_id = id_short;
     };
 
     template <>
-    class value_traits<unsigned short>: public generic_value_traits<unsigned short>
+    struct default_image_id<unsigned short>
     {
-    public:
       static const image_id_type image_id = id_ushort;
     };
 
     template <>
-    class value_traits<int>: public generic_value_traits<int>
+    struct default_image_id<int>
     {
-    public:
       static const image_id_type image_id = id_long;
     };
 
     template <>
-    class value_traits<unsigned int>: public generic_value_traits<unsigned int>
+    struct default_image_id<unsigned int>
     {
-    public:
       static const image_id_type image_id = id_ulong;
     };
 
     template <>
-    class value_traits<long>: public generic_value_traits<long>
+    struct default_image_id<long>
     {
-    public:
       static const image_id_type image_id = id_longlong;
     };
 
     template <>
-    class value_traits<unsigned long>: public generic_value_traits<unsigned long>
+    struct default_image_id<unsigned long>
     {
-    public:
       static const image_id_type image_id = id_ulonglong;
     };
 
     template <>
-    class value_traits<long long>: public generic_value_traits<long long>
+    struct default_image_id<long long>
     {
-    public:
       static const image_id_type image_id = id_longlong;
     };
 
     template <>
-    class value_traits<unsigned long long>: public generic_value_traits<unsigned long long>
+    struct default_image_id<unsigned long long>
     {
-    public:
       static const image_id_type image_id = id_ulonglong;
     };
 
     // Float types.
     //
     template <>
-    class value_traits<float>: public generic_value_traits<float>
+    struct default_image_id<float>
     {
-    public:
       static const image_id_type image_id = id_float;
     };
 
     template <>
-    class value_traits<double>: public generic_value_traits<double>
+    struct default_image_id<double>
     {
-    public:
       static const image_id_type image_id = id_double;
     };
 
     // String type.
     //
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<std::string>
+    struct default_image_id<std::string>
     {
-    public:
-      typedef std::string type;
-      typedef std::string value_type;
       static const image_id_type image_id = id_string;
-
-      static void
-      set_value (std::string& v, const char* s, std::size_t n, bool is_null)
-      {
-        if (!is_null)
-          v.assign (s, n);
-        else
-          v.erase ();
-      }
-
-      static void
-      set_image (char*,
-                 std::size_t c,
-                 std::size_t& n,
-                 bool& is_null,
-                 const std::string&);
-
-      static void
-      set_image (details::buffer&,
-                 std::size_t& n,
-                 bool& is_null,
-                 const std::string&);
     };
 
-    // Specialization for const char* which only supports initialization
-    // of an image from the value but not the other way around. This way
-    // we can pass such values to the queries.
-    //
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<const char*>
+    struct default_image_id<const char*>
     {
-    public:
-      typedef const char* type;
-      typedef const char* value_type;
       static const image_id_type image_id = id_string;
-
-      static void
-      set_image (char*,
-                 std::size_t c,
-                 std::size_t& n,
-                 bool& is_null,
-                 const char*);
-
-      static void
-      set_image (details::buffer&,
-                 std::size_t& n,
-                 bool& is_null,
-                 const char*);
     };
   }
 }

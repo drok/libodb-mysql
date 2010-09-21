@@ -97,14 +97,14 @@ namespace odb
       explicit
       query (val_bind<T> v)
       {
-        append<T, value_traits<T>::image_id> (v);
+        append<T, image_traits<T>::image_id> (v);
       }
 
       template <typename T>
       explicit
       query (ref_bind<T> r)
       {
-        append<T, value_traits<T>::image_id> (r);
+        append<T, image_traits<T>::image_id> (r);
       }
 
       template <image_id_type ID>
@@ -157,7 +157,7 @@ namespace odb
       query&
       operator+= (val_bind<T> v)
       {
-        append<T, value_traits<T>::image_id> (v);
+        append<T, image_traits<T>::image_id> (v);
         return *this;
       }
 
@@ -165,7 +165,7 @@ namespace odb
       query&
       operator+= (ref_bind<T> r)
       {
-        append<T, value_traits<T>::image_id> (r);
+        append<T, image_traits<T>::image_id> (r);
         return *this;
       }
 
@@ -1024,7 +1024,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, signed char>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1056,7 +1056,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, unsigned char>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1090,7 +1090,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, short>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1122,7 +1122,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, unsigned short>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1156,7 +1156,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, int>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1188,7 +1188,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, unsigned int>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1222,7 +1222,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, long long>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1254,7 +1254,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, unsigned long long>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1288,7 +1288,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, float>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1322,7 +1322,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, double>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1355,7 +1355,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1388,7 +1388,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1421,7 +1421,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1454,7 +1454,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1488,7 +1488,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T>::set_image (image_, dummy, v);
+        value_traits<T, short>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1524,7 +1524,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size;
-        value_traits<T>::set_image (buffer_, size, dummy, v);
+        value_traits<T, details::buffer>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
       }
 
@@ -1562,7 +1562,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size;
-        value_traits<T>::set_image (buffer_, size, dummy, v);
+        value_traits<T, details::buffer>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
       }
 
