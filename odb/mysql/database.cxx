@@ -170,7 +170,7 @@ namespace odb
       try
       {
         cli::argv_file_scanner scan (argc, argv, "--options-file", erase);
-        options ops (scan);
+        options ops (scan, cli::unknown_mode::skip, cli::unknown_mode::skip);
 
         user_ = ops.user ();
 
