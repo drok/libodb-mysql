@@ -101,8 +101,8 @@ namespace odb
       //
       // For more information, see the output of the print_usage() function
       // below. If erase is true, the above options are removed from the
-      // argv array and the argc is updated accordingly. This constructor
-      // may throw the cli_exception exception.
+      // argv array and the argc count is updated accordingly. This
+      // constructor may throw the cli_exception exception.
       //
       database (int& argc,
                 char* argv[],
