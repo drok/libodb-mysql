@@ -7,7 +7,7 @@ namespace odb
 {
   namespace mysql
   {
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     inline void query::
     append (val_bind<T> v)
     {
@@ -16,7 +16,7 @@ namespace odb
           new (details::shared) query_param_impl<T, ID> (v)));
     }
 
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     inline void query::
     append (ref_bind<T> r)
     {

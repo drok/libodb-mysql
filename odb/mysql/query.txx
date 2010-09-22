@@ -10,7 +10,7 @@ namespace odb
     // query
     //
 
-    template <image_id_type ID>
+    template <database_type_id ID>
     query::
     query (const query_column<bool, ID>& c)
         : clause_ (c.name ())
@@ -20,7 +20,7 @@ namespace odb
 
     // query_column
     //
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     query query_column<T, ID>::
     in (const T& v1, const T& v2) const
     {
@@ -33,7 +33,7 @@ namespace odb
       return q;
     }
 
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     query query_column<T, ID>::
     in (const T& v1, const T& v2, const T& v3) const
     {
@@ -48,7 +48,7 @@ namespace odb
       return q;
     }
 
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     query query_column<T, ID>::
     in (const T& v1, const T& v2, const T& v3, const T& v4) const
     {
@@ -65,7 +65,7 @@ namespace odb
       return q;
     }
 
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     query query_column<T, ID>::
     in (const T& v1, const T& v2, const T& v3, const T& v4, const T& v5) const
     {
@@ -84,7 +84,7 @@ namespace odb
       return q;
     }
 
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     template <typename I>
     query query_column<T, ID>::
     in_range (I begin, I end) const

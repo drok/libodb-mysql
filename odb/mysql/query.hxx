@@ -77,7 +77,7 @@ namespace odb
 
     //
     //
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     struct query_column;
 
     class LIBODB_MYSQL_EXPORT query
@@ -97,17 +97,17 @@ namespace odb
       explicit
       query (val_bind<T> v)
       {
-        append<T, image_traits<T>::image_id> (v);
+        append<T, type_traits<T>::db_type_id> (v);
       }
 
       template <typename T>
       explicit
       query (ref_bind<T> r)
       {
-        append<T, image_traits<T>::image_id> (r);
+        append<T, type_traits<T>::db_type_id> (r);
       }
 
-      template <image_id_type ID>
+      template <database_type_id ID>
       query (const query_column<bool, ID>&);
 
       query (const query&);
@@ -157,7 +157,7 @@ namespace odb
       query&
       operator+= (val_bind<T> v)
       {
-        append<T, image_traits<T>::image_id> (v);
+        append<T, type_traits<T>::db_type_id> (v);
         return *this;
       }
 
@@ -165,16 +165,16 @@ namespace odb
       query&
       operator+= (ref_bind<T> r)
       {
-        append<T, image_traits<T>::image_id> (r);
+        append<T, type_traits<T>::db_type_id> (r);
         return *this;
       }
 
     public:
-      template <typename T, image_id_type ID>
+      template <typename T, database_type_id ID>
       void
       append (val_bind<T>);
 
-      template <typename T, image_id_type ID>
+      template <typename T, database_type_id ID>
       void
       append (ref_bind<T>);
 
@@ -338,7 +338,7 @@ namespace odb
     const T&
     type_instance ();
 
-    template <typename T, image_id_type ID>
+    template <typename T, database_type_id ID>
     struct query_column
     {
       explicit
@@ -904,9 +904,9 @@ namespace odb
       // Column comparison.
       //
     public:
-      template <typename T2, image_id_type I2>
+      template <typename T2, database_type_id ID2>
       query
-      operator== (const query_column<T2, I2>& c) const
+      operator== (const query_column<T2, ID2>& c) const
       {
         // We can compare columns only if we can compare their C++ types.
         //
@@ -918,9 +918,9 @@ namespace odb
         return q;
       }
 
-      template <typename T2, image_id_type I2>
+      template <typename T2, database_type_id ID2>
       query
-      operator!= (const query_column<T2, I2>& c) const
+      operator!= (const query_column<T2, ID2>& c) const
       {
         // We can compare columns only if we can compare their C++ types.
         //
@@ -932,9 +932,9 @@ namespace odb
         return q;
       }
 
-      template <typename T2, image_id_type I2>
+      template <typename T2, database_type_id ID2>
       query
-      operator< (const query_column<T2, I2>& c) const
+      operator< (const query_column<T2, ID2>& c) const
       {
         // We can compare columns only if we can compare their C++ types.
         //
@@ -946,9 +946,9 @@ namespace odb
         return q;
       }
 
-      template <typename T2, image_id_type I2>
+      template <typename T2, database_type_id ID2>
       query
-      operator> (const query_column<T2, I2>& c) const
+      operator> (const query_column<T2, ID2>& c) const
       {
         // We can compare columns only if we can compare their C++ types.
         //
@@ -960,9 +960,9 @@ namespace odb
         return q;
       }
 
-      template <typename T2, image_id_type I2>
+      template <typename T2, database_type_id ID2>
       query
-      operator<= (const query_column<T2, I2>& c) const
+      operator<= (const query_column<T2, ID2>& c) const
       {
         // We can compare columns only if we can compare their C++ types.
         //
@@ -974,9 +974,9 @@ namespace odb
         return q;
       }
 
-      template <typename T2, image_id_type I2>
+      template <typename T2, database_type_id ID2>
       query
-      operator>= (const query_column<T2, I2>& c) const
+      operator>= (const query_column<T2, ID2>& c) const
       {
         // We can compare columns only if we can compare their C++ types.
         //
@@ -994,7 +994,7 @@ namespace odb
 
     //
     //
-    template <typename T, image_id_type>
+    template <typename T, database_type_id>
     struct query_param_impl;
 
     // TINY
@@ -1024,7 +1024,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, signed char>::set_image (image_, dummy, v);
+        value_traits<T, signed char, id_tiny>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1056,7 +1056,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned char>::set_image (image_, dummy, v);
+        value_traits<T, unsigned char, id_utiny>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1090,7 +1090,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, short>::set_image (image_, dummy, v);
+        value_traits<T, short, id_short>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1122,7 +1122,8 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned short>::set_image (image_, dummy, v);
+        value_traits<T, unsigned short, id_ushort>::set_image (
+          image_, dummy, v);
       }
 
     private:
@@ -1156,7 +1157,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, int>::set_image (image_, dummy, v);
+        value_traits<T, int, id_long>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1188,7 +1189,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned int>::set_image (image_, dummy, v);
+        value_traits<T, unsigned int, id_ulong>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1222,7 +1223,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, long long>::set_image (image_, dummy, v);
+        value_traits<T, long long, id_longlong>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1254,7 +1255,8 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned long long>::set_image (image_, dummy, v);
+        value_traits<T, unsigned long long, id_ulonglong>::set_image (
+          image_, dummy, v);
       }
 
     private:
@@ -1288,7 +1290,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, float>::set_image (image_, dummy, v);
+        value_traits<T, float, id_float>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1322,11 +1324,50 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, double>::set_image (image_, dummy, v);
+        value_traits<T, double, id_double>::set_image (image_, dummy, v);
       }
 
     private:
       double image_;
+    };
+
+    // DECIMAL
+    //
+    template <typename T>
+    struct query_param_impl<T, id_decimal>: query_param
+    {
+      query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
+      query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
+
+      virtual void
+      init ()
+      {
+        init (*static_cast<const T*> (value_));
+      }
+
+      virtual void
+      bind (MYSQL_BIND* b)
+      {
+        b->buffer_type = MYSQL_TYPE_NEWDECIMAL;
+        b->buffer = buffer_.data ();
+        b->buffer_length = static_cast<unsigned long> (buffer_.capacity ());
+        b->length = &size_;
+      }
+
+    private:
+      void
+      init (const T& v)
+      {
+        bool dummy;
+        std::size_t size;
+        value_traits<T, details::buffer, id_decimal>::set_image (
+          buffer_, size, dummy, v);
+        size_ = static_cast<unsigned long> (size);
+      }
+
+    private:
+      details::buffer buffer_;
+      unsigned long size_;
     };
 
     // DATE
@@ -1355,7 +1396,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME, id_date>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1388,7 +1429,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME, id_time>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1421,7 +1462,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME, id_datetime>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1454,7 +1495,8 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME>::set_image (image_, dummy, v);
+        value_traits<T, MYSQL_TIME, id_timestamp>::set_image (
+          image_, dummy, v);
       }
 
     private:
@@ -1488,7 +1530,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, short>::set_image (image_, dummy, v);
+        value_traits<T, short, id_year>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1524,7 +1566,8 @@ namespace odb
       {
         bool dummy;
         std::size_t size;
-        value_traits<T, details::buffer>::set_image (buffer_, size, dummy, v);
+        value_traits<T, details::buffer, id_string>::set_image (
+          buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
       }
 
@@ -1562,7 +1605,127 @@ namespace odb
       {
         bool dummy;
         std::size_t size;
-        value_traits<T, details::buffer>::set_image (buffer_, size, dummy, v);
+        value_traits<T, details::buffer, id_blob>::set_image (
+          buffer_, size, dummy, v);
+        size_ = static_cast<unsigned long> (size);
+      }
+
+    private:
+      details::buffer buffer_;
+      unsigned long size_;
+    };
+
+    // BIT
+    //
+    template <typename T>
+    struct query_param_impl<T, id_bit>: query_param
+    {
+      query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
+      query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
+
+      virtual void
+      init ()
+      {
+        init (*static_cast<const T*> (value_));
+      }
+
+      virtual void
+      bind (MYSQL_BIND* b)
+      {
+        b->buffer_type = MYSQL_TYPE_BLOB;
+        b->buffer = buffer_;
+        b->buffer_length = static_cast<unsigned long> (sizeof (buffer_));
+        b->length = &size_;
+      }
+
+    private:
+      void
+      init (const T& v)
+      {
+        bool dummy;
+        std::size_t size;
+        value_traits<T, details::buffer, id_bit>::set_image (
+          buffer_, sizeof (buffer_), size, dummy, v);
+        size_ = static_cast<unsigned long> (size);
+      }
+
+    private:
+      // Max 64 bit.
+      //
+      unsigned char buffer_[8];
+      unsigned long size_;
+    };
+
+    // ENUM
+    //
+    template <typename T>
+    struct query_param_impl<T, id_enum>: query_param
+    {
+      query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
+      query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
+
+      virtual void
+      init ()
+      {
+        init (*static_cast<const T*> (value_));
+      }
+
+      virtual void
+      bind (MYSQL_BIND* b)
+      {
+        b->buffer_type = MYSQL_TYPE_STRING;
+        b->buffer = buffer_.data ();
+        b->buffer_length = static_cast<unsigned long> (buffer_.capacity ());
+        b->length = &size_;
+      }
+
+    private:
+      void
+      init (const T& v)
+      {
+        bool dummy;
+        std::size_t size;
+        value_traits<T, details::buffer, id_enum>::set_image (
+          buffer_, size, dummy, v);
+        size_ = static_cast<unsigned long> (size);
+      }
+
+    private:
+      details::buffer buffer_;
+      unsigned long size_;
+    };
+
+    // SET
+    //
+    template <typename T>
+    struct query_param_impl<T, id_set>: query_param
+    {
+      query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
+      query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
+
+      virtual void
+      init ()
+      {
+        init (*static_cast<const T*> (value_));
+      }
+
+      virtual void
+      bind (MYSQL_BIND* b)
+      {
+        b->buffer_type = MYSQL_TYPE_STRING;
+        b->buffer = buffer_.data ();
+        b->buffer_length = static_cast<unsigned long> (buffer_.capacity ());
+        b->length = &size_;
+      }
+
+    private:
+      void
+      init (const T& v)
+      {
+        bool dummy;
+        std::size_t size;
+        value_traits<T, details::buffer, id_set>::set_image (
+          buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
       }
 
@@ -1614,7 +1777,7 @@ namespace odb
     {
     }
 
-    template <mysql::image_id_type ID>
+    template <mysql::database_type_id ID>
     query (const mysql::query_column<bool, ID>& qc)
         : object_traits<T>::query_type (qc)
     {

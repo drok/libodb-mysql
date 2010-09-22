@@ -24,7 +24,7 @@ namespace odb
 {
   namespace mysql
   {
-    enum image_id_type
+    enum database_type_id
     {
       id_tiny,
       id_utiny,
@@ -37,6 +37,7 @@ namespace odb
 
       id_float,
       id_double,
+      id_decimal,
 
       id_date,
       id_time,
@@ -45,10 +46,14 @@ namespace odb
       id_year,
 
       id_string,
-      id_blob
+      id_blob,
+
+      id_bit,
+      id_enum,
+      id_set
     };
 
-    template <typename T, typename I>
+    template <typename T, typename I, database_type_id>
     class value_traits
     {
     public:
@@ -75,8 +80,7 @@ namespace odb
 
     // std::string specialization.
     //
-    template <>
-    class LIBODB_MYSQL_EXPORT value_traits<std::string, details::buffer>
+    class LIBODB_MYSQL_EXPORT string_value_traits
     {
     public:
       typedef std::string value_type;
@@ -102,14 +106,37 @@ namespace odb
                  const std::string&);
     };
 
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      std::string, details::buffer, id_string>: public string_value_traits
+    {
+    };
+
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      std::string, details::buffer, id_decimal>: public string_value_traits
+    {
+    };
+
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      std::string, details::buffer, id_enum>: public string_value_traits
+    {
+    };
+
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      std::string, details::buffer, id_set>: public string_value_traits
+    {
+    };
+
     // const char* specialization
     //
     // Specialization for const char* which only supports initialization
     // of an image from the value but not the other way around. This way
     // we can pass such values to the queries.
     //
-    template <>
-    class LIBODB_MYSQL_EXPORT value_traits<const char*, details::buffer>
+    class LIBODB_MYSQL_EXPORT c_string_value_traits
     {
     public:
       typedef const char* value_type;
@@ -123,114 +150,139 @@ namespace odb
                  const char*);
     };
 
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      const char*, details::buffer, id_string>: public c_string_value_traits
+    {
+    };
+
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      const char*, details::buffer, id_decimal>: public c_string_value_traits
+    {
+    };
+
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      const char*, details::buffer, id_enum>: public c_string_value_traits
+    {
+    };
+
+    template <>
+    class LIBODB_MYSQL_EXPORT value_traits<
+      const char*, details::buffer, id_set>: public c_string_value_traits
+    {
+    };
+
     //
-    // image_traits
+    // type_traits
     //
 
     template <typename T>
-    struct default_image_id;
+    struct default_type_traits;
 
     template <typename T>
-    class image_traits
+    class type_traits
     {
     public:
-      static const image_id_type image_id = default_image_id<T>::image_id;
+      static const database_type_id db_type_id =
+        default_type_traits<T>::db_type_id;
     };
 
     // Integral types.
     //
     template <>
-    struct default_image_id<bool>
+    struct default_type_traits<bool>
     {
-      static const image_id_type image_id = id_tiny;
+      static const database_type_id db_type_id = id_tiny;
     };
 
     template <>
-    struct default_image_id<signed char>
+    struct default_type_traits<signed char>
     {
-      static const image_id_type image_id = id_tiny;
+      static const database_type_id db_type_id = id_tiny;
     };
 
     template <>
-    struct default_image_id<unsigned char>
+    struct default_type_traits<unsigned char>
     {
-      static const image_id_type image_id = id_utiny;
+      static const database_type_id db_type_id = id_utiny;
     };
 
     template <>
-    struct default_image_id<short>
+    struct default_type_traits<short>
     {
-      static const image_id_type image_id = id_short;
+      static const database_type_id db_type_id = id_short;
     };
 
     template <>
-    struct default_image_id<unsigned short>
+    struct default_type_traits<unsigned short>
     {
-      static const image_id_type image_id = id_ushort;
+      static const database_type_id db_type_id = id_ushort;
     };
 
     template <>
-    struct default_image_id<int>
+    struct default_type_traits<int>
     {
-      static const image_id_type image_id = id_long;
+      static const database_type_id db_type_id = id_long;
     };
 
     template <>
-    struct default_image_id<unsigned int>
+    struct default_type_traits<unsigned int>
     {
-      static const image_id_type image_id = id_ulong;
+      static const database_type_id db_type_id = id_ulong;
     };
 
     template <>
-    struct default_image_id<long>
+    struct default_type_traits<long>
     {
-      static const image_id_type image_id = id_longlong;
+      static const database_type_id db_type_id = id_longlong;
     };
 
     template <>
-    struct default_image_id<unsigned long>
+    struct default_type_traits<unsigned long>
     {
-      static const image_id_type image_id = id_ulonglong;
+      static const database_type_id db_type_id = id_ulonglong;
     };
 
     template <>
-    struct default_image_id<long long>
+    struct default_type_traits<long long>
     {
-      static const image_id_type image_id = id_longlong;
+      static const database_type_id db_type_id = id_longlong;
     };
 
     template <>
-    struct default_image_id<unsigned long long>
+    struct default_type_traits<unsigned long long>
     {
-      static const image_id_type image_id = id_ulonglong;
+      static const database_type_id db_type_id = id_ulonglong;
     };
 
     // Float types.
     //
     template <>
-    struct default_image_id<float>
+    struct default_type_traits<float>
     {
-      static const image_id_type image_id = id_float;
+      static const database_type_id db_type_id = id_float;
     };
 
     template <>
-    struct default_image_id<double>
+    struct default_type_traits<double>
     {
-      static const image_id_type image_id = id_double;
+      static const database_type_id db_type_id = id_double;
     };
 
     // String type.
     //
     template <>
-    struct default_image_id<std::string>
+    struct default_type_traits<std::string>
     {
-      static const image_id_type image_id = id_string;
+      static const database_type_id db_type_id = id_string;
     };
 
     template <>
-    struct default_image_id<const char*>
+    struct default_type_traits<const char*>
     {
-      static const image_id_type image_id = id_string;
+      static const database_type_id db_type_id = id_string;
     };
   }
 }

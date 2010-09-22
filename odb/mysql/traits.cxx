@@ -16,10 +16,10 @@ namespace odb
     using details::buffer;
 
     //
-    // value_traits<string, buffer>
+    // string_value_traits
     //
 
-    void value_traits<string, buffer>::
+    void string_value_traits::
     set_image (buffer& b,
                size_t& n,
                bool& is_null,
@@ -36,10 +36,10 @@ namespace odb
     }
 
     //
-    // value_traits<const char*, buffer>
+    // c_string_value_traits
     //
 
-    void value_traits<const char*, buffer>::
+    void c_string_value_traits::
     set_image (buffer& b,
                size_t& n,
                bool& is_null,
