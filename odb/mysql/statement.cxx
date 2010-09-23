@@ -8,6 +8,8 @@
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/exceptions.hxx>
 
+#include <iostream> // @@ tmp
+
 using namespace std;
 
 namespace odb
@@ -64,6 +66,7 @@ namespace odb
                      binding& image,
                      MYSQL_BIND* parameters)
         : statement (conn),
+          end_ (false),
           cached_ (false),
           image_ (image),
           image_version_ (0),
@@ -84,6 +87,8 @@ namespace odb
 
       if (cached_)
         free_result ();
+
+      end_ = false;
 
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
@@ -120,10 +125,13 @@ namespace odb
     void query_statement::
     cache ()
     {
-      if (!cached_)
+      if (!cached_ && !end_)
       {
         if (mysql_stmt_store_result (stmt_))
+        {
+          std::cerr << "store result failed" << std::endl;
           throw database_exception (stmt_);
+        }
 
         cached_ = true;
       }
@@ -153,6 +161,7 @@ namespace odb
         }
       case MYSQL_NO_DATA:
         {
+          end_ = true;
           return no_data;
         }
       case MYSQL_DATA_TRUNCATED:
@@ -187,6 +196,7 @@ namespace odb
     void query_statement::
     free_result ()
     {
+      end_ = true;
       cached_ = false;
 
       if (mysql_stmt_free_result (stmt_))

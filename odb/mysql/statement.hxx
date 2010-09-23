@@ -106,6 +106,7 @@ namespace odb
       query_statement& operator= (const query_statement&);
 
     private:
+      bool end_;
       bool cached_;
 
       binding& image_;
