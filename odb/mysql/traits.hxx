@@ -53,8 +53,20 @@ namespace odb
       id_set
     };
 
+    //
+    // value_traits
+    //
+
     template <typename T, typename I, database_type_id>
-    class value_traits
+    struct default_value_traits;
+
+    template <typename T, typename I, database_type_id ID>
+    class value_traits: public default_value_traits<T, I, ID>
+    {
+    };
+
+    template <typename T, typename I, database_type_id>
+    class default_value_traits
     {
     public:
       typedef T value_type;
@@ -107,25 +119,25 @@ namespace odb
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       std::string, details::buffer, id_string>: public string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       std::string, details::buffer, id_decimal>: public string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       std::string, details::buffer, id_enum>: public string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       std::string, details::buffer, id_set>: public string_value_traits
     {
     };
@@ -151,25 +163,25 @@ namespace odb
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       const char*, details::buffer, id_string>: public c_string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       const char*, details::buffer, id_decimal>: public c_string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       const char*, details::buffer, id_enum>: public c_string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT value_traits<
+    class LIBODB_MYSQL_EXPORT default_value_traits<
       const char*, details::buffer, id_set>: public c_string_value_traits
     {
     };
@@ -182,11 +194,8 @@ namespace odb
     struct default_type_traits;
 
     template <typename T>
-    class type_traits
+    class type_traits: public default_type_traits<T>
     {
-    public:
-      static const database_type_id db_type_id =
-        default_type_traits<T>::db_type_id;
     };
 
     // Integral types.
