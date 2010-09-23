@@ -15,7 +15,11 @@ namespace odb
     query (const query_column<bool, ID>& c)
         : clause_ (c.name ())
     {
-      clause_ += " IS TRUE";
+      // Cannot use IS TRUE here since database type can be a non-
+      // integral type.
+      //
+      clause_ += " = ";
+      append<bool, ID> (val_bind<bool> (true));
     }
 
     // query_column
