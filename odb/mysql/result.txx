@@ -80,5 +80,12 @@ namespace odb
     {
       statement_->cache ();
     }
+
+    template <typename T>
+    std::size_t result_impl<T>::
+    size ()
+    {
+      return statement_->result_size ();
+    }
   }
 }

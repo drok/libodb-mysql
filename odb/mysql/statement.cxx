@@ -8,8 +8,6 @@
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/exceptions.hxx>
 
-#include <iostream> // @@ tmp
-
 using namespace std;
 
 namespace odb
@@ -68,6 +66,7 @@ namespace odb
         : statement (conn),
           end_ (false),
           cached_ (false),
+          rows_ (0),
           image_ (image),
           image_version_ (0),
           parameters_ (parameters)
@@ -89,6 +88,7 @@ namespace odb
         free_result ();
 
       end_ = false;
+      rows_ = 0;
 
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
@@ -125,16 +125,30 @@ namespace odb
     void query_statement::
     cache ()
     {
-      if (!cached_ && !end_)
+      if (!cached_)
       {
-        if (mysql_stmt_store_result (stmt_))
+        if (!end_)
         {
-          std::cerr << "store result failed" << std::endl;
-          throw database_exception (stmt_);
+          if (mysql_stmt_store_result (stmt_))
+          {
+            throw database_exception (stmt_);
+          }
         }
 
         cached_ = true;
       }
+    }
+
+    std::size_t query_statement::
+    result_size ()
+    {
+      if (!cached_)
+        throw result_not_cached ();
+
+      // mysql_stmt_num_rows() returns the number of rows that have been
+      // fetched by store_result.
+      //
+      return rows_ + static_cast<std::size_t> (mysql_stmt_num_rows (stmt_));
     }
 
     query_statement::result query_statement::
@@ -157,6 +171,9 @@ namespace odb
       {
       case 0:
         {
+          if (!cached_)
+            rows_++;
+
           return success;
         }
       case MYSQL_NO_DATA:
@@ -166,6 +183,9 @@ namespace odb
         }
       case MYSQL_DATA_TRUNCATED:
         {
+          if (!cached_)
+            rows_++;
+
           return truncated;
         }
       default:
@@ -198,6 +218,7 @@ namespace odb
     {
       end_ = true;
       cached_ = false;
+      rows_ = 0;
 
       if (mysql_stmt_free_result (stmt_))
         throw database_exception (stmt_);

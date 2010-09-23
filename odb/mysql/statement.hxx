@@ -89,6 +89,9 @@ namespace odb
       void
       cache ();
 
+      std::size_t
+      result_size ();
+
       result
       fetch ();
 
@@ -108,6 +111,7 @@ namespace odb
     private:
       bool end_;
       bool cached_;
+      std::size_t rows_;
 
       binding& image_;
       std::size_t image_version_;

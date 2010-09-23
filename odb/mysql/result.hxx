@@ -46,6 +46,9 @@ namespace odb
       virtual void
       cache ();
 
+      virtual std::size_t
+      size ();
+
       using odb::result_impl<T>::current;
 
     private:
