@@ -71,7 +71,7 @@ namespace odb
       virtual const char*
       what () const throw ();
 
-    private:;
+    private:
       std::string what_;
     };
   }
