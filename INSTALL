@@ -39,7 +39,7 @@ to specify its location, for example:
 
 As another example, the following configure command only builds shared
 libraries, uses the specified C++ compiler, and compiles with optimization
-and without the debug information:
+and without debug information:
 
 ./configure --disable-static CXX=g++-4.5 CXXFLAGS=-O3
 
@@ -47,7 +47,7 @@ Once configuration is complete, run make to build libodb-mysql:
 
 make
 
-Once the build completes successfully, you can install the libodb-mysql
+Once the build is completed successfully, you can install the libodb-mysql
 headers and libraries using the install target (you may need to do this
 step as root depending on the installation directory):
 
@@ -83,8 +83,8 @@ The resulting 32-bit DLLs and import libraries are placed into the
 libodb-mysql\bin\ and libodb-mysql\lib\ directories, respectively.
 Similarly, the 64-bit DLLs and import libraries are placed into
 libodb-mysql\bin64\ and libodb-mysql\lib64\. The Release versions of
-import libraries are named odb-mysql.lib and the Debug versions are
-named odb-mysql-d.lib.
+the import libraries are named odb-mysql.lib and the Debug versions
+are named odb-mysql-d.lib.
 
 To configure Visual Studio to automatically locate the libodb-mysql
 headers, DLLs, and import libraries, add the following paths to your
