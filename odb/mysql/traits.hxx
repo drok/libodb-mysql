@@ -66,9 +66,8 @@ namespace odb
     };
 
     template <typename T, typename I, database_type_id>
-    class default_value_traits
+    struct default_value_traits
     {
-    public:
       typedef T value_type;
       typedef T query_type;
       typedef I image_type;
@@ -119,26 +118,26 @@ namespace odb
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      std::string, details::buffer, id_string>: public string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      std::string, details::buffer, id_string>: string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      std::string, details::buffer, id_decimal>: public string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      std::string, details::buffer, id_decimal>: string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      std::string, details::buffer, id_enum>: public string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      std::string, details::buffer, id_enum>: string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      std::string, details::buffer, id_set>: public string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      std::string, details::buffer, id_set>: string_value_traits
     {
     };
 
@@ -163,26 +162,26 @@ namespace odb
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      const char*, details::buffer, id_string>: public c_string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      const char*, details::buffer, id_string>: c_string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      const char*, details::buffer, id_decimal>: public c_string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      const char*, details::buffer, id_decimal>: c_string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      const char*, details::buffer, id_enum>: public c_string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      const char*, details::buffer, id_enum>: c_string_value_traits
     {
     };
 
     template <>
-    class LIBODB_MYSQL_EXPORT default_value_traits<
-      const char*, details::buffer, id_set>: public c_string_value_traits
+    struct LIBODB_MYSQL_EXPORT default_value_traits<
+      const char*, details::buffer, id_set>: c_string_value_traits
     {
     };
 
