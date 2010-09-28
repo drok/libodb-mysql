@@ -160,7 +160,7 @@ namespace odb
 
     public:
       virtual transaction_impl*
-      begin_transaction ();
+      begin ();
 
     public:
       details::shared_ptr<connection_type>
