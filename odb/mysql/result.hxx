@@ -35,9 +35,6 @@ namespace odb
                    object_statements<T>& statements);
 
       virtual void
-      current ();
-
-      virtual void
       current (T&);
 
       virtual void

@@ -24,18 +24,6 @@ namespace odb
 
     template <typename T>
     void result_impl<T>::
-    current ()
-    {
-      if (!this->end_)
-      {
-        pointer_type p (traits::create ());
-        current (p);
-        traits::init (pointer_traits::get_ref (p), statements_.image ());
-      }
-    }
-
-    template <typename T>
-    void result_impl<T>::
     current (T& x)
     {
       if (!this->end_)
