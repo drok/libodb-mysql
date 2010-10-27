@@ -45,7 +45,9 @@ namespace odb
 
           if (traits::grow (i, statements_.image_error ()))
           {
-            traits::bind (statements_.image_binding (), i);
+            binding& b (statements_.image_binding ());
+            traits::bind (b.bind, i);
+            b.version++;
             statement_->refetch ();
           }
           // Fall throught.
