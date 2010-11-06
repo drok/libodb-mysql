@@ -9,12 +9,12 @@
 #include <odb/pre.hxx>
 
 #include <vector>
+#include <memory> // std::auto_ptr
 
 #include <odb/forward.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
-#include <odb/mysql/statement.hxx>
 
 #include <odb/details/shared-ptr.hxx>
 
@@ -24,6 +24,9 @@ namespace odb
 {
   namespace mysql
   {
+    class statement;
+    class statement_cache;
+
     class LIBODB_MYSQL_EXPORT connection: public details::shared_base
     {
     public:
@@ -44,7 +47,7 @@ namespace odb
       statement_cache_type&
       statement_cache ()
       {
-        return statement_cache_;
+        return *statement_cache_;
       }
 
     public:
@@ -82,7 +85,7 @@ namespace odb
       MYSQL mysql_;
       MYSQL* handle_;
       statement* active_;
-      statement_cache_type statement_cache_;
+      std::auto_ptr<statement_cache_type> statement_cache_;
 
       typedef std::vector<MYSQL_STMT*> stmt_handles;
       stmt_handles stmt_handles_;

@@ -3,11 +3,12 @@
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <new> // std::bad_alloc
+#include <new>    // std::bad_alloc
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/exceptions.hxx>
+#include <odb/mysql/statement-cache.hxx>
 
 using namespace std;
 
@@ -17,7 +18,9 @@ namespace odb
   {
     connection::
     connection (database& db)
-        : handle_ (&mysql_), active_ (0), statement_cache_ (*this)
+        : handle_ (&mysql_),
+          active_ (0),
+          statement_cache_ (new statement_cache_type (*this))
     {
       if (mysql_init (handle_) == 0)
         throw bad_alloc ();

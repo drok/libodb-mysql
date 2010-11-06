@@ -31,7 +31,7 @@ namespace odb
       virtual
       ~result_impl ();
 
-      result_impl (details::shared_ptr<query_statement> statement,
+      result_impl (details::shared_ptr<select_statement> statement,
                    object_statements<T>& statements);
 
       virtual void
@@ -49,7 +49,7 @@ namespace odb
       using odb::result_impl<T>::current;
 
     private:
-      details::shared_ptr<query_statement> statement_;
+      details::shared_ptr<select_statement> statement_;
       object_statements<T>& statements_;
     };
   }

@@ -5,15 +5,16 @@
 
 include $(dir $(lastword $(MAKEFILE_LIST)))../../build/bootstrap.make
 
-cxx :=                 \
-connection.cxx         \
-connection-factory.cxx \
-database.cxx           \
-exceptions.cxx         \
-transaction.cxx        \
-transaction-impl.cxx   \
-statement.cxx          \
-query.cxx              \
+cxx :=                   \
+connection.cxx           \
+connection-factory.cxx   \
+database.cxx             \
+exceptions.cxx           \
+object-statements.cxx    \
+transaction.cxx          \
+transaction-impl.cxx     \
+statement.cxx            \
+query.cxx                \
 traits.cxx
 
 cli_tun := details/options.cli

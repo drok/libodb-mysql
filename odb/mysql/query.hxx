@@ -18,6 +18,7 @@
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/traits.hxx>
+#include <odb/mysql/binding.hxx>
 
 #include <odb/details/buffer.hxx>
 #include <odb/details/shared-ptr.hxx>
@@ -59,7 +60,7 @@ namespace odb
         return value_ != 0;
       }
 
-      virtual void
+      virtual bool
       init () = 0;
 
       virtual void
@@ -84,18 +85,20 @@ namespace odb
     {
     public:
       query ()
+        : binding_ (0, 0)
       {
       }
 
       explicit
       query (const std::string& q)
-          : clause_ (q)
+        : clause_ (q), binding_ (0, 0)
       {
       }
 
       template <typename T>
       explicit
       query (val_bind<T> v)
+        : binding_ (0, 0)
       {
         append<T, type_traits<T>::db_type_id> (v);
       }
@@ -103,6 +106,7 @@ namespace odb
       template <typename T>
       explicit
       query (ref_bind<T> r)
+        : binding_ (0, 0)
       {
         append<T, type_traits<T>::db_type_id> (r);
       }
@@ -116,7 +120,7 @@ namespace odb
       operator= (const query&);
 
     public:
-      MYSQL_BIND*
+      binding&
       parameters () const;
 
       std::string
@@ -187,7 +191,8 @@ namespace odb
 
       std::string clause_;
       parameters_type parameters_;
-      std::vector<MYSQL_BIND> binding_;
+      std::vector<MYSQL_BIND> bind_;
+      binding binding_;
     };
 
     inline query
@@ -1005,10 +1010,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1037,10 +1043,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1071,10 +1078,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1103,10 +1111,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1138,10 +1147,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1170,10 +1180,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1204,10 +1215,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1236,10 +1248,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1271,10 +1284,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1305,10 +1319,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1339,10 +1354,10 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
-        init (*static_cast<const T*> (value_));
+        return init (*static_cast<const T*> (value_));
       }
 
       virtual void
@@ -1355,14 +1370,15 @@ namespace odb
       }
 
     private:
-      void
+      bool
       init (const T& v)
       {
         bool dummy;
-        std::size_t size;
+        std::size_t size, cap (buffer_.capacity ());
         value_traits<T, details::buffer, id_decimal>::set_image (
           buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
+        return cap != buffer_.capacity ();
       }
 
     private:
@@ -1378,10 +1394,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1411,10 +1428,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1444,10 +1462,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1477,10 +1496,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1511,10 +1531,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1545,10 +1566,10 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
-        init (*static_cast<const T*> (value_));
+        return init (*static_cast<const T*> (value_));
       }
 
       virtual void
@@ -1561,14 +1582,15 @@ namespace odb
       }
 
     private:
-      void
+      bool
       init (const T& v)
       {
         bool dummy;
-        std::size_t size;
+        std::size_t size, cap (buffer_.capacity ());
         value_traits<T, details::buffer, id_string>::set_image (
           buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
+        return cap != buffer_.capacity ();
       }
 
     private:
@@ -1584,10 +1606,10 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
-        init (*static_cast<const T*> (value_));
+        return init (*static_cast<const T*> (value_));
       }
 
       virtual void
@@ -1600,14 +1622,15 @@ namespace odb
       }
 
     private:
-      void
+      bool
       init (const T& v)
       {
         bool dummy;
-        std::size_t size;
+        std::size_t size, cap (buffer_.capacity ());
         value_traits<T, details::buffer, id_blob>::set_image (
           buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
+        return cap != buffer_.capacity ();
       }
 
     private:
@@ -1623,10 +1646,11 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
         init (*static_cast<const T*> (value_));
+        return false;
       }
 
       virtual void
@@ -1664,10 +1688,10 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
-        init (*static_cast<const T*> (value_));
+        return init (*static_cast<const T*> (value_));
       }
 
       virtual void
@@ -1680,14 +1704,15 @@ namespace odb
       }
 
     private:
-      void
+      bool
       init (const T& v)
       {
         bool dummy;
-        std::size_t size;
+        std::size_t size, cap (buffer_.capacity ());
         value_traits<T, details::buffer, id_enum>::set_image (
           buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
+        return cap != buffer_.capacity ();
       }
 
     private:
@@ -1703,10 +1728,10 @@ namespace odb
       query_param_impl (ref_bind<T> r) : query_param (&r.ref) {}
       query_param_impl (val_bind<T> v) : query_param (0) {init (v.val);}
 
-      virtual void
+      virtual bool
       init ()
       {
-        init (*static_cast<const T*> (value_));
+        return init (*static_cast<const T*> (value_));
       }
 
       virtual void
@@ -1719,14 +1744,15 @@ namespace odb
       }
 
     private:
-      void
+      bool
       init (const T& v)
       {
         bool dummy;
-        std::size_t size;
+        std::size_t size, cap (buffer_.capacity ());
         value_traits<T, details::buffer, id_set>::set_image (
           buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
+        return cap != buffer_.capacity ();
       }
 
     private:

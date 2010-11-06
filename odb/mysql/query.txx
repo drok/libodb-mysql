@@ -13,7 +13,7 @@ namespace odb
     template <database_type_id ID>
     query::
     query (const query_column<bool, ID>& c)
-        : clause_ (c.name ())
+        : clause_ (c.name ()), binding_ (0, 0)
     {
       // Cannot use IS TRUE here since database type can be a non-
       // integral type.

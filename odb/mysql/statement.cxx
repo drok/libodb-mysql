@@ -35,15 +35,13 @@ namespace odb
     {
     }
 
-    // query_statement
+    // select_statement
     //
 
-    query_statement::
-    ~query_statement ()
+    select_statement::
+    ~select_statement ()
     {
-      statement* as (conn_.active ());
-
-      if (cached_ || as == this)
+      if (cached_ || conn_.active () == this)
       {
         try
         {
@@ -53,23 +51,21 @@ namespace odb
         {
         }
       }
-
-      if (as == this)
-        conn_.active (0);
     }
 
-    query_statement::
-    query_statement (connection& conn,
-                     const string& s,
-                     binding& image,
-                     MYSQL_BIND* parameters)
+    select_statement::
+    select_statement (connection& conn,
+                      const string& s,
+                      binding& cond,
+                      binding& data)
         : statement (conn),
           end_ (false),
           cached_ (false),
           rows_ (0),
-          image_ (image),
-          image_version_ (0),
-          parameters_ (parameters)
+          cond_ (cond),
+          cond_version_ (0),
+          data_ (data),
+          data_version_ (0)
     {
       if (statement* a = conn_.active ())
         a->cancel ();
@@ -78,7 +74,7 @@ namespace odb
         throw database_exception (stmt_);
     }
 
-    void query_statement::
+    void select_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
@@ -93,20 +89,20 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 
-      if (image_version_ != image_.version)
+      if (cond_version_ != cond_.version)
       {
-        if (mysql_stmt_bind_result (stmt_, image_.bind))
+        if (mysql_stmt_bind_param (stmt_, cond_.bind))
           throw database_exception (stmt_);
 
-        image_version_ = image_.version;
+        cond_version_ = cond_.version;
       }
 
-      if (parameters_ != 0)
+      if (data_version_ != data_.version)
       {
-        // @@ versioning
-        //
-        if (mysql_stmt_bind_param (stmt_, parameters_))
+        if (mysql_stmt_bind_result (stmt_, data_.bind))
           throw database_exception (stmt_);
+
+        data_version_ = data_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -122,7 +118,7 @@ namespace odb
       conn_.active (this);
     }
 
-    void query_statement::
+    void select_statement::
     cache ()
     {
       if (!cached_)
@@ -139,7 +135,7 @@ namespace odb
       }
     }
 
-    std::size_t query_statement::
+    std::size_t select_statement::
     result_size ()
     {
       if (!cached_)
@@ -151,18 +147,18 @@ namespace odb
       return rows_ + static_cast<std::size_t> (mysql_stmt_num_rows (stmt_));
     }
 
-    query_statement::result query_statement::
+    select_statement::result select_statement::
     fetch ()
     {
-      // If the result was cached the image can grow between calls
+      // If the result was cached the data image can grow between calls
       // to fetch() as a result of other statements execution.
       //
-      if (cached_ && image_version_ != image_.version)
+      if (cached_ && data_version_ != data_.version)
       {
-        if (mysql_stmt_bind_result (stmt_, image_.bind))
+        if (mysql_stmt_bind_result (stmt_, data_.bind))
           throw database_exception (stmt_);
 
-        image_version_ = image_.version;
+        data_version_ = data_.version;
       }
 
       int r (mysql_stmt_fetch (stmt_));
@@ -195,25 +191,25 @@ namespace odb
       }
     }
 
-    void query_statement::
+    void select_statement::
     refetch ()
     {
       // Re-fetch columns that were truncated.
       //
-      for (size_t i (0); i < image_.count; ++i)
+      for (size_t i (0); i < data_.count; ++i)
       {
-        if (*image_.bind[i].error)
+        if (*data_.bind[i].error)
         {
-          *image_.bind[i].error = 0;
+          *data_.bind[i].error = 0;
 
           if (mysql_stmt_fetch_column (
-                stmt_, image_.bind + i, static_cast<unsigned int> (i), 0))
+                stmt_, data_.bind + i, static_cast<unsigned int> (i), 0))
             throw database_exception (stmt_);
         }
       }
     }
 
-    void query_statement::
+    void select_statement::
     free_result ()
     {
       end_ = true;
@@ -222,30 +218,33 @@ namespace odb
 
       if (mysql_stmt_free_result (stmt_))
         throw database_exception (stmt_);
+
+      if (conn_.active () == this)
+        conn_.active (0);
     }
 
-    void query_statement::
+    void select_statement::
     cancel ()
     {
       // If we cached the result, don't free it just yet.
       //
       if (!cached_)
         free_result ();
-
-      conn_.active (0);
+      else
+        conn_.active (0);
     }
 
-    // persist_statement
+    // insert_statement
     //
 
-    persist_statement::
-    ~persist_statement ()
+    insert_statement::
+    ~insert_statement ()
     {
     }
 
-    persist_statement::
-    persist_statement (connection& conn, const string& s, binding& image)
-        : statement (conn), image_ (image), version_ (0)
+    insert_statement::
+    insert_statement (connection& conn, const string& s, binding& data)
+        : statement (conn), data_ (data), data_version_ (0)
     {
       if (statement* a = conn_.active ())
         a->cancel ();
@@ -254,7 +253,7 @@ namespace odb
         throw database_exception (stmt_);
     }
 
-    void persist_statement::
+    bool insert_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
@@ -263,12 +262,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 
-      if (version_ != image_.version)
+      if (data_version_ != data_.version)
       {
-        if (mysql_stmt_bind_param (stmt_, image_.bind))
+        if (mysql_stmt_bind_param (stmt_, data_.bind))
           throw database_exception (stmt_);
 
-        version_ = image_.version;
+        data_version_ = data_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -277,7 +276,7 @@ namespace odb
         {
         case ER_DUP_ENTRY:
           {
-            throw object_already_persistent ();
+            return false;
           }
         case ER_LOCK_DEADLOCK:
           {
@@ -289,138 +288,9 @@ namespace odb
           }
         }
       }
+
+      return true;
     }
-
-    // find_statement
-    //
-
-    find_statement::
-    ~find_statement ()
-    {
-      if (conn_.active () == this)
-      {
-        try
-        {
-          free_result ();
-        }
-        catch (...)
-        {
-        }
-      }
-    }
-
-    find_statement::
-    find_statement (connection& conn,
-                    const string& s,
-                    binding& id,
-                    binding& image)
-        : statement (conn),
-          id_ (id),
-          id_version_ (0),
-          image_ (image),
-          image_version_ (0)
-    {
-      if (statement* a = conn_.active ())
-        a->cancel ();
-
-      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        throw database_exception (stmt_);
-    }
-
-    find_statement::result find_statement::
-    execute ()
-    {
-      if (statement* a = conn_.active ())
-        a->cancel ();
-
-      if (mysql_stmt_reset (stmt_))
-        throw database_exception (stmt_);
-
-      if (id_version_ != id_.version)
-      {
-        if (mysql_stmt_bind_param (stmt_, id_.bind))
-          throw database_exception (stmt_);
-
-        id_version_ = id_.version;
-      }
-
-      if (image_version_ != image_.version)
-      {
-        if (mysql_stmt_bind_result (stmt_, image_.bind))
-          throw database_exception (stmt_);
-
-        image_version_ = image_.version;
-      }
-
-      if (mysql_stmt_execute (stmt_))
-      {
-        unsigned int e (mysql_stmt_errno (stmt_));
-
-        if (e == ER_LOCK_DEADLOCK)
-          throw deadlock ();
-        else
-          throw database_exception (stmt_);
-      }
-
-      conn_.active (this);
-
-      int r (mysql_stmt_fetch (stmt_));
-
-      switch (r)
-      {
-      case 0:
-        {
-          return success;
-        }
-      case MYSQL_NO_DATA:
-        {
-          free_result ();
-          return no_data;
-        }
-      case MYSQL_DATA_TRUNCATED:
-        {
-          return truncated;
-        }
-      default:
-        {
-          throw database_exception (stmt_);
-        }
-      }
-    }
-
-    void find_statement::
-    refetch ()
-    {
-      // Re-fetch columns that were truncated.
-      //
-      for (size_t i (0); i < image_.count; ++i)
-      {
-        if (*image_.bind[i].error)
-        {
-          *image_.bind[i].error = 0;
-
-          if (mysql_stmt_fetch_column (
-                stmt_, image_.bind + i, static_cast<unsigned int> (i), 0))
-            throw database_exception (stmt_);
-        }
-      }
-    }
-
-    void find_statement::
-    free_result ()
-    {
-      if (mysql_stmt_free_result (stmt_))
-        throw database_exception (stmt_);
-
-      conn_.active (0);
-    }
-
-    void find_statement::
-    cancel ()
-    {
-      free_result ();
-    }
-
 
     // update_statement
     //
@@ -490,17 +360,17 @@ namespace odb
         throw database_exception (stmt_);
     }
 
-    // erase_statement
+    // delete_statement
     //
 
-    erase_statement::
-    ~erase_statement ()
+    delete_statement::
+    ~delete_statement ()
     {
     }
 
-    erase_statement::
-    erase_statement (connection& conn, const string& s, binding& id)
-        : statement (conn), id_ (id), version_ (0)
+    delete_statement::
+    delete_statement (connection& conn, const string& s, binding& cond)
+        : statement (conn), cond_ (cond), cond_version_ (0)
     {
       if (statement* a = conn_.active ())
         a->cancel ();
@@ -509,7 +379,7 @@ namespace odb
         throw database_exception (stmt_);
     }
 
-    void erase_statement::
+    unsigned long long delete_statement::
     execute ()
     {
       if (statement* a = conn_.active ())
@@ -518,12 +388,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         throw database_exception (stmt_);
 
-      if (version_ != id_.version)
+      if (cond_version_ != cond_.version)
       {
-        if (mysql_stmt_bind_param (stmt_, id_.bind))
+        if (mysql_stmt_bind_param (stmt_, cond_.bind))
           throw database_exception (stmt_);
 
-        version_ = id_.version;
+        cond_version_ = cond_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -538,21 +408,10 @@ namespace odb
 
       my_ulonglong r (mysql_stmt_affected_rows (stmt_));
 
-      if (r > 0)
-        return;
-
-      if (r == 0)
-        throw object_not_persistent ();
-      else
+      if (r == static_cast<my_ulonglong> (-1))
         throw database_exception (stmt_);
-    }
 
-    // object_statements_base
-    //
-
-    object_statements_base::
-    ~object_statements_base ()
-    {
+      return static_cast<unsigned long long> (r);
     }
   }
 }

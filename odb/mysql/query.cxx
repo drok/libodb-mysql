@@ -25,7 +25,8 @@ namespace odb
     query (const query& q)
         : clause_ (q.clause_),
           parameters_ (q.parameters_),
-          binding_ (q.binding_)
+          bind_ (q.bind_),
+          binding_ (0, 0)
     {
     }
 
@@ -36,7 +37,7 @@ namespace odb
       {
         clause_ = q.clause_;
         parameters_ = q.parameters_;
-        binding_ = q.binding_;
+        bind_ = q.bind_;
       }
 
       return *this;
@@ -56,8 +57,8 @@ namespace odb
       parameters_.insert (
         parameters_.end (), q.parameters_.begin (), q.parameters_.end ());
 
-      binding_.insert (
-        binding_.end (), q.binding_.begin (), q.binding_.end ());
+      bind_.insert (
+        bind_.end (), q.bind_.begin (), q.bind_.end ());
 
       return *this;
     }
@@ -73,23 +74,32 @@ namespace odb
       clause_ += '?';
 
       parameters_.push_back (p);
-      binding_.push_back (MYSQL_BIND ());
-      MYSQL_BIND* b (&binding_.back ());
+      bind_.push_back (MYSQL_BIND ());
+      MYSQL_BIND* b (&bind_.back ());
       memset (b, 0, sizeof (MYSQL_BIND));
 
-      if (!p->reference ())
-        p->bind (b);
+      p->bind (b);
     }
 
-    MYSQL_BIND* query::
+    binding& query::
     parameters () const
     {
       size_t n (parameters_.size ());
+      binding& r (const_cast<binding&> (binding_));
 
       if (n == 0)
-        return 0;
+        return r; // r.bind and r.count should be 0.
 
-      MYSQL_BIND* b (const_cast<MYSQL_BIND*> (&binding_[0]));
+      MYSQL_BIND* b (const_cast<MYSQL_BIND*> (&bind_[0]));
+
+      bool inc_ver (false);
+
+      if (r.bind != b || r.count != bind_.size ())
+      {
+        r.bind = b;
+        r.count = bind_.size ();
+        inc_ver = true;
+      }
 
       for (size_t i (0); i < n; ++i)
       {
@@ -97,12 +107,18 @@ namespace odb
 
         if (p.reference ())
         {
-          p.init ();
-          p.bind (b + i);
+          if (p.init ())
+          {
+            p.bind (b + i);
+            inc_ver = true;
+          }
         }
       }
 
-      return b;
+      if (inc_ver)
+        r.version++;
+
+      return r;
     }
 
     std::string query::

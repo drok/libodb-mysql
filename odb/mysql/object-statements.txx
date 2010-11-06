@@ -1,4 +1,4 @@
-// file      : odb/mysql/statement.txx
+// file      : odb/mysql/object-statements.txx
 // author    : Boris Kolpackov <boris@codesynthesis.com>
 // copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
@@ -17,6 +17,7 @@ namespace odb
     object_statements<T>::
     object_statements (connection& conn)
         : object_statements_base (conn),
+          container_statement_cache_ (conn),
           image_binding_ (image_bind_, object_traits::column_count),
           id_image_binding_ (image_bind_ + object_traits::column_count, 1)
     {

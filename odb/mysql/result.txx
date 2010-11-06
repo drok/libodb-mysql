@@ -15,7 +15,7 @@ namespace odb
 
     template <typename T>
     result_impl<T>::
-    result_impl (details::shared_ptr<query_statement> statement,
+    result_impl (details::shared_ptr<select_statement> statement,
                  object_statements<T>& statements)
         : statement_ (statement), statements_ (statements)
     {
@@ -35,11 +35,11 @@ namespace odb
     next ()
     {
       this->current (pointer_type ());
-      query_statement::result r (statement_->fetch ());
+      select_statement::result r (statement_->fetch ());
 
       switch (r)
       {
-      case query_statement::truncated:
+      case select_statement::truncated:
         {
           typename traits::image_type& i (statements_.image ());
 
@@ -52,11 +52,11 @@ namespace odb
           }
           // Fall throught.
         }
-      case query_statement::success:
+      case select_statement::success:
         {
           break;
         }
-      case query_statement::no_data:
+      case select_statement::no_data:
         {
           this->end_ = true;
           break;

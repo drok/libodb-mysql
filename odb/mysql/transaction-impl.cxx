@@ -6,6 +6,7 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
+#include <odb/mysql/statement.hxx>
 #include <odb/mysql/exceptions.hxx>
 #include <odb/mysql/transaction-impl.hxx>
 

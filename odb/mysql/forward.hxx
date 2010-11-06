@@ -16,11 +16,15 @@ namespace odb
     class connection;
     class connection_factory;
     class transaction;
-    class binding;
     class query;
 
+    // Implementation details.
+    //
     template <typename T>
     class object_statements;
+
+    template <typename T>
+    class container_statements;
   }
 }
 
