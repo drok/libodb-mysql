@@ -40,7 +40,15 @@ namespace odb
       typedef mysql::select_statement select_statement_type;
       typedef mysql::delete_statement delete_statement_type;
 
-      container_statements (connection&);
+      typedef mysql::connection connection_type;
+
+      container_statements (connection_type&);
+
+      connection_type&
+      connection ()
+      {
+        return conn_;
+      }
 
       // Functions.
       //
@@ -129,7 +137,7 @@ namespace odb
       container_statements& operator= (const container_statements&);
 
     private:
-      connection& conn_;
+      connection_type& conn_;
       functions_type functions_;
 
       cond_image_type cond_image_;

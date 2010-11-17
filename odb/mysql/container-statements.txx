@@ -15,7 +15,7 @@ namespace odb
 
     template <typename T>
     container_statements<T>::
-    container_statements (connection& conn)
+    container_statements (connection_type& conn)
         : conn_ (conn),
           functions_ (this,
                       &traits::insert_one,

@@ -15,6 +15,7 @@
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
+#include <odb/mysql/forward.hxx>
 
 #include <odb/details/shared-ptr.hxx>
 
@@ -31,11 +32,18 @@ namespace odb
     {
     public:
       typedef mysql::statement_cache statement_cache_type;
-
-      connection (database&);
+      typedef mysql::database database_type;
 
       virtual
       ~connection ();
+
+      connection (database_type&);
+
+      database_type&
+      database ()
+      {
+        return db_;
+      }
 
     public:
       MYSQL*
@@ -82,8 +90,11 @@ namespace odb
       free_stmt_handles ();
 
     private:
+      database_type& db_;
+
       MYSQL mysql_;
       MYSQL* handle_;
+
       statement* active_;
       std::auto_ptr<statement_cache_type> statement_cache_;
 

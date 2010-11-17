@@ -27,7 +27,8 @@ namespace odb
     current (T& x)
     {
       if (!this->end_)
-        traits::init (x, statements_.image ());
+        traits::init (
+          x, statements_.image (), statements_.connection ().database ());
     }
 
     template <typename T>

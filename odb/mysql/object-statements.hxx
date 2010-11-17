@@ -29,17 +29,25 @@ namespace odb
       public details::shared_base
     {
     public:
+      typedef mysql::connection connection_type;
+
+      connection_type&
+      connection ()
+      {
+        return conn_;
+      }
+
       virtual
       ~object_statements_base ();
 
     protected:
-      object_statements_base (connection& conn)
+      object_statements_base (connection_type& conn)
           : conn_ (conn)
       {
       }
 
     protected:
-      connection& conn_;
+      connection_type& conn_;
     };
 
     template <typename T>
@@ -59,7 +67,7 @@ namespace odb
       typedef mysql::update_statement update_statement_type;
       typedef mysql::delete_statement erase_statement_type;
 
-      object_statements (connection&);
+      object_statements (connection_type&);
 
       image_type&
       image ()

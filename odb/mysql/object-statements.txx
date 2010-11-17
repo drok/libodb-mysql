@@ -15,7 +15,7 @@ namespace odb
 
     template <typename T>
     object_statements<T>::
-    object_statements (connection& conn)
+    object_statements (connection_type& conn)
         : object_statements_base (conn),
           container_statement_cache_ (conn),
           image_binding_ (image_bind_, object_traits::column_count),
