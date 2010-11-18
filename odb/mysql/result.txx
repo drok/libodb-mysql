@@ -36,18 +36,37 @@ namespace odb
     next ()
     {
       this->current (pointer_type ());
+
+      // If the result was cached the image can grow between calls
+      // to next() as a result of other statements execution.
+      //
+      if (statement_->cached ())
+      {
+        typename traits::image_type& im (statements_.image ());
+
+        if (im.version != statements_.image_version ())
+        {
+          binding& b (statements_.image_binding ());
+          traits::bind (b.bind, im);
+          statements_.image_version (im.version);
+          b.version++;
+        }
+      }
+
       select_statement::result r (statement_->fetch ());
 
       switch (r)
       {
       case select_statement::truncated:
         {
-          typename traits::image_type& i (statements_.image ());
+          typename traits::image_type& im (statements_.image ());
+          traits::grow (im, statements_.image_error ());
 
-          if (traits::grow (i, statements_.image_error ()))
+          if (im.version != statements_.image_version ())
           {
             binding& b (statements_.image_binding ());
-            traits::bind (b.bind, i);
+            traits::bind (b.bind, im);
+            statements_.image_version (im.version);
             b.version++;
             statement_->refetch ();
           }

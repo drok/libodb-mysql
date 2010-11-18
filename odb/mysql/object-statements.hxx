@@ -69,10 +69,24 @@ namespace odb
 
       object_statements (connection_type&);
 
+      // Object image.
+      //
       image_type&
       image ()
       {
         return image_;
+      }
+
+      std::size_t
+      image_version () const
+      {
+        return image_version_;
+      }
+
+      void
+      image_version (std::size_t v)
+      {
+        image_version_ = v;
       }
 
       binding&
@@ -87,10 +101,24 @@ namespace odb
         return image_error_;
       }
 
+      // Object id image.
+      //
       id_image_type&
       id_image ()
       {
         return id_image_;
+      }
+
+      std::size_t
+      id_image_version () const
+      {
+        return id_image_version_;
+      }
+
+      void
+      id_image_version (std::size_t v)
+      {
+        id_image_version_ = v;
       }
 
       binding&
@@ -172,10 +200,12 @@ namespace odb
       MYSQL_BIND image_bind_[object_traits::column_count + 1];
 
       image_type image_;
+      std::size_t image_version_;
       my_bool image_error_[object_traits::column_count];
       binding image_binding_;
 
       id_image_type id_image_;
+      std::size_t id_image_version_;
       binding id_image_binding_;
 
       details::shared_ptr<persist_statement_type> persist_;

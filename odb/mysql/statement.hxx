@@ -70,6 +70,12 @@ namespace odb
       void
       cache ();
 
+      bool
+      cached () const
+      {
+        return cached_;
+      }
+
       std::size_t
       result_size ();
 

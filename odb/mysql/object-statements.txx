@@ -21,6 +21,12 @@ namespace odb
           image_binding_ (image_bind_, object_traits::column_count),
           id_image_binding_ (image_bind_ + object_traits::column_count, 1)
     {
+      image_.version = 0;
+      image_version_ = 0;
+
+      id_image_.version = 0;
+      id_image_version_ = 0;
+
       std::memset (image_bind_, 0, sizeof (image_bind_));
       std::memset (image_error_, 0, sizeof (image_error_));
 

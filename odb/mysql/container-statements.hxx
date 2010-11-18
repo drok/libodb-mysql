@@ -31,6 +31,7 @@ namespace odb
     public:
       typedef T traits;
 
+      typedef typename traits::id_image_type id_image_type;
       typedef typename traits::data_image_type data_image_type;
       typedef typename traits::cond_image_type cond_image_type;
 
@@ -58,12 +59,50 @@ namespace odb
         return functions_;
       }
 
+      // Id image (external).
+      //
+      id_image_type&
+      id_image ()
+      {
+        return *id_image_;
+      }
+
+      void
+      id_image (id_image_type& i)
+      {
+        id_image_ = &i;
+      }
+
       // Condition image.
       //
       cond_image_type&
       cond_image ()
       {
         return cond_image_;
+      }
+
+      std::size_t
+      cond_image_version () const
+      {
+        return cond_image_version_;
+      }
+
+      void
+      cond_image_version (std::size_t v)
+      {
+        cond_image_version_ = v;
+      }
+
+      std::size_t
+      cond_id_image_version () const
+      {
+        return cond_id_image_version_;
+      }
+
+      void
+      cond_id_image_version (std::size_t v)
+      {
+        cond_id_image_version_ = v;
       }
 
       binding&
@@ -78,6 +117,30 @@ namespace odb
       data_image ()
       {
         return data_image_;
+      }
+
+      std::size_t
+      data_image_version () const
+      {
+        return data_image_version_;
+      }
+
+      void
+      data_image_version (std::size_t v)
+      {
+        data_image_version_ = v;
+      }
+
+      std::size_t
+      data_id_image_version () const
+      {
+        return data_id_image_version_;
+      }
+
+      void
+      data_id_image_version (std::size_t v)
+      {
+        data_id_image_version_ = v;
       }
 
       binding&
@@ -140,11 +203,17 @@ namespace odb
       connection_type& conn_;
       functions_type functions_;
 
+      id_image_type* id_image_;
+
       cond_image_type cond_image_;
+      std::size_t cond_image_version_;
+      std::size_t cond_id_image_version_;
       binding cond_image_binding_;
       MYSQL_BIND cond_image_bind_[traits::cond_column_count];
 
       data_image_type data_image_;
+      std::size_t data_image_version_;
+      std::size_t data_id_image_version_;
       binding data_image_binding_;
       MYSQL_BIND data_image_bind_[traits::data_column_count];
       my_bool data_image_error_[traits::data_column_count];
