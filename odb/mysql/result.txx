@@ -44,11 +44,11 @@ namespace odb
       {
         typename traits::image_type& im (statements_.image ());
 
-        if (im.version != statements_.image_version ())
+        if (im.version != statements_.out_image_version ())
         {
-          binding& b (statements_.image_binding ());
-          traits::bind (b.bind, im);
-          statements_.image_version (im.version);
+          binding& b (statements_.out_image_binding ());
+          traits::bind (b.bind, im, true);
+          statements_.out_image_version (im.version);
           b.version++;
         }
       }
@@ -60,13 +60,13 @@ namespace odb
       case select_statement::truncated:
         {
           typename traits::image_type& im (statements_.image ());
-          traits::grow (im, statements_.image_error ());
+          traits::grow (im, statements_.out_image_error ());
 
-          if (im.version != statements_.image_version ())
+          if (im.version != statements_.out_image_version ())
           {
-            binding& b (statements_.image_binding ());
-            traits::bind (b.bind, im);
-            statements_.image_version (im.version);
+            binding& b (statements_.out_image_binding ());
+            traits::bind (b.bind, im, true);
+            statements_.out_image_version (im.version);
             b.version++;
             statement_->refetch ();
           }

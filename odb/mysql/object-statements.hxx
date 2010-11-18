@@ -78,27 +78,45 @@ namespace odb
       }
 
       std::size_t
-      image_version () const
+      in_image_version () const
       {
-        return image_version_;
+        return in_image_version_;
+      }
+
+      std::size_t
+      out_image_version () const
+      {
+        return out_image_version_;
       }
 
       void
-      image_version (std::size_t v)
+      in_image_version (std::size_t v)
       {
-        image_version_ = v;
+        in_image_version_ = v;
+      }
+
+      void
+      out_image_version (std::size_t v)
+      {
+        out_image_version_ = v;
       }
 
       binding&
-      image_binding ()
+      in_image_binding ()
       {
-        return image_binding_;
+        return in_image_binding_;
+      }
+
+      binding&
+      out_image_binding ()
+      {
+        return out_image_binding_;
       }
 
       my_bool*
-      image_error ()
+      out_image_error ()
       {
-        return image_error_;
+        return out_image_error_;
       }
 
       // Object id image.
@@ -133,7 +151,7 @@ namespace odb
         if (persist_ == 0)
           persist_.reset (
             new (details::shared) persist_statement_type (
-              conn_, object_traits::persist_statement, image_binding_));
+              conn_, object_traits::persist_statement, in_image_binding_));
 
         return *persist_;
       }
@@ -147,7 +165,7 @@ namespace odb
               conn_,
               object_traits::find_statement,
               id_image_binding_,
-              image_binding_));
+              out_image_binding_));
 
         return *find_;
       }
@@ -161,7 +179,7 @@ namespace odb
               conn_,
               object_traits::update_statement,
               id_image_binding_,
-              image_binding_));
+              in_image_binding_));
 
         return *update_;
       }
@@ -194,16 +212,24 @@ namespace odb
     private:
       container_statement_cache_type container_statement_cache_;
 
-      // The last element is the id parameter. The update statement
-      // depends on this being one contiguous arrays.
-      //
-      MYSQL_BIND image_bind_[object_traits::column_count + 1];
-
       image_type image_;
-      std::size_t image_version_;
-      my_bool image_error_[object_traits::column_count];
-      binding image_binding_;
 
+      // In (send) binding. The last element is the id parameter. The
+      // update statement depends on this being one contiguous arrays.
+      //
+      std::size_t in_image_version_;
+      binding in_image_binding_;
+      MYSQL_BIND in_image_bind_[object_traits::in_column_count + 1];
+
+      // Out (receive) binding.
+      //
+      std::size_t out_image_version_;
+      binding out_image_binding_;
+      MYSQL_BIND out_image_bind_[object_traits::out_column_count];
+      my_bool out_image_error_[object_traits::out_column_count];
+
+      // Id image binding (only in).
+      //
       id_image_type id_image_;
       std::size_t id_image_version_;
       binding id_image_binding_;

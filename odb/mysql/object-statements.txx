@@ -18,20 +18,23 @@ namespace odb
     object_statements (connection_type& conn)
         : object_statements_base (conn),
           container_statement_cache_ (conn),
-          image_binding_ (image_bind_, object_traits::column_count),
-          id_image_binding_ (image_bind_ + object_traits::column_count, 1)
+          in_image_binding_ (in_image_bind_, object_traits::in_column_count),
+          out_image_binding_ (out_image_bind_, object_traits::out_column_count),
+          id_image_binding_ (in_image_bind_ + object_traits::in_column_count, 1)
     {
       image_.version = 0;
-      image_version_ = 0;
+      in_image_version_ = 0;
+      out_image_version_ = 0;
 
       id_image_.version = 0;
       id_image_version_ = 0;
 
-      std::memset (image_bind_, 0, sizeof (image_bind_));
-      std::memset (image_error_, 0, sizeof (image_error_));
+      std::memset (in_image_bind_, 0, sizeof (in_image_bind_));
+      std::memset (out_image_bind_, 0, sizeof (out_image_bind_));
+      std::memset (out_image_error_, 0, sizeof (out_image_error_));
 
-      for (std::size_t i (0); i < object_traits::column_count; ++i)
-        image_bind_[i].error = image_error_ + i;
+      for (std::size_t i (0); i < object_traits::out_column_count; ++i)
+        out_image_bind_[i].error = out_image_error_ + i;
     }
   }
 }
