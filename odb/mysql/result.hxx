@@ -24,18 +24,25 @@ namespace odb
     class result_impl: public odb::result_impl<T>
     {
     public:
-      typedef object_traits<T> traits;
-      typedef typename traits::pointer_type pointer_type;
-      typedef typename traits::pointer_traits pointer_traits;
+      typedef typename odb::result_impl<T>::pointer_type pointer_type;
+      typedef typename odb::result_impl<T>::pointer_traits pointer_traits;
+
+      typedef typename odb::result_impl<T>::object_type object_type;
+      typedef typename odb::result_impl<T>::id_type id_type;
+      typedef typename odb::result_impl<T>::object_traits object_traits;
+
 
       virtual
       ~result_impl ();
 
       result_impl (details::shared_ptr<select_statement> statement,
-                   object_statements<T>& statements);
+                   object_statements<object_type>& statements);
 
       virtual void
-      current (T&);
+      current (object_type&);
+
+      virtual id_type
+      current_id ();
 
       virtual void
       next ();
@@ -50,7 +57,7 @@ namespace odb
 
     private:
       details::shared_ptr<select_statement> statement_;
-      object_statements<T>& statements_;
+      object_statements<object_type>& statements_;
     };
   }
 }

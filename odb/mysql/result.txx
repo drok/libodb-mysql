@@ -16,19 +16,26 @@ namespace odb
     template <typename T>
     result_impl<T>::
     result_impl (details::shared_ptr<select_statement> statement,
-                 object_statements<T>& statements)
-        : statement_ (statement), statements_ (statements)
+                 object_statements<object_type>& statements)
+        : odb::result_impl<T> (statements.connection ().database ()),
+          statement_ (statement),
+          statements_ (statements)
     {
       next ();
     }
 
     template <typename T>
     void result_impl<T>::
-    current (T& x)
+    current (object_type& x)
     {
-      if (!this->end_)
-        traits::init (
-          x, statements_.image (), statements_.connection ().database ());
+      object_traits::init (x, statements_.image (), this->database ());
+    }
+
+    template <typename T>
+    typename result_impl<T>::id_type result_impl<T>::
+    current_id ()
+    {
+      return object_traits::id (statements_.image ());
     }
 
     template <typename T>
@@ -42,12 +49,12 @@ namespace odb
       //
       if (statement_->cached ())
       {
-        typename traits::image_type& im (statements_.image ());
+        typename object_traits::image_type& im (statements_.image ());
 
         if (im.version != statements_.out_image_version ())
         {
           binding& b (statements_.out_image_binding ());
-          traits::bind (b.bind, im, true);
+          object_traits::bind (b.bind, im, true);
           statements_.out_image_version (im.version);
           b.version++;
         }
@@ -59,13 +66,13 @@ namespace odb
       {
       case select_statement::truncated:
         {
-          typename traits::image_type& im (statements_.image ());
-          traits::grow (im, statements_.out_image_error ());
+          typename object_traits::image_type& im (statements_.image ());
+          object_traits::grow (im, statements_.out_image_error ());
 
           if (im.version != statements_.out_image_version ())
           {
             binding& b (statements_.out_image_binding ());
-            traits::bind (b.bind, im, true);
+            object_traits::bind (b.bind, im, true);
             statements_.out_image_version (im.version);
             b.version++;
             statement_->refetch ();

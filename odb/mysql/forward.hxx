@@ -20,6 +20,8 @@ namespace odb
 
     // Implementation details.
     //
+    class select_statement;
+
     template <typename T>
     class object_statements;
 
