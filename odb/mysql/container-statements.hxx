@@ -53,8 +53,8 @@ namespace odb
 
       // Functions.
       //
-      const functions_type&
-      functions () const
+      functions_type&
+      functions ()
       {
         return functions_;
       }
