@@ -6,13 +6,15 @@
 #include <cstddef> // std::size_t
 #include <cstring> // std::memset
 
+#include <odb/session.hxx>
+#include <odb/exceptions.hxx>
+
+#include <odb/mysql/connection.hxx>
+
 namespace odb
 {
   namespace mysql
   {
-    // object_statements
-    //
-
     template <typename T>
     object_statements<T>::
     object_statements (connection_type& conn)
@@ -35,6 +37,47 @@ namespace odb
 
       for (std::size_t i (0); i < object_traits::out_column_count; ++i)
         out_image_bind_[i].error = out_image_error_ + i;
+    }
+
+    template <typename T>
+    void object_statements<T>::
+    load_delayed_ ()
+    {
+      // We should be careful here: the delayed vector can change
+      // from under us as a result of a recursive load.
+      //
+      database& db (connection ().database ());
+
+      while (!delayed_.empty ())
+      {
+        delayed_load l (delayed_.back ());
+        typename object_cache_traits::insert_guard g (l.pos);
+        delayed_.pop_back ();
+
+        if (!object_traits::find_ (*this, l.id))
+          throw object_not_persistent ();
+
+        object_traits::init (*l.obj, image (), db);
+        g.release ();
+      }
+    }
+
+    template <typename T>
+    void object_statements<T>::
+    clear_delayed_ ()
+    {
+      // Remove the objects from the session cache.
+      //
+      if (session::has_current ())
+      {
+        for (typename delayed_loads::iterator i (delayed_.begin ()),
+               e (delayed_.end ()); i != e; ++i)
+        {
+          object_cache_traits::erase (i->pos);
+        }
+      }
+
+      delayed_.clear ();
     }
   }
 }

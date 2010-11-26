@@ -39,10 +39,10 @@ namespace odb
                    object_statements<object_type>& statements);
 
       virtual void
-      current (object_type&);
+      load (object_type&);
 
       virtual id_type
-      current_id ();
+      load_id ();
 
       virtual void
       next ();

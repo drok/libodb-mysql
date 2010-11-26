@@ -3,6 +3,8 @@
 // copyright : Copyright (c) 2009-2010 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <odb/cache-traits.hxx>
+
 namespace odb
 {
   namespace mysql
@@ -26,14 +28,22 @@ namespace odb
 
     template <typename T>
     void result_impl<T>::
-    current (object_type& x)
+    load (object_type& obj)
     {
-      object_traits::init (x, statements_.image (), this->database ());
+      // This is a top-level call so the statements cannot be locked.
+      //
+      assert (!statements_.locked ());
+      typename object_statements<object_type>::auto_lock l (statements_);
+
+      object_traits::init (obj, statements_.image (), this->database ());
+
+      statements_.load_delayed ();
+      l.unlock ();
     }
 
     template <typename T>
     typename result_impl<T>::id_type result_impl<T>::
-    current_id ()
+    load_id ()
     {
       return object_traits::id (statements_.image ());
     }

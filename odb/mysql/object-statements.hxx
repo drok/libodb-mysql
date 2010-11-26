@@ -8,8 +8,12 @@
 
 #include <odb/pre.hxx>
 
+#include <vector>
+#include <cassert>
+
 #include <odb/forward.hxx>
 #include <odb/traits.hxx>
+#include <odb/cache-traits.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
@@ -37,26 +41,55 @@ namespace odb
         return conn_;
       }
 
+      // Locking.
+      //
+      void
+      lock ()
+      {
+        assert (!locked_);
+        locked_ = true;
+      }
+
+      void
+      unlock ()
+      {
+        assert (locked_);
+        locked_ = false;
+      }
+
+      bool
+      locked () const
+      {
+        return locked_;
+      }
+
+    public:
       virtual
       ~object_statements_base ();
 
     protected:
       object_statements_base (connection_type& conn)
-          : conn_ (conn)
+        : conn_ (conn), locked_ (false)
       {
       }
 
     protected:
       connection_type& conn_;
+      bool locked_;
     };
 
     template <typename T>
     class object_statements: public object_statements_base
     {
     public:
-      typedef odb::object_traits<T> object_traits;
+      typedef T object_type;
+      typedef odb::object_traits<object_type> object_traits;
+      typedef typename object_traits::id_type id_type;
+      typedef typename object_traits::pointer_type pointer_type;
       typedef typename object_traits::image_type image_type;
       typedef typename object_traits::id_image_type id_image_type;
+
+      typedef pointer_cache_traits<pointer_type> object_cache_traits;
 
       typedef
       typename object_traits::container_statement_cache_type
@@ -67,7 +100,70 @@ namespace odb
       typedef mysql::update_statement update_statement_type;
       typedef mysql::delete_statement erase_statement_type;
 
+      // Automatic lock.
+      //
+      struct auto_lock
+      {
+        // Lock the statements unless they are already locked in which
+        // case subsequent calls to locked() will return false.
+        //
+        auto_lock (object_statements&);
+
+        // Unlock the statemens if we are holding the lock and clear
+        // the delayed loads. This should only happen in case an
+        // exception is thrown. In normal circumstances, the user
+        // should call unlock() explicitly.
+        //
+        ~auto_lock ();
+
+        // Return true if this auto_lock instance holds the lock.
+        //
+        bool
+        locked () const;
+
+        // Unlock the statemens.
+        //
+        void
+        unlock ();
+
+      private:
+        auto_lock (const auto_lock&);
+        auto_lock& operator= (const auto_lock&);
+
+      private:
+        object_statements& s_;
+        bool locked_;
+      };
+
+      //
+      //
       object_statements (connection_type&);
+
+      // Delayed loading.
+      //
+      void
+      delay_load (const id_type& id,
+                  object_type& obj,
+                  const typename object_cache_traits::position_type& p)
+      {
+        delayed_.push_back (delayed_load (id, obj, p));
+      }
+
+      void
+      load_delayed ()
+      {
+        assert (locked ());
+
+        if (!delayed_.empty ())
+          load_delayed_ ();
+      }
+
+      void
+      clear_delayed ()
+      {
+        if (!delayed_.empty ())
+          clear_delayed_ ();
+      }
 
       // Object image.
       //
@@ -210,6 +306,13 @@ namespace odb
       object_statements& operator= (const object_statements&);
 
     private:
+      void
+      load_delayed_ ();
+
+      void
+      clear_delayed_ ();
+
+    private:
       container_statement_cache_type container_statement_cache_;
 
       image_type image_;
@@ -238,10 +341,31 @@ namespace odb
       details::shared_ptr<find_statement_type> find_;
       details::shared_ptr<update_statement_type> update_;
       details::shared_ptr<erase_statement_type> erase_;
+
+      // Delayed loading.
+      //
+      struct delayed_load
+      {
+        typedef typename object_cache_traits::position_type position_type;
+
+        delayed_load () {}
+        delayed_load (const id_type& i, object_type& o, const position_type& p)
+            : id (i), obj (&o), pos (p)
+        {
+        }
+
+        id_type id;
+        object_type* obj;
+        position_type pos;
+      };
+
+      typedef std::vector<delayed_load> delayed_loads;
+      delayed_loads delayed_;
     };
   }
 }
 
+#include <odb/mysql/object-statements.ixx>
 #include <odb/mysql/object-statements.txx>
 
 #include <odb/post.hxx>
