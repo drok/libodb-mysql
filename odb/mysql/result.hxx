@@ -8,6 +8,8 @@
 
 #include <odb/pre.hxx>
 
+#include <cstddef> // std::size_t
+
 #include <odb/result.hxx>
 
 #include <odb/mysql/version.hxx>
@@ -56,8 +58,13 @@ namespace odb
       using odb::result_impl<T>::current;
 
     private:
+      void
+      fetch ();
+
+    private:
       details::shared_ptr<select_statement> statement_;
       object_statements<object_type>& statements_;
+      std::size_t count_;
     };
   }
 }

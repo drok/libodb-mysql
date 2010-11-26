@@ -76,8 +76,21 @@ namespace odb
         return cached_;
       }
 
+      // Can only be called on a cached result.
+      //
       std::size_t
-      result_size ();
+      result_size () const
+      {
+        return size_;
+      }
+
+      // Number of rows already fetched.
+      //
+      std::size_t
+      fetched () const
+      {
+        return rows_;
+      }
 
       result
       fetch ();
@@ -99,6 +112,7 @@ namespace odb
       bool end_;
       bool cached_;
       std::size_t rows_;
+      std::size_t size_;
 
       binding& cond_;
       std::size_t cond_version_;

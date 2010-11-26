@@ -126,25 +126,18 @@ namespace odb
         if (!end_)
         {
           if (mysql_stmt_store_result (stmt_))
-          {
             throw database_exception (stmt_);
-          }
+
+          // mysql_stmt_num_rows() returns the number of rows that have been
+          // fetched by store_result.
+          //
+          size_ = rows_ + static_cast<size_t> (mysql_stmt_num_rows (stmt_));
         }
+        else
+          size_ = rows_;
 
         cached_ = true;
       }
-    }
-
-    std::size_t select_statement::
-    result_size ()
-    {
-      if (!cached_)
-        throw result_not_cached ();
-
-      // mysql_stmt_num_rows() returns the number of rows that have been
-      // fetched by store_result.
-      //
-      return rows_ + static_cast<std::size_t> (mysql_stmt_num_rows (stmt_));
     }
 
     select_statement::result select_statement::
@@ -167,9 +160,7 @@ namespace odb
       {
       case 0:
         {
-          if (!cached_)
-            rows_++;
-
+          rows_++;
           return success;
         }
       case MYSQL_NO_DATA:
@@ -179,9 +170,7 @@ namespace odb
         }
       case MYSQL_DATA_TRUNCATED:
         {
-          if (!cached_)
-            rows_++;
-
+          rows_++;
           return truncated;
         }
       default:
