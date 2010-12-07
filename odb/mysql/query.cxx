@@ -85,12 +85,12 @@ namespace odb
     parameters () const
     {
       size_t n (parameters_.size ());
-      binding& r (const_cast<binding&> (binding_));
+      binding& r (binding_);
 
       if (n == 0)
         return r; // r.bind and r.count should be 0.
 
-      MYSQL_BIND* b (const_cast<MYSQL_BIND*> (&bind_[0]));
+      MYSQL_BIND* b (&bind_[0]);
 
       bool inc_ver (false);
 

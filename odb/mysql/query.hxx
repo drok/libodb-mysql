@@ -191,8 +191,8 @@ namespace odb
 
       std::string clause_;
       parameters_type parameters_;
-      std::vector<MYSQL_BIND> bind_;
-      binding binding_;
+      mutable std::vector<MYSQL_BIND> bind_;
+      mutable binding binding_;
     };
 
     inline query
