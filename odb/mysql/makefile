@@ -67,15 +67,16 @@ $(gen): cli_options +=                   \
 --guard-prefix LIBODB_MYSQL_DETAILS
 
 $(out_base)/details/config.h:
-	@echo '// file      : odb/mysql/details/config.h'                >$@
-	@echo '// author    : automatically generated'                  >>$@
+	@echo '/* file      : odb/mysql/details/config.h'                >$@
+	@echo ' * author    : automatically generated'                  >>$@
+	@echo ' */'                                                     >>$@
 	@echo ''                                                        >>$@
 	@echo '#ifndef ODB_MYSQL_DETAILS_CONFIG_H'                      >>$@
 	@echo '#define ODB_MYSQL_DETAILS_CONFIG_H'                      >>$@
 	@echo ''                                                        >>$@
 	@echo '#define LIBODB_MYSQL_INCLUDE_LONG 1'                     >>$@
 	@echo ''                                                        >>$@
-	@echo '#endif // ODB_MYSQL_DETAILS_CONFIG_H'                    >>$@
+	@echo '#endif /* ODB_MYSQL_DETAILS_CONFIG_H */'                 >>$@
 
 $(call include-dep,$(cxx_od),$(cxx_obj),$(gen) $(out_base)/details/config.h)
 
