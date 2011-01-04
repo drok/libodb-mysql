@@ -1,6 +1,6 @@
 # file      : build/import/libmysqlclient/stub.make
 # author    : Boris Kolpackov <boris@kolpackov.net>
-# copyright : Copyright (c) 2009-2010 Boris Kolpackov
+# copyright : Copyright (c) 2009-2011 Boris Kolpackov
 # license   : GNU GPL v2; see accompanying LICENSE file
 
 $(call include-once,$(scf_root)/import/libmysqlclient/configuration-rules.make,$(dcf_root))
