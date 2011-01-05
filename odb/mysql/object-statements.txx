@@ -58,6 +58,7 @@ namespace odb
           throw object_not_persistent ();
 
         object_traits::init (*l.obj, image (), db);
+        object_traits::load_ (*this, *l.obj); // Load containers, etc.
         g.release ();
       }
     }
