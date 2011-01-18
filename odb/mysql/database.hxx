@@ -159,6 +159,10 @@ namespace odb
       }
 
     public:
+      virtual unsigned long long
+      execute (const char* statement, std::size_t length);
+
+    public:
       virtual transaction_impl*
       begin ();
 
