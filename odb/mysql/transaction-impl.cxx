@@ -7,7 +7,7 @@
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/statement.hxx>
-#include <odb/mysql/exceptions.hxx>
+#include <odb/mysql/error.hxx>
 #include <odb/mysql/transaction-impl.hxx>
 
 namespace odb
@@ -18,10 +18,8 @@ namespace odb
     transaction_impl (database_type& db)
         : odb::transaction_impl (db), connection_ (db.connection ())
     {
-      MYSQL* h (connection_->handle ());
-
-      if (mysql_real_query (h, "begin", 5) != 0)
-        throw database_exception (h);
+      if (mysql_real_query (connection_->handle (), "begin", 5) != 0)
+        translate_error (*connection_);
     }
 
     transaction_impl::
@@ -35,10 +33,8 @@ namespace odb
       if (statement* a = connection_->active ())
         a->cancel ();
 
-      MYSQL* h (connection_->handle ());
-
-      if (mysql_real_query (h, "commit", 6) != 0)
-        throw database_exception (h);
+      if (mysql_real_query (connection_->handle (), "commit", 6) != 0)
+        translate_error (*connection_);
 
       // Release the connection.
       //
@@ -51,10 +47,8 @@ namespace odb
       if (statement* a = connection_->active ())
         a->cancel ();
 
-      MYSQL* h (connection_->handle ());
-
-      if (mysql_real_query (h, "rollback", 8) != 0)
-        throw database_exception (h);
+      if (mysql_real_query (connection_->handle (), "rollback", 8) != 0)
+        translate_error (*connection_);
 
       // Release the connection.
       //

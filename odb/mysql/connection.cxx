@@ -4,6 +4,7 @@
 // license   : GNU GPL v2; see accompanying LICENSE file
 
 #include <new>    // std::bad_alloc
+#include <string>
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
@@ -40,9 +41,18 @@ namespace odb
                               db.socket (),
                               db.client_flags () | CLIENT_FOUND_ROWS) == 0)
       {
-        database_exception e (handle_);
+        // We cannot use translate_error() here since there is no connection
+        // yet.
+        //
+        unsigned int e (mysql_errno (handle_));
+        string sqlstate (mysql_sqlstate (handle_));
+        string message (mysql_error (handle_));
         mysql_close (handle_);
-        throw e;
+
+        if (e == CR_OUT_OF_MEMORY)
+          throw bad_alloc ();
+
+        throw database_exception (e, sqlstate, message);
       }
     }
 

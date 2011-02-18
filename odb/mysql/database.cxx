@@ -10,6 +10,7 @@
 #include <odb/mysql/transaction.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
+#include <odb/mysql/error.hxx>
 #include <odb/mysql/exceptions.hxx>
 
 #include <odb/mysql/details/options.hxx>
@@ -220,14 +221,7 @@ namespace odb
       MYSQL* h (c.handle ());
 
       if (mysql_real_query (h, s, static_cast<unsigned long> (n)))
-      {
-        unsigned int e (mysql_errno (h));
-
-        if (e == ER_LOCK_DEADLOCK)
-          throw deadlock ();
-        else
-          throw database_exception (h);
-      }
+        translate_error (c);
 
       // Get the affected row count, if any. If the statement has a result
       // set (e.g., SELECT), we first need to call mysql_store_result().
@@ -244,7 +238,7 @@ namespace odb
           mysql_free_result (rs);
         }
         else
-          throw database_exception (h);
+          translate_error (c);
       }
 
       return r;

@@ -6,6 +6,7 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
+#include <odb/mysql/error.hxx>
 #include <odb/mysql/exceptions.hxx>
 
 using namespace std;
@@ -71,7 +72,7 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
     }
 
     void select_statement::
@@ -87,12 +88,12 @@ namespace odb
       rows_ = 0;
 
       if (mysql_stmt_reset (stmt_))
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
 
       if (cond_version_ != cond_.version)
       {
         if (mysql_stmt_bind_param (stmt_, cond_.bind))
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
 
         cond_version_ = cond_.version;
       }
@@ -100,20 +101,13 @@ namespace odb
       if (data_version_ != data_.version)
       {
         if (mysql_stmt_bind_result (stmt_, data_.bind))
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
 
         data_version_ = data_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
-      {
-        unsigned int e (mysql_stmt_errno (stmt_));
-
-        if (e == ER_LOCK_DEADLOCK)
-          throw deadlock ();
-        else
-          throw database_exception (stmt_);
-      }
+        translate_error (conn_, stmt_);
 
       conn_.active (this);
     }
@@ -126,7 +120,7 @@ namespace odb
         if (!end_)
         {
           if (mysql_stmt_store_result (stmt_))
-            throw database_exception (stmt_);
+            translate_error (conn_, stmt_);
 
           // mysql_stmt_num_rows() returns the number of rows that have been
           // fetched by store_result.
@@ -149,7 +143,7 @@ namespace odb
       if (cached_ && data_version_ != data_.version)
       {
         if (mysql_stmt_bind_result (stmt_, data_.bind))
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
 
         data_version_ = data_.version;
       }
@@ -175,7 +169,8 @@ namespace odb
         }
       default:
         {
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
+          return no_data; // Never reaches.
         }
       }
     }
@@ -193,7 +188,7 @@ namespace odb
 
           if (mysql_stmt_fetch_column (
                 stmt_, data_.bind + i, static_cast<unsigned int> (i), 0))
-            throw database_exception (stmt_);
+            translate_error (conn_, stmt_);
         }
       }
     }
@@ -206,7 +201,7 @@ namespace odb
       rows_ = 0;
 
       if (mysql_stmt_free_result (stmt_))
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
 
       if (conn_.active () == this)
         conn_.active (0);
@@ -239,7 +234,7 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
     }
 
     bool insert_statement::
@@ -249,33 +244,22 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_reset (stmt_))
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
 
       if (data_version_ != data_.version)
       {
         if (mysql_stmt_bind_param (stmt_, data_.bind))
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
 
         data_version_ = data_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
       {
-        switch (mysql_stmt_errno (stmt_))
-        {
-        case ER_DUP_ENTRY:
-          {
-            return false;
-          }
-        case ER_LOCK_DEADLOCK:
-          {
-            throw deadlock ();
-          }
-        default:
-          {
-            throw database_exception (stmt_);
-          }
-        }
+        if (mysql_stmt_errno (stmt_) == ER_DUP_ENTRY)
+          return false;
+        else
+          translate_error (conn_, stmt_);
       }
 
       return true;
@@ -304,7 +288,7 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
     }
 
     void update_statement::
@@ -314,7 +298,7 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_reset (stmt_))
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
 
       if (image_version_ != image_.version || id_version_ != id_.version)
       {
@@ -322,21 +306,14 @@ namespace odb
         // id parameter.
         //
         if (mysql_stmt_bind_param (stmt_, image_.bind))
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
 
         id_version_ = id_.version;
         image_version_ = image_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
-      {
-        unsigned int e (mysql_stmt_errno (stmt_));
-
-        if (e == ER_LOCK_DEADLOCK)
-          throw deadlock ();
-        else
-          throw database_exception (stmt_);
-      }
+        translate_error (conn_, stmt_);
 
       my_ulonglong r (mysql_stmt_affected_rows (stmt_));
 
@@ -346,7 +323,7 @@ namespace odb
       if (r == 0)
         throw object_not_persistent ();
       else
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
     }
 
     // delete_statement
@@ -365,7 +342,7 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
     }
 
     unsigned long long delete_statement::
@@ -375,30 +352,23 @@ namespace odb
         a->cancel ();
 
       if (mysql_stmt_reset (stmt_))
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
 
       if (cond_version_ != cond_.version)
       {
         if (mysql_stmt_bind_param (stmt_, cond_.bind))
-          throw database_exception (stmt_);
+          translate_error (conn_, stmt_);
 
         cond_version_ = cond_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
-      {
-        unsigned int e (mysql_stmt_errno (stmt_));
-
-        if (e == ER_LOCK_DEADLOCK)
-          throw deadlock ();
-        else
-          throw database_exception (stmt_);
-      }
+        translate_error (conn_, stmt_);
 
       my_ulonglong r (mysql_stmt_affected_rows (stmt_));
 
       if (r == static_cast<my_ulonglong> (-1))
-        throw database_exception (stmt_);
+        translate_error (conn_, stmt_);
 
       return static_cast<unsigned long long> (r);
     }

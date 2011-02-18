@@ -9,6 +9,7 @@ cxx :=                   \
 connection.cxx           \
 connection-factory.cxx   \
 database.cxx             \
+error.cxx                \
 exceptions.cxx           \
 object-statements.cxx    \
 transaction.cxx          \

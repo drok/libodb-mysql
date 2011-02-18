@@ -12,7 +12,6 @@
 
 #include <odb/exceptions.hxx>
 
-#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 
 #include <odb/mysql/details/export.hxx>
@@ -23,8 +22,6 @@ namespace odb
   {
     struct LIBODB_MYSQL_EXPORT database_exception: odb::database_exception
     {
-      database_exception (MYSQL*);
-      database_exception (MYSQL_STMT*);
       database_exception (unsigned int,
                           const std::string& sqlstate,
                           const std::string& message);
@@ -51,10 +48,6 @@ namespace odb
 
       virtual const char*
       what () const throw ();
-
-    private:
-      void
-      init ();
 
     private:
       unsigned int error_;
