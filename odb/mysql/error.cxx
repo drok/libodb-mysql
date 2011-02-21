@@ -16,7 +16,7 @@ namespace odb
   namespace mysql
   {
     void
-    translate_error (connection&,
+    translate_error (connection& c,
                      unsigned int e,
                      const std::string& sqlstate,
                      const std::string& message)
@@ -30,6 +30,15 @@ namespace odb
       case ER_LOCK_DEADLOCK:
         {
           throw deadlock ();
+        }
+      case CR_SERVER_LOST:
+      case CR_SERVER_GONE_ERROR:
+      case CR_UNKNOWN_ERROR:
+        {
+          // This connection is no longer usable.
+          //
+          c.mark_failed ();
+          // Fall through.
         }
       default:
         {

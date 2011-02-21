@@ -46,6 +46,19 @@ namespace odb
       }
 
     public:
+      bool
+      failed () const
+      {
+        return failed_;
+      }
+
+      void
+      mark_failed ()
+      {
+        failed_ = true;
+      }
+
+    public:
       MYSQL*
       handle ()
       {
@@ -91,6 +104,7 @@ namespace odb
 
     private:
       database_type& db_;
+      bool failed_;
 
       MYSQL mysql_;
       MYSQL* handle_;
