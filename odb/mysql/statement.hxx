@@ -135,7 +135,7 @@ namespace odb
       // All other errors are reported by throwing exceptions.
       //
       bool
-        execute ();
+      execute ();
 
       unsigned long long
       id ()
