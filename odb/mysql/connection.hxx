@@ -58,6 +58,13 @@ namespace odb
         failed_ = true;
       }
 
+      // Ping the server to make sure the connection is still alive. Return
+      // true if successful, mark the connection as failed and return false
+      // otherwise. This function can also throw database_exception.
+      //
+      bool
+      ping ();
+
     public:
       MYSQL*
       handle ()

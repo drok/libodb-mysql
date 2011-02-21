@@ -178,8 +178,12 @@ namespace odb
         if (connections_.size () != 0)
         {
           shared_ptr<pooled_connection> c (connections_.back ());
-          c->pool_ = this;
           connections_.pop_back ();
+
+          if (ping_ && !c->ping ())
+            continue;
+
+          c->pool_ = this;
           in_use_++;
           return c;
         }

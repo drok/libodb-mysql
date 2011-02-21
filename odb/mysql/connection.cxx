@@ -8,6 +8,7 @@
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
+#include <odb/mysql/error.hxx>
 #include <odb/mysql/exceptions.hxx>
 #include <odb/mysql/statement-cache.hxx>
 
@@ -64,6 +65,31 @@ namespace odb
         free_stmt_handles ();
 
       mysql_close (handle_);
+    }
+
+    bool connection::
+    ping ()
+    {
+      if (failed ())
+        return false;
+
+      if (!mysql_ping (handle_))
+        return true;
+
+      switch (mysql_errno (handle_))
+      {
+      case CR_SERVER_LOST:
+      case CR_SERVER_GONE_ERROR:
+        {
+          mark_failed ();
+          return false;
+        }
+      default:
+        {
+          translate_error (*this);
+          return false; // Never reached.
+        }
+      }
     }
 
     MYSQL_STMT* connection::

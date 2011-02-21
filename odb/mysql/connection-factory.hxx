@@ -80,10 +80,15 @@ namespace odb
       // value is 0 then the pool will maintain all the connections
       // that were ever created.
       //
+      // The ping argument specifies whether to ping the connection to
+      // make sure it is still alive before returning it to the caller.
+      //
       connection_pool_factory (std::size_t max_connections = 0,
-                               std::size_t min_connections = 0)
+                               std::size_t min_connections = 0,
+                               bool ping = true)
           : max_ (max_connections),
             min_ (min_connections),
+            ping_ (ping),
             in_use_ (0),
             waiters_ (0),
             db_ (0),
@@ -134,6 +139,7 @@ namespace odb
     private:
       const std::size_t max_;
       const std::size_t min_;
+      const bool ping_;
 
       std::size_t in_use_;  // Number of connections currently in use.
       std::size_t waiters_; // Number of threads waiting for a connection.
