@@ -33,10 +33,12 @@ namespace odb
         }
       case CR_SERVER_LOST:
       case CR_SERVER_GONE_ERROR:
+        {
+          c.mark_failed ();
+          throw connection_lost ();
+        }
       case CR_UNKNOWN_ERROR:
         {
-          // This connection is no longer usable.
-          //
           c.mark_failed ();
           // Fall through.
         }
