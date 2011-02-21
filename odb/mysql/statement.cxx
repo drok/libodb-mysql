@@ -170,7 +170,7 @@ namespace odb
       default:
         {
           translate_error (conn_, stmt_);
-          return no_data; // Never reaches.
+          return no_data; // Never reached.
         }
       }
     }
