@@ -229,7 +229,9 @@ namespace odb
     void connection_pool_factory::
     release (pooled_connection* c)
     {
+      c->clear ();
       c->pool_ = 0;
+
       lock l (mutex_);
 
       // Determine if we need to keep or free this connection.

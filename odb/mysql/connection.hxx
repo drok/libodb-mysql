@@ -94,6 +94,15 @@ namespace odb
           free_stmt_handles ();
       }
 
+      // Cancel and clear the active statement, if any.
+      //
+      void
+      clear ()
+      {
+        if (active_ != 0)
+          clear_ ();
+      }
+
     public:
       MYSQL_STMT*
       alloc_stmt_handle ();
@@ -108,6 +117,9 @@ namespace odb
     private:
       void
       free_stmt_handles ();
+
+      void
+      clear_ ();
 
     private:
       database_type& db_;

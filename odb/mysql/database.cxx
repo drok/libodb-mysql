@@ -218,6 +218,8 @@ namespace odb
         throw not_in_transaction ();
 
       connection_type& c (transaction::current ().connection ());
+      c.clear ();
+
       MYSQL* h (c.handle ());
 
       if (mysql_real_query (h, s, static_cast<unsigned long> (n)))

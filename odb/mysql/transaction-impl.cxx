@@ -6,7 +6,6 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
-#include <odb/mysql/statement.hxx>
 #include <odb/mysql/error.hxx>
 #include <odb/mysql/transaction-impl.hxx>
 
@@ -30,8 +29,7 @@ namespace odb
     void transaction_impl::
     commit ()
     {
-      if (statement* a = connection_->active ())
-        a->cancel ();
+      connection_->clear ();
 
       if (mysql_real_query (connection_->handle (), "commit", 6) != 0)
         translate_error (*connection_);
@@ -44,8 +42,7 @@ namespace odb
     void transaction_impl::
     rollback ()
     {
-      if (statement* a = connection_->active ())
-        a->cancel ();
+      connection_->clear ();
 
       if (mysql_real_query (connection_->handle (), "rollback", 8) != 0)
         translate_error (*connection_);

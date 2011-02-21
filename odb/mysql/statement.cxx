@@ -68,8 +68,7 @@ namespace odb
           data_ (data),
           data_version_ (0)
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         translate_error (conn_, stmt_);
@@ -78,8 +77,7 @@ namespace odb
     void select_statement::
     execute ()
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (cached_)
         free_result ();
@@ -230,8 +228,7 @@ namespace odb
     insert_statement (connection& conn, const string& s, binding& data)
         : statement (conn), data_ (data), data_version_ (0)
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         translate_error (conn_, stmt_);
@@ -240,8 +237,7 @@ namespace odb
     bool insert_statement::
     execute ()
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
@@ -284,8 +280,7 @@ namespace odb
           image_ (image),
           image_version_ (0)
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         translate_error (conn_, stmt_);
@@ -294,8 +289,7 @@ namespace odb
     void update_statement::
     execute ()
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
@@ -338,8 +332,7 @@ namespace odb
     delete_statement (connection& conn, const string& s, binding& cond)
         : statement (conn), cond_ (cond), cond_version_ (0)
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
         translate_error (conn_, stmt_);
@@ -348,8 +341,7 @@ namespace odb
     unsigned long long delete_statement::
     execute ()
     {
-      if (statement* a = conn_.active ())
-        a->cancel ();
+      conn_.clear ();
 
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);

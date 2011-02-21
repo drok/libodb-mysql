@@ -8,6 +8,7 @@
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
+#include <odb/mysql/statement.hxx>
 #include <odb/mysql/error.hxx>
 #include <odb/mysql/exceptions.hxx>
 #include <odb/mysql/statement-cache.hxx>
@@ -90,6 +91,12 @@ namespace odb
           return false; // Never reached.
         }
       }
+    }
+
+    void connection::
+    clear_ ()
+    {
+      active_->cancel (); // Should clear itself from active_.
     }
 
     MYSQL_STMT* connection::
