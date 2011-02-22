@@ -100,7 +100,7 @@ namespace odb
         }
       }
 
-      while (count_ > statement_->fetched ())
+      while (!this->end_ && count_ > statement_->fetched ())
       {
         select_statement::result r (statement_->fetch ());
 
