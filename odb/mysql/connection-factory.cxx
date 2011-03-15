@@ -169,41 +169,58 @@ namespace odb
     {
       tls_get (mysql_thread_init_);
 
-      lock l (mutex_);
-
+      // The outer loop checks whether the connection we were
+      // given is still valid.
+      //
       while (true)
       {
-        // See if we have a spare connection.
+        shared_ptr<pooled_connection> c;
+
+        lock l (mutex_);
+
+        // The inner loop tries to find a free connection.
         //
-        if (connections_.size () != 0)
+        while (true)
         {
-          shared_ptr<pooled_connection> c (connections_.back ());
-          connections_.pop_back ();
+          // See if we have a spare connection.
+          //
+          if (connections_.size () != 0)
+          {
+            c = connections_.back ();
+            connections_.pop_back ();
 
-          if (ping_ && !c->ping ())
-            continue;
+            c->pool_ = this;
+            in_use_++;
+            break;
+          }
 
-          c->pool_ = this;
-          in_use_++;
-          return c;
+          // See if we can create a new one.
+          //
+          if(max_ == 0 || in_use_ < max_)
+          {
+            // For new connections we don't need to ping so we
+            // can return immediately.
+            //
+            shared_ptr<pooled_connection> c (
+              new (shared) pooled_connection (*db_, this));
+            in_use_++;
+            return c;
+          }
+
+          // Wait until someone releases a connection.
+          //
+          waiters_++;
+          cond_.wait ();
+          waiters_--;
         }
 
-        // See if we can create a new one.
-        //
-        if(max_ == 0 || in_use_ < max_)
-        {
-          shared_ptr<pooled_connection> c (
-            new (shared) pooled_connection (*db_, this));
-          in_use_++;
-          return c;
-        }
+        l.unlock ();
 
-        // Wait until someone releases a connection.
-        //
-        waiters_++;
-        cond_.wait ();
-        waiters_--;
+        if (!ping_ || c->ping ())
+          return c;
       }
+
+      return shared_ptr<pooled_connection> (); // Never reached.
     }
 
     void connection_pool_factory::
