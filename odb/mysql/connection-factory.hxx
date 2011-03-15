@@ -119,7 +119,7 @@ namespace odb
         pooled_connection (database_type&, connection_pool_factory*);
 
       private:
-        static void
+        static bool
         zero_counter (void*);
 
       private:
@@ -133,7 +133,9 @@ namespace odb
       typedef std::vector<details::shared_ptr<pooled_connection> > connections;
 
     private:
-      void
+      // Return true if the connection should be deleted, false otherwise.
+      //
+      bool
       release (pooled_connection*);
 
     private:

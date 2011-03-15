@@ -226,7 +226,7 @@ namespace odb
       }
     }
 
-    void connection_pool_factory::
+    bool connection_pool_factory::
     release (pooled_connection* c)
     {
       c->clear ();
@@ -249,6 +249,8 @@ namespace odb
 
       if (waiters_ != 0)
         cond_.signal ();
+
+      return !keep;
     }
 
     //
@@ -264,13 +266,11 @@ namespace odb
       shared_base::callback_ = &callback_;
     }
 
-    void connection_pool_factory::pooled_connection::
+    bool connection_pool_factory::pooled_connection::
     zero_counter (void* arg)
     {
       pooled_connection* c (static_cast<pooled_connection*> (arg));
-
-      if (c->pool_)
-        c->pool_->release (c);
+      return c->pool_ ? c->pool_->release (c) : true;
     }
   }
 }
