@@ -62,6 +62,7 @@ gen  := $(addprefix $(out_base)/,$(genf))
 $(gen): $(cli)
 $(gen): cli := $(cli)
 $(gen): cli_options +=                   \
+--long-usage                             \
 --generate-specifier                     \
 --generate-file-scanner                  \
 --cli-namespace odb::mysql::details::cli \
