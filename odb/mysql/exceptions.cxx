@@ -24,11 +24,8 @@ namespace odb
 
     database_exception::
     database_exception (unsigned int e, const string& s, const string& m)
-        : error_ (e)
+        : error_ (e), sqlstate_ (s), message_ (m)
     {
-      sqlstate_ = s;
-      message_ = m;
-
       ostringstream ostr;
       ostr << error_ << " (" << sqlstate_ << "): " << message_;
       what_ = ostr.str ();

@@ -3,7 +3,8 @@
 // copyright : Copyright (c) 2005-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <new> // std::bad_alloc
+#include <new>    // std::bad_alloc
+#include <string>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/connection.hxx>
@@ -18,8 +19,8 @@ namespace odb
     void
     translate_error (connection& c,
                      unsigned int e,
-                     const std::string& sqlstate,
-                     const std::string& message)
+                     const string& sqlstate,
+                     const string& message)
     {
       switch (e)
       {
