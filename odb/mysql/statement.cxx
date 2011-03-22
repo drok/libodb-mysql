@@ -3,11 +3,12 @@
 // copyright : Copyright (c) 2005-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <odb/exceptions.hxx> // object_not_persistent
+
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/error.hxx>
-#include <odb/mysql/exceptions.hxx>
 
 using namespace std;
 
@@ -272,13 +273,13 @@ namespace odb
     update_statement::
     update_statement (connection& conn,
                       const string& s,
-                      binding& id,
-                      binding& image)
+                      binding& cond,
+                      binding& data)
         : statement (conn),
-          id_ (id),
-          id_version_ (0),
-          image_ (image),
-          image_version_ (0)
+          cond_ (cond),
+          cond_version_ (0),
+          data_ (data),
+          data_version_ (0)
     {
       conn_.clear ();
 
@@ -294,16 +295,15 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
 
-      if (image_version_ != image_.version || id_version_ != id_.version)
+      if (data_version_ != data_.version || cond_version_ != cond_.version)
       {
-        // Here we assume that the last element in image_.bind is the
-        // id parameter.
+        // Here we assume that cond_.bind is a suffix of data_.bind.
         //
-        if (mysql_stmt_bind_param (stmt_, image_.bind))
+        if (mysql_stmt_bind_param (stmt_, data_.bind))
           translate_error (conn_, stmt_);
 
-        id_version_ = id_.version;
-        image_version_ = image_.version;
+        cond_version_ = cond_.version;
+        data_version_ = data_.version;
       }
 
       if (mysql_stmt_execute (stmt_))

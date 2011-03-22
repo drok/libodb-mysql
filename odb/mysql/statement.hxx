@@ -159,10 +159,12 @@ namespace odb
       virtual
       ~update_statement ();
 
+      // Asssumes that cond.bind is a suffix of data.bind.
+      //
       update_statement (connection& conn,
                         const std::string& statement,
-                        binding& id,
-                        binding& image);
+                        binding& cond,
+                        binding& data);
       void
       execute ();
 
@@ -171,11 +173,11 @@ namespace odb
       update_statement& operator= (const update_statement&);
 
     private:
-      binding& id_;
-      std::size_t id_version_;
+      binding& cond_;
+      std::size_t cond_version_;
 
-      binding& image_;
-      std::size_t image_version_;
+      binding& data_;
+      std::size_t data_version_;
     };
 
     class LIBODB_MYSQL_EXPORT delete_statement: public statement
