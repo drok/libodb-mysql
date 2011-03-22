@@ -12,10 +12,10 @@ database.cxx             \
 error.cxx                \
 exceptions.cxx           \
 object-statements.cxx    \
+query.cxx                \
+statement.cxx            \
 transaction.cxx          \
 transaction-impl.cxx     \
-statement.cxx            \
-query.cxx                \
 traits.cxx
 
 cli_tun := details/options.cli
