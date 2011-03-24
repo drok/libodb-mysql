@@ -33,10 +33,10 @@ namespace odb
 
       std::memset (in_image_bind_, 0, sizeof (in_image_bind_));
       std::memset (out_image_bind_, 0, sizeof (out_image_bind_));
-      std::memset (out_image_error_, 0, sizeof (out_image_error_));
+      std::memset (out_image_truncated_, 0, sizeof (out_image_truncated_));
 
       for (std::size_t i (0); i < object_traits::out_column_count; ++i)
-        out_image_bind_[i].error = out_image_error_ + i;
+        out_image_bind_[i].error = out_image_truncated_ + i;
     }
 
     template <typename T>

@@ -8,6 +8,8 @@
 
 #include <odb/pre.hxx>
 
+#include <cstddef> // std::size_t
+
 #include <odb/forward.hxx>
 #include <odb/traits.hxx>
 
@@ -150,9 +152,9 @@ namespace odb
       }
 
       my_bool*
-      data_image_error ()
+      data_image_truncated ()
       {
-        return data_image_error_;
+        return data_image_truncated_;
       }
 
       //
@@ -216,7 +218,7 @@ namespace odb
       std::size_t data_id_image_version_;
       binding data_image_binding_;
       MYSQL_BIND data_image_bind_[traits::data_column_count];
-      my_bool data_image_error_[traits::data_column_count];
+      my_bool data_image_truncated_[traits::data_column_count];
 
       details::shared_ptr<insert_statement_type> insert_one_;
       details::shared_ptr<select_statement_type> select_all_;

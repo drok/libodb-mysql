@@ -35,10 +35,10 @@ namespace odb
 
       std::memset (cond_image_bind_, 0, sizeof (cond_image_bind_));
       std::memset (data_image_bind_, 0, sizeof (data_image_bind_));
-      std::memset (data_image_error_, 0, sizeof (data_image_error_));
+      std::memset (data_image_truncated_, 0, sizeof (data_image_truncated_));
 
       for (std::size_t i (0); i < traits::data_column_count; ++i)
-        data_image_bind_[i].error = data_image_error_ + i;
+        data_image_bind_[i].error = data_image_truncated_ + i;
     }
   }
 }

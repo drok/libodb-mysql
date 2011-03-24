@@ -114,7 +114,7 @@ namespace odb
               continue;
 
             typename object_traits::image_type& im (statements_.image ());
-            object_traits::grow (im, statements_.out_image_error ());
+            object_traits::grow (im, statements_.out_image_truncated ());
 
             if (im.version != statements_.out_image_version ())
             {

@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <cassert>
+#include <cstddef> // std::size_t
 
 #include <odb/forward.hxx>
 #include <odb/traits.hxx>
@@ -210,9 +211,9 @@ namespace odb
       }
 
       my_bool*
-      out_image_error ()
+      out_image_truncated ()
       {
-        return out_image_error_;
+        return out_image_truncated_;
       }
 
       // Object id image.
@@ -329,7 +330,7 @@ namespace odb
       std::size_t out_image_version_;
       binding out_image_binding_;
       MYSQL_BIND out_image_bind_[object_traits::out_column_count];
-      my_bool out_image_error_[object_traits::out_column_count];
+      my_bool out_image_truncated_[object_traits::out_column_count];
 
       // Id image binding (only in).
       //
