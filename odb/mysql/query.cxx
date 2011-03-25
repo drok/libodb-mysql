@@ -28,6 +28,18 @@ namespace odb
           bind_ (q.bind_),
           binding_ (0, 0)
     {
+      // Here and below we want to maintain up to date binding info so
+      // that the call to parameters_binding() below is an immutable
+      // operation, provided the query does not have any by-reference
+      // parameters. This way a by-value-only query can be shared
+      // between multiple threads without the need for synchronization.
+      //
+      if (size_t n = bind_.size ())
+      {
+        binding_.bind = &bind_[0];
+        binding_.count = n;
+        binding_.version++;
+      }
     }
 
     query& query::
@@ -38,6 +50,11 @@ namespace odb
         clause_ = q.clause_;
         parameters_ = q.parameters_;
         bind_ = q.bind_;
+
+        size_t n (bind_.size ());
+        binding_.bind = n != 0 ? &bind_[0] : 0;
+        binding_.count = n;
+        binding_.version++;
       }
 
       return *this;
@@ -54,11 +71,20 @@ namespace odb
 
       clause_ += q.clause_;
 
+      n = bind_.size ();
+
       parameters_.insert (
         parameters_.end (), q.parameters_.begin (), q.parameters_.end ());
 
       bind_.insert (
         bind_.end (), q.bind_.begin (), q.bind_.end ());
+
+      if (n != bind_.size ())
+      {
+        binding_.bind = &bind_[0];
+        binding_.count = bind_.size ();
+        binding_.version++;
+      }
 
       return *this;
     }
@@ -75,9 +101,12 @@ namespace odb
 
       parameters_.push_back (p);
       bind_.push_back (MYSQL_BIND ());
+      binding_.bind = &bind_[0];
+      binding_.count = bind_.size ();
+      binding_.version++;
+
       MYSQL_BIND* b (&bind_.back ());
       memset (b, 0, sizeof (MYSQL_BIND));
-
       p->bind (b);
     }
 
@@ -88,18 +117,10 @@ namespace odb
       binding& r (binding_);
 
       if (n == 0)
-        return r; // r.bind and r.count should be 0.
-
-      MYSQL_BIND* b (&bind_[0]);
+        return r;
 
       bool inc_ver (false);
-
-      if (r.bind != b || r.count != n)
-      {
-        r.bind = b;
-        r.count = n;
-        inc_ver = true;
-      }
+      MYSQL_BIND* b (&bind_[0]);
 
       for (size_t i (0); i < n; ++i)
       {
