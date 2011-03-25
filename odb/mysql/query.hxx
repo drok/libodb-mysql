@@ -120,11 +120,11 @@ namespace odb
       operator= (const query&);
 
     public:
-      binding&
-      parameters () const;
-
       std::string
       clause () const;
+
+      binding&
+      parameters_binding () const;
 
     public:
       template <typename T>

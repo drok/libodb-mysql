@@ -82,7 +82,7 @@ namespace odb
     }
 
     binding& query::
-    parameters () const
+    parameters_binding () const
     {
       size_t n (parameters_.size ());
       binding& r (binding_);
@@ -94,10 +94,10 @@ namespace odb
 
       bool inc_ver (false);
 
-      if (r.bind != b || r.count != bind_.size ())
+      if (r.bind != b || r.count != n)
       {
         r.bind = b;
-        r.count = bind_.size ();
+        r.count = n;
         inc_ver = true;
       }
 

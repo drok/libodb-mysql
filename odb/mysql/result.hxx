@@ -22,6 +22,8 @@ namespace odb
 {
   namespace mysql
   {
+    class query;
+
     template <typename T>
     class result_impl: public odb::result_impl<T>
     {
@@ -37,7 +39,8 @@ namespace odb
       virtual
       ~result_impl ();
 
-      result_impl (details::shared_ptr<select_statement> statement,
+      result_impl (const query&,
+                   details::shared_ptr<select_statement> statement,
                    object_statements<object_type>& statements);
 
       virtual void

@@ -17,7 +17,8 @@ namespace odb
 
     template <typename T>
     result_impl<T>::
-    result_impl (details::shared_ptr<select_statement> statement,
+    result_impl (const query&,
+                 details::shared_ptr<select_statement> statement,
                  object_statements<object_type>& statements)
         : odb::result_impl<T> (statements.connection ().database ()),
           statement_ (statement),
