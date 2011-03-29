@@ -159,6 +159,8 @@ namespace odb
       }
 
     public:
+      using odb::database::execute;
+
       virtual unsigned long long
       execute (const char* statement, std::size_t length);
 
