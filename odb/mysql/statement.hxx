@@ -138,11 +138,7 @@ namespace odb
       execute ();
 
       unsigned long long
-      id ()
-      {
-        return static_cast<unsigned long long> (
-          mysql_stmt_insert_id (stmt_));
-      }
+      id ();
 
     private:
       insert_statement (const insert_statement&);

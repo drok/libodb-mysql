@@ -262,6 +262,12 @@ namespace odb
       return true;
     }
 
+    unsigned long long insert_statement::
+    id ()
+    {
+      return static_cast<unsigned long long> (mysql_stmt_insert_id (stmt_));
+    }
+
     // update_statement
     //
 
