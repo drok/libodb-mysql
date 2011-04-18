@@ -1030,7 +1030,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, signed char, id_tiny>::set_image (image_, dummy, v);
+        value_traits<T, id_tiny>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1063,7 +1063,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned char, id_utiny>::set_image (image_, dummy, v);
+        value_traits<T, id_utiny>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1098,7 +1098,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, short, id_short>::set_image (image_, dummy, v);
+        value_traits<T, id_short>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1131,8 +1131,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned short, id_ushort>::set_image (
-          image_, dummy, v);
+        value_traits<T, id_ushort>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1167,7 +1166,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, int, id_long>::set_image (image_, dummy, v);
+        value_traits<T, id_long>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1200,7 +1199,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned int, id_ulong>::set_image (image_, dummy, v);
+        value_traits<T, id_ulong>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1235,7 +1234,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, long long, id_longlong>::set_image (image_, dummy, v);
+        value_traits<T, id_longlong>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1268,8 +1267,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, unsigned long long, id_ulonglong>::set_image (
-          image_, dummy, v);
+        value_traits<T, id_ulonglong>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1304,7 +1302,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, float, id_float>::set_image (image_, dummy, v);
+        value_traits<T, id_float>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1339,7 +1337,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, double, id_double>::set_image (image_, dummy, v);
+        value_traits<T, id_double>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1375,8 +1373,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size, cap (buffer_.capacity ());
-        value_traits<T, details::buffer, id_decimal>::set_image (
-          buffer_, size, dummy, v);
+        value_traits<T, id_decimal>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
       }
@@ -1413,7 +1410,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME, id_date>::set_image (image_, dummy, v);
+        value_traits<T, id_date>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1447,7 +1444,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME, id_time>::set_image (image_, dummy, v);
+        value_traits<T, id_time>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1481,7 +1478,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME, id_datetime>::set_image (image_, dummy, v);
+        value_traits<T, id_datetime>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1515,8 +1512,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, MYSQL_TIME, id_timestamp>::set_image (
-          image_, dummy, v);
+        value_traits<T, id_timestamp>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1551,7 +1547,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        value_traits<T, short, id_year>::set_image (image_, dummy, v);
+        value_traits<T, id_year>::set_image (image_, dummy, v);
       }
 
     private:
@@ -1587,8 +1583,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size, cap (buffer_.capacity ());
-        value_traits<T, details::buffer, id_string>::set_image (
-          buffer_, size, dummy, v);
+        value_traits<T, id_string>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
       }
@@ -1627,8 +1622,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size, cap (buffer_.capacity ());
-        value_traits<T, details::buffer, id_blob>::set_image (
-          buffer_, size, dummy, v);
+        value_traits<T, id_blob>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
       }
@@ -1668,7 +1662,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size;
-        value_traits<T, details::buffer, id_bit>::set_image (
+        value_traits<T, id_bit>::set_image (
           buffer_, sizeof (buffer_), size, dummy, v);
         size_ = static_cast<unsigned long> (size);
       }
@@ -1709,8 +1703,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size, cap (buffer_.capacity ());
-        value_traits<T, details::buffer, id_enum>::set_image (
-          buffer_, size, dummy, v);
+        value_traits<T, id_enum>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
       }
@@ -1749,8 +1742,7 @@ namespace odb
       {
         bool dummy;
         std::size_t size, cap (buffer_.capacity ());
-        value_traits<T, details::buffer, id_set>::set_image (
-          buffer_, size, dummy, v);
+        value_traits<T, id_set>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
       }
