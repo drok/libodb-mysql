@@ -162,6 +162,37 @@ namespace odb
       }
     };
 
+    // Specialization for numeric enum representations (C++ enum, integer
+    // types, etc). In particular, this specialization works only for C++
+    // enum type as long as its numeric value space starts with 0, is
+    // ascending and contiguous (i.e., the default enumerator assignment).
+    //
+    template <typename T>
+    struct default_value_traits<T, id_enum>
+    {
+      typedef T value_type;
+      typedef T query_type;
+      typedef unsigned short image_type;
+
+      static void
+      set_value (T& v, unsigned short i, bool is_null)
+      {
+        // In MySQL first enumerator has index 1.
+        //
+        if (!is_null)
+          v = static_cast<T> (i - 1);
+        else
+          v = T ();
+      }
+
+      static void
+      set_image (unsigned short& i, bool& is_null, const T& v)
+      {
+        is_null = false;
+        i = static_cast<unsigned short> (v) + 1;
+      }
+    };
+
     // std::string specialization.
     //
     class LIBODB_MYSQL_EXPORT string_value_traits

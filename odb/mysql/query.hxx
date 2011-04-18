@@ -18,6 +18,7 @@
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/traits.hxx>
+#include <odb/mysql/enum.hxx>
 #include <odb/mysql/binding.hxx>
 
 #include <odb/details/buffer.hxx>
@@ -1676,6 +1677,8 @@ namespace odb
 
     // ENUM
     //
+    // The image type can be either integer or string.
+    //
     template <typename T>
     struct query_param_impl<T, id_enum>: query_param
     {
@@ -1691,10 +1694,7 @@ namespace odb
       virtual void
       bind (MYSQL_BIND* b)
       {
-        b->buffer_type = MYSQL_TYPE_STRING;
-        b->buffer = buffer_.data ();
-        b->buffer_length = static_cast<unsigned long> (buffer_.capacity ());
-        b->length = &size_;
+        enum_traits::bind (*b, image_, size_, 0);
       }
 
     private:
@@ -1702,15 +1702,12 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        std::size_t size, cap (buffer_.capacity ());
-        value_traits<T, id_enum>::set_image (buffer_, size, dummy, v);
-        size_ = static_cast<unsigned long> (size);
-        return cap != buffer_.capacity ();
+        return enum_traits::set_image (image_, size_, dummy, v);
       }
 
     private:
-      details::buffer buffer_;
-      unsigned long size_;
+      typename value_traits<T, id_enum>::image_type image_;
+      unsigned long size_; // Keep size in case it is a string.
     };
 
     // SET
