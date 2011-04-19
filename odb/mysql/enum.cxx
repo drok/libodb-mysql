@@ -30,5 +30,3 @@ namespace odb
 }
 
 #include <odb/post.hxx>
-
-#endif // ODB_MYSQL_ENUMS_HXX
