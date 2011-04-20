@@ -120,7 +120,7 @@ namespace odb
       }
 
     private:
-      void
+      static void
       strip_value (const details::buffer& i, unsigned long& size);
     };
   }
