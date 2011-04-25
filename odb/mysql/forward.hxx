@@ -20,6 +20,7 @@ namespace odb
 
     // Implementation details.
     //
+    class binding;
     class select_statement;
 
     template <typename T>
