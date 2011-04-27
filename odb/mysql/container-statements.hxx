@@ -237,8 +237,9 @@ namespace odb
     public:
       typedef T traits;
       typedef typename T::statements_type base;
+      typedef mysql::connection connection_type;
 
-      container_statements_impl (connection&);
+      container_statements_impl (connection_type&);
 
     private:
       container_statements_impl (const container_statements_impl&);
