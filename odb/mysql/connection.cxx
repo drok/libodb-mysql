@@ -62,6 +62,10 @@ namespace odb
     connection::
     ~connection ()
     {
+      // Deallocate prepared statements before we close the connection.
+      //
+      statement_cache_.reset ();
+
       if (stmt_handles_.size () > 0)
         free_stmt_handles ();
 
