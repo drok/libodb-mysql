@@ -1373,7 +1373,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        std::size_t size, cap (buffer_.capacity ());
+        std::size_t size (0), cap (buffer_.capacity ());
         value_traits<T, id_decimal>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
@@ -1583,7 +1583,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        std::size_t size, cap (buffer_.capacity ());
+        std::size_t size (0), cap (buffer_.capacity ());
         value_traits<T, id_string>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
@@ -1622,7 +1622,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        std::size_t size, cap (buffer_.capacity ());
+        std::size_t size (0), cap (buffer_.capacity ());
         value_traits<T, id_blob>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
@@ -1662,7 +1662,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        std::size_t size;
+        std::size_t size (0);
         value_traits<T, id_bit>::set_image (
           buffer_, sizeof (buffer_), size, dummy, v);
         size_ = static_cast<unsigned long> (size);
@@ -1738,7 +1738,7 @@ namespace odb
       init (const T& v)
       {
         bool dummy;
-        std::size_t size, cap (buffer_.capacity ());
+        std::size_t size (0), cap (buffer_.capacity ());
         value_traits<T, id_set>::set_image (buffer_, size, dummy, v);
         size_ = static_cast<unsigned long> (size);
         return cap != buffer_.capacity ();
