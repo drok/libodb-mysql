@@ -85,15 +85,33 @@ namespace odb
     class LIBODB_MYSQL_EXPORT query
     {
     public:
+      struct clause_part
+      {
+        enum kind_type
+        {
+          column,
+          param,
+          native
+        };
+
+        clause_part (kind_type k): kind (k) {}
+        clause_part (kind_type k, const std::string& p): kind (k), part (p) {}
+
+        kind_type kind;
+        std::string part;
+      };
+
       query ()
         : binding_ (0, 0)
       {
       }
 
       explicit
-      query (const std::string& q)
-        : clause_ (q), binding_ (0, 0)
+      query (const std::string& q,
+             clause_part::kind_type k = clause_part::native)
+        : binding_ (0, 0)
       {
+        clause_.push_back (clause_part (k, q));
       }
 
       template <typename T>
@@ -122,7 +140,7 @@ namespace odb
 
     public:
       std::string
-      clause () const;
+      clause (std::string const& default_table) const;
 
       binding&
       parameters_binding () const;
@@ -149,12 +167,7 @@ namespace odb
       query&
       operator+= (const std::string& q)
       {
-        size_t n (clause_.size ());
-
-        if (n != 0 && clause_[n - 1] != ' ' && !q.empty () && q[0] != ' ')
-          clause_ += ' ';
-
-        clause_ += q;
+        append (q, clause_part::native);
         return *this;
       }
 
@@ -183,14 +196,18 @@ namespace odb
       void
       append (ref_bind<T>);
 
+      void
+      append (const std::string&, clause_part::kind_type);
+
     private:
       void
       add (details::shared_ptr<query_param>);
 
     private:
+      typedef std::vector<clause_part> clause_type;
       typedef std::vector<details::shared_ptr<query_param> > parameters_type;
 
-      std::string clause_;
+      clause_type clause_;
       parameters_type parameters_;
       mutable std::vector<MYSQL_BIND> bind_;
       mutable binding binding_;
@@ -365,7 +382,7 @@ namespace odb
       query
       is_null () const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "IS NULL";
         return q;
       }
@@ -373,7 +390,7 @@ namespace odb
       query
       is_not_null () const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "IS NOT NULL";
         return q;
       }
@@ -409,7 +426,7 @@ namespace odb
       query
       equal (val_bind<T> v) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "=";
         q.append<T, ID> (v);
         return q;
@@ -426,7 +443,7 @@ namespace odb
       query
       equal (ref_bind<T> r) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "=";
         q.append<T, ID> (r);
         return q;
@@ -494,7 +511,7 @@ namespace odb
       query
       unequal (val_bind<T> v) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "!=";
         q.append<T, ID> (v);
         return q;
@@ -511,7 +528,7 @@ namespace odb
       query
       unequal (ref_bind<T> r) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "!=";
         q.append<T, ID> (r);
         return q;
@@ -579,7 +596,7 @@ namespace odb
       query
       less (val_bind<T> v) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "<";
         q.append<T, ID> (v);
         return q;
@@ -596,7 +613,7 @@ namespace odb
       query
       less (ref_bind<T> r) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "<";
         q.append<T, ID> (r);
         return q;
@@ -664,7 +681,7 @@ namespace odb
       query
       greater (val_bind<T> v) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += ">";
         q.append<T, ID> (v);
         return q;
@@ -681,7 +698,7 @@ namespace odb
       query
       greater (ref_bind<T> r) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += ">";
         q.append<T, ID> (r);
         return q;
@@ -749,7 +766,7 @@ namespace odb
       query
       less_equal (val_bind<T> v) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "<=";
         q.append<T, ID> (v);
         return q;
@@ -766,7 +783,7 @@ namespace odb
       query
       less_equal (ref_bind<T> r) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "<=";
         q.append<T, ID> (r);
         return q;
@@ -834,7 +851,7 @@ namespace odb
       query
       greater_equal (val_bind<T> v) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += ">=";
         q.append<T, ID> (v);
         return q;
@@ -851,7 +868,7 @@ namespace odb
       query
       greater_equal (ref_bind<T> r) const
       {
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += ">=";
         q.append<T, ID> (r);
         return q;
@@ -918,9 +935,9 @@ namespace odb
         //
         (void) (sizeof (type_instance<T> () == type_instance<T2> ()));
 
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "=";
-        q += c.name ();
+        q.append (c.name (), query::clause_part::column);
         return q;
       }
 
@@ -932,9 +949,9 @@ namespace odb
         //
         (void) (sizeof (type_instance<T> () != type_instance<T2> ()));
 
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "!=";
-        q += c.name ();
+        q.append (c.name (), query::clause_part::column);
         return q;
       }
 
@@ -946,9 +963,9 @@ namespace odb
         //
         (void) (sizeof (type_instance<T> () < type_instance<T2> ()));
 
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "<";
-        q += c.name ();
+        q.append (c.name (), query::clause_part::column);
         return q;
       }
 
@@ -960,9 +977,9 @@ namespace odb
         //
         (void) (sizeof (type_instance<T> () > type_instance<T2> ()));
 
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += ">";
-        q += c.name ();
+        q.append (c.name (), query::clause_part::column);
         return q;
       }
 
@@ -974,9 +991,9 @@ namespace odb
         //
         (void) (sizeof (type_instance<T> () <= type_instance<T2> ()));
 
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += "<=";
-        q += c.name ();
+        q.append (c.name (), query::clause_part::column);
         return q;
       }
 
@@ -988,9 +1005,9 @@ namespace odb
         //
         (void) (sizeof (type_instance<T> () >= type_instance<T2> ()));
 
-        query q (name_);
+        query q (name_, query::clause_part::column);
         q += ">=";
-        q += c.name ();
+        q.append (c.name (), query::clause_part::column);
         return q;
       }
 
@@ -1796,6 +1813,13 @@ namespace odb
     query (const mysql::query_column<bool, ID>& qc)
         : object_traits<T>::query_type (qc)
     {
+    }
+
+    std::string
+    clause () const
+    {
+      return object_traits<T>::query_type::clause (
+        object_traits<T>::table_name);
     }
   };
 }
