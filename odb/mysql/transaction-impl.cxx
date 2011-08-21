@@ -14,8 +14,8 @@ namespace odb
   namespace mysql
   {
     transaction_impl::
-    transaction_impl (database_type& db)
-        : odb::transaction_impl (db), connection_ (db.connection ())
+    transaction_impl (connection_ptr c)
+        : odb::transaction_impl (c->database (), *c), connection_ (c)
     {
       if (mysql_real_query (connection_->handle (), "begin", 5) != 0)
         translate_error (*connection_);

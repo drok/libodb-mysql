@@ -5,12 +5,9 @@
 
 #include <sstream>
 
-#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/database.hxx>
-#include <odb/mysql/transaction.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
-#include <odb/mysql/error.hxx>
 #include <odb/mysql/exceptions.hxx>
 
 #include <odb/mysql/details/options.hxx>
@@ -211,48 +208,11 @@ namespace odb
       details::options::print_usage (os);
     }
 
-    unsigned long long database::
-    execute (const char* s, std::size_t n)
+    odb::connection* database::
+    connection_ ()
     {
-      if (!transaction::has_current ())
-        throw not_in_transaction ();
-
-      connection_type& c (transaction::current ().connection ());
-      c.clear ();
-
-      MYSQL* h (c.handle ());
-
-      if (mysql_real_query (h, s, static_cast<unsigned long> (n)))
-        translate_error (c);
-
-      // Get the affected row count, if any. If the statement has a result
-      // set (e.g., SELECT), we first need to call mysql_store_result().
-      //
-      unsigned long long r (0);
-
-      if (mysql_field_count (h) == 0)
-        r = static_cast<unsigned long long> (mysql_affected_rows (h));
-      else
-      {
-        if (MYSQL_RES* rs = mysql_store_result (h))
-        {
-          r = static_cast<unsigned long long> (mysql_num_rows (rs));
-          mysql_free_result (rs);
-        }
-        else
-          translate_error (c);
-      }
-
-      return r;
-    }
-
-    transaction_impl* database::
-    begin ()
-    {
-      if (transaction::has_current ())
-        throw already_in_transaction ();
-
-      return new transaction_impl (*this);
+      connection_ptr c (factory_->connect ());
+      return c.release ();
     }
   }
 }

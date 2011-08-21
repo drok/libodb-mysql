@@ -28,7 +28,7 @@ namespace odb
     class LIBODB_MYSQL_EXPORT connection_factory
     {
     public:
-      virtual details::shared_ptr<connection>
+      virtual connection_ptr
       connect () = 0;
 
     public:
@@ -49,7 +49,7 @@ namespace odb
       {
       }
 
-      virtual details::shared_ptr<connection>
+      virtual connection_ptr
       connect ();
 
       virtual void
@@ -97,7 +97,7 @@ namespace odb
         // @@ check min_ <= max_
       }
 
-      virtual details::shared_ptr<connection>
+      virtual connection_ptr
       connect ();
 
       virtual void

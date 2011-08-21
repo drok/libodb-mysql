@@ -19,7 +19,6 @@
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
-#include <odb/mysql/transaction-impl.hxx>
 
 #include <odb/details/shared-ptr.hxx>
 
@@ -29,11 +28,10 @@ namespace odb
 {
   namespace mysql
   {
+    class transaction_impl;
+
     class LIBODB_MYSQL_EXPORT database: public odb::database
     {
-    public:
-      typedef mysql::connection connection_type;
-
     public:
       // In MySQL, NULL and empty string are treated as the same value
       // for all the arguments except passwd and socket.
@@ -159,22 +157,20 @@ namespace odb
       }
 
     public:
-      using odb::database::execute;
-
-      virtual unsigned long long
-      execute (const char* statement, std::size_t length);
-
-    public:
-      virtual transaction_impl*
+      transaction_impl*
       begin ();
 
     public:
-      details::shared_ptr<connection_type>
+      connection_ptr
       connection ();
 
     public:
       virtual
       ~database ();
+
+    protected:
+      virtual odb::connection*
+      connection_ ();
 
     private:
       std::string user_;

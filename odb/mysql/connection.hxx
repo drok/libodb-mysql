@@ -12,10 +12,12 @@
 #include <memory> // std::auto_ptr
 
 #include <odb/forward.hxx>
+#include <odb/connection.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
+#include <odb/mysql/transaction-impl.hxx>
 
 #include <odb/details/shared-ptr.hxx>
 
@@ -28,7 +30,10 @@ namespace odb
     class statement;
     class statement_cache;
 
-    class LIBODB_MYSQL_EXPORT connection: public details::shared_base
+    class connection;
+    typedef details::shared_ptr<connection> connection_ptr;
+
+    class LIBODB_MYSQL_EXPORT connection: public odb::connection
     {
     public:
       typedef mysql::statement_cache statement_cache_type;
@@ -44,6 +49,22 @@ namespace odb
       {
         return db_;
       }
+
+    public:
+      virtual transaction_impl*
+      begin ();
+
+      transaction_impl*
+      begin_immediate ();
+
+      transaction_impl*
+      begin_exclusive ();
+
+    public:
+      using odb::connection::execute;
+
+      virtual unsigned long long
+      execute (const char* statement, std::size_t length);
 
     public:
       bool

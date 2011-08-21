@@ -8,6 +8,7 @@
 
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
+#include <odb/mysql/transaction.hxx>
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/error.hxx>
 #include <odb/mysql/exceptions.hxx>
@@ -21,7 +22,8 @@ namespace odb
   {
     connection::
     connection (database_type& db)
-        : db_ (db),
+        : odb::connection (db),
+          db_ (db),
           failed_ (false),
           handle_ (&mysql_),
           active_ (0),
@@ -70,6 +72,44 @@ namespace odb
         free_stmt_handles ();
 
       mysql_close (handle_);
+    }
+
+    transaction_impl* connection::
+    begin ()
+    {
+      if (transaction::has_current ())
+        throw already_in_transaction ();
+
+      return new transaction_impl (connection_ptr (inc_ref (this)));
+    }
+
+    unsigned long long connection::
+    execute (const char* s, std::size_t n)
+    {
+      clear ();
+
+      if (mysql_real_query (handle_, s, static_cast<unsigned long> (n)))
+        translate_error (*this);
+
+      // Get the affected row count, if any. If the statement has a result
+      // set (e.g., SELECT), we first need to call mysql_store_result().
+      //
+      unsigned long long r (0);
+
+      if (mysql_field_count (handle_) == 0)
+        r = static_cast<unsigned long long> (mysql_affected_rows (handle_));
+      else
+      {
+        if (MYSQL_RES* rs = mysql_store_result (handle_))
+        {
+          r = static_cast<unsigned long long> (mysql_num_rows (rs));
+          mysql_free_result (rs);
+        }
+        else
+          translate_error (*this);
+      }
+
+      return r;
     }
 
     bool connection::
