@@ -14,16 +14,35 @@ namespace odb
   namespace mysql
   {
     transaction_impl::
+    transaction_impl (database_type& db)
+        : odb::transaction_impl (db)
+    {
+    }
+
+    transaction_impl::
     transaction_impl (connection_ptr c)
         : odb::transaction_impl (c->database (), *c), connection_ (c)
     {
-      if (mysql_real_query (connection_->handle (), "begin", 5) != 0)
-        translate_error (*connection_);
     }
 
     transaction_impl::
     ~transaction_impl ()
     {
+    }
+
+    void transaction_impl::
+    start ()
+    {
+      // Grab a connection if we don't already have one.
+      //
+      if (connection_ == 0)
+      {
+        connection_ = static_cast<database_type&> (database_).connection ();
+        odb::transaction_impl::connection_ = connection_.get ();
+      }
+
+      if (mysql_real_query (connection_->handle (), "begin", 5) != 0)
+        translate_error (*connection_);
     }
 
     void transaction_impl::

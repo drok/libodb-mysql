@@ -157,7 +157,7 @@ namespace odb
       }
 
     public:
-      transaction_impl*
+      virtual transaction_impl*
       begin ();
 
     public:

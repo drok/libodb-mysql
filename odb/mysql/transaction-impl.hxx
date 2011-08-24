@@ -23,17 +23,18 @@ namespace odb
   {
     class LIBODB_MYSQL_EXPORT transaction_impl: public odb::transaction_impl
     {
-    protected:
-      friend class connection;
-      friend class transaction;
-
+    public:
       typedef mysql::database database_type;
       typedef mysql::connection connection_type;
 
+      transaction_impl (database_type&);
       transaction_impl (connection_ptr);
 
       virtual
       ~transaction_impl ();
+
+      virtual void
+      start ();
 
       virtual void
       commit ();
