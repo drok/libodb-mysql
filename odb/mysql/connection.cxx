@@ -32,6 +32,11 @@ namespace odb
       if (mysql_init (handle_) == 0)
         throw bad_alloc ();
 
+      if (*db_.charset () != '\0')
+        // Can only fail if we pass an unknown option.
+        //
+        mysql_options (handle_, MYSQL_SET_CHARSET_NAME, db_.charset ());
+
       // Force the CLIENT_FOUND_ROWS flag so that UPDATE returns the
       // number of found rows, not the number of changed rows. This
       // is necessary to distinguish between the object-not-persistent

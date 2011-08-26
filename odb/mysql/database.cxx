@@ -30,6 +30,7 @@ namespace odb
               const char* host,
               unsigned int port,
               const char* socket,
+              const char* charset,
               unsigned long client_flags,
               auto_ptr<connection_factory> factory)
         : user_ (user ? user : ""),
@@ -40,6 +41,7 @@ namespace odb
           port_ (port),
           socket_str_ (socket ? socket : ""),
           socket_ (socket ? socket_str_.c_str () : 0),
+          charset_ (charset == 0 ? "" : charset),
           client_flags_ (client_flags),
           factory_ (factory)
     {
@@ -56,6 +58,7 @@ namespace odb
               const string& host,
               unsigned int port,
               const string* socket,
+              const string& charset,
               unsigned long client_flags,
               auto_ptr<connection_factory> factory)
         : user_ (user),
@@ -66,6 +69,7 @@ namespace odb
           port_ (port),
           socket_str_ (socket ? *socket : ""),
           socket_ (socket ? socket_str_.c_str () : 0),
+          charset_ (charset),
           client_flags_ (client_flags),
           factory_ (factory)
     {
@@ -82,6 +86,7 @@ namespace odb
               const string& host,
               unsigned int port,
               const string* socket,
+              const string& charset,
               unsigned long client_flags,
               auto_ptr<connection_factory> factory)
         : user_ (user),
@@ -92,6 +97,7 @@ namespace odb
           port_ (port),
           socket_str_ (socket ? *socket : ""),
           socket_ (socket ? socket_str_.c_str () : 0),
+          charset_ (charset),
           client_flags_ (client_flags),
           factory_ (factory)
     {
@@ -108,6 +114,7 @@ namespace odb
               const string& host,
               unsigned int port,
               const string& socket,
+              const string& charset,
               unsigned long client_flags,
               auto_ptr<connection_factory> factory)
         : user_ (user),
@@ -118,6 +125,7 @@ namespace odb
           port_ (port),
           socket_str_ (socket),
           socket_ (socket_str_.c_str ()),
+          charset_ (charset),
           client_flags_ (client_flags),
           factory_ (factory)
     {
@@ -134,6 +142,7 @@ namespace odb
               const string& host,
               unsigned int port,
               const string& socket,
+              const string& charset,
               unsigned long client_flags,
               auto_ptr<connection_factory> factory)
         : user_ (user),
@@ -144,6 +153,7 @@ namespace odb
           port_ (port),
           socket_str_ (socket),
           socket_ (socket_str_.c_str ()),
+          charset_ (charset),
           client_flags_ (client_flags),
           factory_ (factory)
     {
@@ -157,10 +167,12 @@ namespace odb
     database (int& argc,
               char* argv[],
               bool erase,
+              const string& charset,
               unsigned long client_flags,
-              std::auto_ptr<connection_factory> factory)
+              auto_ptr<connection_factory> factory)
         : passwd_ (0),
           socket_ (0),
+          charset_ (charset),
           client_flags_ (client_flags),
           factory_ (factory)
     {
@@ -203,7 +215,7 @@ namespace odb
     }
 
     void database::
-    print_usage (std::ostream& os)
+    print_usage (ostream& os)
     {
       details::options::print_usage (os);
     }

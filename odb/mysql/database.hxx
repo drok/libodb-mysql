@@ -42,6 +42,7 @@ namespace odb
                 const char* host = 0,
                 unsigned int port = 0,
                 const char* socket = 0,
+                const char* charset = 0,
                 unsigned long client_flags = 0,
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
@@ -52,6 +53,7 @@ namespace odb
                 const std::string& host = "",
                 unsigned int port = 0,
                 const std::string* socket = 0,
+                const std::string& charset = "",
                 unsigned long client_flags = 0,
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
@@ -62,6 +64,7 @@ namespace odb
                 const std::string& host = "",
                 unsigned int port = 0,
                 const std::string* socket = 0,
+                const std::string& charset = "",
                 unsigned long client_flags = 0,
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
@@ -72,6 +75,7 @@ namespace odb
                 const std::string& host,
                 unsigned int port,
                 const std::string& socket,
+                const std::string& charset = "",
                 unsigned long client_flags = 0,
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
@@ -82,6 +86,7 @@ namespace odb
                 const std::string& host,
                 unsigned int port,
                 const std::string& socket,
+                const std::string& charset = "",
                 unsigned long client_flags = 0,
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
@@ -105,6 +110,7 @@ namespace odb
       database (int& argc,
                 char* argv[],
                 bool erase = false,
+                const std::string& charset = "",
                 unsigned long client_flags = 0,
                 std::auto_ptr<connection_factory> =
                   std::auto_ptr<connection_factory> (0));
@@ -150,6 +156,12 @@ namespace odb
         return socket_;
       }
 
+      const char*
+      charset () const
+      {
+        return charset_.c_str ();
+      }
+
       unsigned long
       client_flags () const
       {
@@ -181,6 +193,7 @@ namespace odb
       unsigned int port_;
       std::string socket_str_;
       const char* socket_;
+      std::string charset_;
       unsigned long client_flags_;
       std::auto_ptr<connection_factory> factory_;
     };
