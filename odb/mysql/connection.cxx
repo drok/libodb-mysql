@@ -26,8 +26,7 @@ namespace odb
           db_ (db),
           failed_ (false),
           handle_ (&mysql_),
-          active_ (0),
-          statement_cache_ (new statement_cache_type (*this))
+          active_ (0)
     {
       if (mysql_init (handle_) == 0)
         throw bad_alloc ();
@@ -64,6 +63,19 @@ namespace odb
 
         throw database_exception (e, sqlstate, message);
       }
+
+      statement_cache_.reset (new statement_cache_type (*this));
+    }
+
+    connection::
+    connection (database_type& db, MYSQL* handle)
+        : odb::connection (db),
+          db_ (db),
+          failed_ (false),
+          handle_ (handle),
+          active_ (0)
+    {
+      statement_cache_.reset (new statement_cache_type (*this));
     }
 
     connection::
