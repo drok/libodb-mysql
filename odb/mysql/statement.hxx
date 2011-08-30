@@ -12,12 +12,12 @@
 #include <cstddef>  // std::size_t
 
 #include <odb/forward.hxx>
+#include <odb/details/shared-ptr.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/binding.hxx>
-
-#include <odb/details/shared-ptr.hxx>
+#include <odb/mysql/auto-handle.hxx>
 
 #include <odb/mysql/details/export.hxx>
 
@@ -44,7 +44,7 @@ namespace odb
 
     protected:
       connection& conn_;
-      MYSQL_STMT* stmt_;
+      auto_handle<MYSQL_STMT> stmt_;
     };
 
     class LIBODB_MYSQL_EXPORT select_statement: public statement

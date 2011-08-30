@@ -25,11 +25,12 @@ namespace odb
         : odb::connection (db),
           db_ (db),
           failed_ (false),
-          handle_ (&mysql_),
           active_ (0)
     {
-      if (mysql_init (handle_) == 0)
+      if (mysql_init (&mysql_) == 0)
         throw bad_alloc ();
+
+      handle_.reset (&mysql_);
 
       if (*db_.charset () != '\0')
         // Can only fail if we pass an unknown option.
@@ -54,16 +55,16 @@ namespace odb
         // yet.
         //
         unsigned int e (mysql_errno (handle_));
-        string sqlstate (mysql_sqlstate (handle_));
-        string message (mysql_error (handle_));
-        mysql_close (handle_);
 
         if (e == CR_OUT_OF_MEMORY)
           throw bad_alloc ();
 
-        throw database_exception (e, sqlstate, message);
+        throw database_exception (
+          e, mysql_sqlstate (handle_), mysql_error (handle_));
       }
 
+      // Do this after we have established the connection.
+      //
       statement_cache_.reset (new statement_cache_type (*this));
     }
 
@@ -73,22 +74,16 @@ namespace odb
           db_ (db),
           failed_ (false),
           handle_ (handle),
-          active_ (0)
+          active_ (0),
+          statement_cache_ (new statement_cache_type (*this))
     {
-      statement_cache_.reset (new statement_cache_type (*this));
     }
 
     connection::
     ~connection ()
     {
-      // Deallocate prepared statements before we close the connection.
-      //
-      statement_cache_.reset ();
-
       if (stmt_handles_.size () > 0)
         free_stmt_handles ();
-
-      mysql_close (handle_);
     }
 
     transaction_impl* connection::
@@ -169,12 +164,15 @@ namespace odb
     }
 
     void connection::
-    free_stmt_handle (MYSQL_STMT* stmt)
+    free_stmt_handle (auto_handle<MYSQL_STMT>& stmt)
     {
       if (active_ == 0)
-        mysql_stmt_close (stmt);
+        stmt.reset ();
       else
-        stmt_handles_.push_back (stmt);
+      {
+        stmt_handles_.push_back (stmt); // May throw.
+        stmt.release ();
+      }
     }
 
     void connection::

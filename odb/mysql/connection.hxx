@@ -18,6 +18,7 @@
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/transaction-impl.hxx>
+#include <odb/mysql/auto-handle.hxx>
 
 #include <odb/details/shared-ptr.hxx>
 
@@ -124,7 +125,7 @@ namespace odb
       alloc_stmt_handle ();
 
       void
-      free_stmt_handle (MYSQL_STMT*);
+      free_stmt_handle (auto_handle<MYSQL_STMT>&);
 
     private:
       connection (const connection&);
@@ -142,11 +143,18 @@ namespace odb
       bool failed_;
 
       MYSQL mysql_;
-      MYSQL* handle_;
+      auto_handle<MYSQL> handle_;
 
       statement* active_;
+
+      // Keep statement_cache_ after handle_ so that it is destroyed before
+      // the connection is closed.
+      //
       std::auto_ptr<statement_cache_type> statement_cache_;
 
+      // List of "delayed" statement handles to be freed next time there
+      // is no active statement.
+      //
       typedef std::vector<MYSQL_STMT*> stmt_handles;
       stmt_handles stmt_handles_;
     };

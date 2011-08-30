@@ -29,6 +29,10 @@ namespace odb
     statement::
     ~statement ()
     {
+      // Let the connection handle the release of the statement (it
+      // may delay the actual freeing if it will mess up the currently
+      // active statement).
+      //
       conn_.free_stmt_handle (stmt_);
     }
 
