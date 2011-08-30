@@ -139,7 +139,11 @@ namespace odb
       clear_ ();
 
     private:
+      // Needed to break the circular connection-database dependency
+      // (odb::connection has the odb::database member).
+      //
       database_type& db_;
+
       bool failed_;
 
       MYSQL mysql_;
