@@ -68,8 +68,24 @@ namespace odb
           end_ (false),
           cached_ (false),
           rows_ (0),
-          cond_ (cond),
+          cond_ (&cond),
           cond_version_ (0),
+          data_ (data),
+          data_version_ (0)
+    {
+      conn_.clear ();
+
+      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
+        translate_error (conn_, stmt_);
+    }
+
+    select_statement::
+    select_statement (connection& conn, const string& s, binding& data)
+        : statement (conn),
+          end_ (false),
+          cached_ (false),
+          rows_ (0),
+          cond_ (0),
           data_ (data),
           data_version_ (0)
     {
@@ -93,12 +109,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
 
-      if (cond_version_ != cond_.version)
+      if (cond_ != 0 && cond_version_ != cond_->version)
       {
-        if (mysql_stmt_bind_param (stmt_, cond_.bind))
+        if (mysql_stmt_bind_param (stmt_, cond_->bind))
           translate_error (conn_, stmt_);
 
-        cond_version_ = cond_.version;
+        cond_version_ = cond_->version;
       }
 
       if (data_version_ != data_.version)

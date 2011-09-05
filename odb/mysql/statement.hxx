@@ -57,6 +57,11 @@ namespace odb
                         const std::string& statement,
                         binding& cond,
                         binding& data);
+
+      select_statement (connection& conn,
+                        const std::string& statement,
+                        binding& data);
+
       enum result
       {
         success,
@@ -114,7 +119,7 @@ namespace odb
       std::size_t rows_;
       std::size_t size_;
 
-      binding& cond_;
+      binding* cond_;
       std::size_t cond_version_;
 
       binding& data_;
