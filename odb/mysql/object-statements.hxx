@@ -16,11 +16,12 @@
 #include <odb/traits.hxx>
 #include <odb/cache-traits.hxx>
 
+#include <odb/details/shared-ptr.hxx>
+
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/statement.hxx>
-
-#include <odb/details/shared-ptr.hxx>
+#include <odb/mysql/statements-base.hxx>
 
 #include <odb/mysql/details/export.hxx>
 
@@ -28,22 +29,11 @@ namespace odb
 {
   namespace mysql
   {
-    class connection;
-
-    class LIBODB_MYSQL_EXPORT object_statements_base:
-      public details::shared_base
+    class LIBODB_MYSQL_EXPORT object_statements_base: public statements_base
     {
-    public:
-      typedef mysql::connection connection_type;
-
-      connection_type&
-      connection ()
-      {
-        return conn_;
-      }
-
       // Locking.
       //
+    public:
       void
       lock ()
       {
@@ -70,7 +60,7 @@ namespace odb
 
     protected:
       object_statements_base (connection_type& conn)
-        : conn_ (conn), locked_ (false)
+        : statements_base (conn), locked_ (false)
       {
       }
 
@@ -91,7 +81,6 @@ namespace odb
       };
 
     protected:
-      connection_type& conn_;
       bool locked_;
     };
 

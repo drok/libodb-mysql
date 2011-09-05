@@ -15,6 +15,7 @@ exceptions.cxx           \
 object-statements.cxx    \
 query.cxx                \
 statement.cxx            \
+statements-base.cxx      \
 transaction.cxx          \
 transaction-impl.cxx     \
 traits.cxx

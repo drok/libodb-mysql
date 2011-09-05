@@ -1,4 +1,4 @@
-// file      : odb/mysql/result.txx
+// file      : odb/mysql/object-result.txx
 // author    : Boris Kolpackov <boris@codesynthesis.com>
 // copyright : Copyright (c) 2009-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
@@ -6,22 +6,24 @@
 #include <odb/callback.hxx>
 #include <odb/exceptions.hxx>
 
+#include <odb/mysql/object-statements.hxx>
+
 namespace odb
 {
   namespace mysql
   {
     template <typename T>
-    result_impl<T>::
+    result_impl<T, class_object>::
     ~result_impl ()
     {
     }
 
     template <typename T>
-    result_impl<T>::
+    result_impl<T, class_object>::
     result_impl (const query&,
                  details::shared_ptr<select_statement> statement,
                  object_statements<object_type>& statements)
-        : odb::result_impl<T> (statements.connection ().database ()),
+        : base_type (statements.connection ().database ()),
           statement_ (statement),
           statements_ (statements),
           count_ (0)
@@ -29,7 +31,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T>::
+    void result_impl<T, class_object>::
     load (object_type& obj)
     {
       if (count_ > statement_->fetched ())
@@ -67,7 +69,8 @@ namespace odb
     }
 
     template <typename T>
-    typename result_impl<T>::id_type result_impl<T>::
+    typename result_impl<T, class_object>::id_type
+    result_impl<T, class_object>::
     load_id ()
     {
       if (count_ > statement_->fetched ())
@@ -77,7 +80,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T>::
+    void result_impl<T, class_object>::
     next ()
     {
       this->current (pointer_type ());
@@ -96,7 +99,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T>::
+    void result_impl<T, class_object>::
     fetch ()
     {
       // If the result is cached, the image can grow between calls
@@ -157,7 +160,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T>::
+    void result_impl<T, class_object>::
     cache ()
     {
       if (!statement_->cached ())
@@ -170,7 +173,7 @@ namespace odb
     }
 
     template <typename T>
-    std::size_t result_impl<T>::
+    std::size_t result_impl<T, class_object>::
     size ()
     {
       if (!statement_->cached ())

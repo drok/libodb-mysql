@@ -1773,7 +1773,7 @@ namespace odb
 namespace odb
 {
   template <typename T>
-  class query<T, mysql::query>: public object_traits<T>::query_type
+  class query<T, mysql::query>: public query_selector<T>::type
   {
   public:
     // We don't define any typedefs here since they may clash with
@@ -1786,40 +1786,40 @@ namespace odb
 
     explicit
     query (const std::string& q)
-        : object_traits<T>::query_type (q)
+        : query_selector<T>::type (q)
     {
     }
 
     template <typename T2>
     explicit
     query (mysql::val_bind<T2> v)
-        : object_traits<T>::query_type (mysql::query (v))
+        : query_selector<T>::type (mysql::query (v))
     {
     }
 
     template <typename T2>
     explicit
     query (mysql::ref_bind<T2> r)
-        : object_traits<T>::query_type (mysql::query (r))
+        : query_selector<T>::type (mysql::query (r))
     {
     }
 
     query (const mysql::query& q)
-        : object_traits<T>::query_type (q)
+        : query_selector<T>::type (q)
     {
     }
 
     template <mysql::database_type_id ID>
     query (const mysql::query_column<bool, ID>& qc)
-        : object_traits<T>::query_type (qc)
+        : query_selector<T>::type (qc)
     {
     }
 
     std::string
     clause () const
     {
-      return object_traits<T>::query_type::clause (
-        object_traits<T>::table_name);
+      return query_selector<T>::type::clause (
+        query_selector<T>::table_name ());
     }
   };
 }
