@@ -38,6 +38,9 @@ namespace odb
     public:
       view_statements (connection_type&);
 
+      virtual
+      ~view_statements ();
+
       // View image.
       //
       image_type&

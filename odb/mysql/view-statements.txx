@@ -12,6 +12,12 @@ namespace odb
   {
     template <typename T>
     view_statements<T>::
+    ~view_statements ()
+    {
+    }
+
+    template <typename T>
+    view_statements<T>::
     view_statements (connection_type& conn)
         : statements_base (conn),
           image_binding_ (image_bind_, view_traits::column_count)

@@ -141,9 +141,11 @@ namespace odb
         bool locked_;
       };
 
-      //
-      //
+    public:
       object_statements (connection_type&);
+
+      virtual
+      ~object_statements ();
 
       // Delayed loading.
       //
