@@ -38,11 +38,9 @@ namespace odb
         fetch ();
 
       odb::database& db (this->database ());
+
       view_traits::callback (db, view, callback_event::pre_load);
-
-      typename view_traits::image_type& i (statements_.image ());
-      view_traits::init (view, i);
-
+      view_traits::init (view, statements_.image ());
       view_traits::callback (db, view, callback_event::post_load);
     }
 

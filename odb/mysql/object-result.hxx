@@ -10,12 +10,12 @@
 
 #include <cstddef> // std::size_t
 
+#include <odb/details/shared-ptr.hxx>
+
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx> // query, object_statements
 #include <odb/mysql/result.hxx>
 #include <odb/mysql/statement.hxx>
-
-#include <odb/details/shared-ptr.hxx>
 
 namespace odb
 {
