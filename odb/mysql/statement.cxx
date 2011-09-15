@@ -117,14 +117,6 @@ namespace odb
         cond_version_ = cond_->version;
       }
 
-      if (data_version_ != data_.version)
-      {
-        if (mysql_stmt_bind_result (stmt_, data_.bind))
-          translate_error (conn_, stmt_);
-
-        data_version_ = data_.version;
-      }
-
       if (mysql_stmt_execute (stmt_))
         translate_error (conn_, stmt_);
 
@@ -156,10 +148,7 @@ namespace odb
     select_statement::result select_statement::
     fetch ()
     {
-      // If the result was cached the data image can grow between calls
-      // to fetch() as a result of other statements execution.
-      //
-      if (cached_ && data_version_ != data_.version)
+      if (data_version_ != data_.version)
       {
         if (mysql_stmt_bind_result (stmt_, data_.bind))
           translate_error (conn_, stmt_);
