@@ -40,7 +40,7 @@ namespace odb
       odb::database& db (this->database ());
 
       view_traits::callback (db, view, callback_event::pre_load);
-      view_traits::init (view, statements_.image ());
+      view_traits::init (view, statements_.image (), db);
       view_traits::callback (db, view, callback_event::post_load);
     }
 
