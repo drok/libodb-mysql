@@ -3,6 +3,8 @@
 // copyright : Copyright (c) 2005-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <cassert>
+
 #include <odb/exceptions.hxx> // object_not_persistent
 
 #include <odb/mysql/mysql.hxx>
@@ -150,6 +152,13 @@ namespace odb
     {
       if (data_version_ != data_.version)
       {
+        // Make sure that the number of columns in the result returned by
+        // the database matches the number that we expect. A common cause
+        // of this assertion is a native view with a number of data members
+        // not matching the number of columns in the SELECT-list.
+        //
+        assert (mysql_stmt_field_count (stmt_) == data_.count);
+
         if (mysql_stmt_bind_result (stmt_, data_.bind))
           translate_error (conn_, stmt_);
 
