@@ -91,14 +91,17 @@ namespace odb
         {
           column,
           param,
-          native
+          native,
+          boolean
         };
 
         clause_part (kind_type k): kind (k) {}
         clause_part (kind_type k, const std::string& p): kind (k), part (p) {}
+        clause_part (bool p): kind (boolean), bool_part (p) {}
 
         kind_type kind;
         std::string part;
+        bool bool_part;
       };
 
       query ()
@@ -112,8 +115,7 @@ namespace odb
       query (bool v)
         : binding_ (0, 0)
       {
-        clause_.push_back (
-          clause_part (clause_part::native, v ? "TRUE" : "FALSE"));
+        clause_.push_back (clause_part (v));
       }
 
       explicit
@@ -169,6 +171,26 @@ namespace odb
 
       binding&
       parameters_binding () const;
+
+    public:
+      bool
+      empty () const
+      {
+        return clause_.empty ();
+      }
+
+      static const query true_expr;
+
+      bool
+      const_true () const
+      {
+        return clause_.size () == 1 &&
+          clause_.front ().kind == clause_part::boolean &&
+          clause_.front ().bool_part;
+      }
+
+      void
+      optimize ();
 
     public:
       template <typename T>
@@ -341,36 +363,14 @@ namespace odb
       return r;
     }
 
-    inline query
-    operator&& (const query& x, const query& y)
-    {
-      query r ("(");
-      r += x;
-      r += ") AND (";
-      r += y;
-      r += ")";
-      return r;
-    }
+    query
+    operator&& (const query& x, const query& y);
 
-    inline query
-    operator|| (const query& x, const query& y)
-    {
-      query r ("(");
-      r += x;
-      r += ") OR (";
-      r += y;
-      r += ")";
-      return r;
-    }
+    query
+    operator|| (const query& x, const query& y);
 
-    inline query
-    operator! (const query& x)
-    {
-      query r ("!(");
-      r += x;
-      r += ")";
-      return r;
-    }
+    query
+    operator! (const query& x);
 
     // query_column
     //
