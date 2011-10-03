@@ -14,6 +14,7 @@ error.cxx                \
 exceptions.cxx           \
 object-statements.cxx    \
 query.cxx                \
+query-const-expr.cxx     \
 statement.cxx            \
 statements-base.cxx      \
 transaction.cxx          \
