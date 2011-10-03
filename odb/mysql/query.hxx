@@ -363,13 +363,13 @@ namespace odb
       return r;
     }
 
-    query
+    LIBODB_MYSQL_EXPORT query
     operator&& (const query& x, const query& y);
 
-    query
+    LIBODB_MYSQL_EXPORT query
     operator|| (const query& x, const query& y);
 
-    query
+    LIBODB_MYSQL_EXPORT query
     operator! (const query& x);
 
     // query_column
