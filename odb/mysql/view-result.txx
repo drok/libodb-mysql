@@ -13,16 +13,16 @@ namespace odb
   namespace mysql
   {
     template <typename T>
-    result_impl<T, class_view>::
-    ~result_impl ()
+    view_result_impl<T>::
+    ~view_result_impl ()
     {
     }
 
     template <typename T>
-    result_impl<T, class_view>::
-    result_impl (const query&,
-                 details::shared_ptr<select_statement> statement,
-                 view_statements<view_type>& statements)
+    view_result_impl<T>::
+    view_result_impl (const query&,
+                      details::shared_ptr<select_statement> statement,
+                      view_statements<view_type>& statements)
         : base_type (statements.connection ().database ()),
           statement_ (statement),
           statements_ (statements),
@@ -31,7 +31,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T, class_view>::
+    void view_result_impl<T>::
     load (view_type& view)
     {
       if (count_ > statement_->fetched ())
@@ -45,7 +45,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T, class_view>::
+    void view_result_impl<T>::
     next ()
     {
       this->current (pointer_type ());
@@ -64,7 +64,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T, class_view>::
+    void view_result_impl<T>::
     fetch ()
     {
       // If the result is cached, the image can grow between calls
@@ -125,7 +125,7 @@ namespace odb
     }
 
     template <typename T>
-    void result_impl<T, class_view>::
+    void view_result_impl<T>::
     cache ()
     {
       if (!statement_->cached ())
@@ -138,7 +138,7 @@ namespace odb
     }
 
     template <typename T>
-    std::size_t result_impl<T, class_view>::
+    std::size_t view_result_impl<T>::
     size ()
     {
       if (!statement_->cached ())

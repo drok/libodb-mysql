@@ -14,15 +14,6 @@
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 
-namespace odb
-{
-  namespace mysql
-  {
-    template <typename T, class_kind kind>
-    class result_impl;
-  }
-}
-
 #include <odb/post.hxx>
 
 #endif // ODB_MYSQL_RESULT_HXX
