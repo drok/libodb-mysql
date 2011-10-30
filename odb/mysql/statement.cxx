@@ -64,16 +64,16 @@ namespace odb
     select_statement::
     select_statement (connection& conn,
                       const string& s,
-                      binding& cond,
-                      binding& data)
+                      binding& param,
+                      binding& result)
         : statement (conn),
           end_ (false),
           cached_ (false),
           rows_ (0),
-          cond_ (&cond),
-          cond_version_ (0),
-          data_ (data),
-          data_version_ (0)
+          param_ (&param),
+          param_version_ (0),
+          result_ (result),
+          result_version_ (0)
     {
       conn_.clear ();
 
@@ -82,14 +82,14 @@ namespace odb
     }
 
     select_statement::
-    select_statement (connection& conn, const string& s, binding& data)
+    select_statement (connection& conn, const string& s, binding& result)
         : statement (conn),
           end_ (false),
           cached_ (false),
           rows_ (0),
-          cond_ (0),
-          data_ (data),
-          data_version_ (0)
+          param_ (0),
+          result_ (result),
+          result_version_ (0)
     {
       conn_.clear ();
 
@@ -111,12 +111,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
 
-      if (cond_ != 0 && cond_version_ != cond_->version)
+      if (param_ != 0 && param_version_ != param_->version)
       {
-        if (mysql_stmt_bind_param (stmt_, cond_->bind))
+        if (mysql_stmt_bind_param (stmt_, param_->bind))
           translate_error (conn_, stmt_);
 
-        cond_version_ = cond_->version;
+        param_version_ = param_->version;
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -150,19 +150,19 @@ namespace odb
     select_statement::result select_statement::
     fetch ()
     {
-      if (data_version_ != data_.version)
+      if (result_version_ != result_.version)
       {
         // Make sure that the number of columns in the result returned by
         // the database matches the number that we expect. A common cause
         // of this assertion is a native view with a number of data members
         // not matching the number of columns in the SELECT-list.
         //
-        assert (mysql_stmt_field_count (stmt_) == data_.count);
+        assert (mysql_stmt_field_count (stmt_) == result_.count);
 
-        if (mysql_stmt_bind_result (stmt_, data_.bind))
+        if (mysql_stmt_bind_result (stmt_, result_.bind))
           translate_error (conn_, stmt_);
 
-        data_version_ = data_.version;
+        result_version_ = result_.version;
       }
 
       int r (mysql_stmt_fetch (stmt_));
@@ -197,14 +197,14 @@ namespace odb
     {
       // Re-fetch columns that were truncated.
       //
-      for (size_t i (0); i < data_.count; ++i)
+      for (size_t i (0); i < result_.count; ++i)
       {
-        if (*data_.bind[i].error)
+        if (*result_.bind[i].error)
         {
-          *data_.bind[i].error = 0;
+          *result_.bind[i].error = 0;
 
           if (mysql_stmt_fetch_column (
-                stmt_, data_.bind + i, static_cast<unsigned int> (i), 0))
+                stmt_, result_.bind + i, static_cast<unsigned int> (i), 0))
             translate_error (conn_, stmt_);
         }
       }
@@ -244,8 +244,8 @@ namespace odb
     }
 
     insert_statement::
-    insert_statement (connection& conn, const string& s, binding& data)
-        : statement (conn), data_ (data), data_version_ (0)
+    insert_statement (connection& conn, const string& s, binding& param)
+        : statement (conn), param_ (param), param_version_ (0)
     {
       conn_.clear ();
 
@@ -261,12 +261,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
 
-      if (data_version_ != data_.version)
+      if (param_version_ != param_.version)
       {
-        if (mysql_stmt_bind_param (stmt_, data_.bind))
+        if (mysql_stmt_bind_param (stmt_, param_.bind))
           translate_error (conn_, stmt_);
 
-        data_version_ = data_.version;
+        param_version_ = param_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -295,15 +295,8 @@ namespace odb
     }
 
     update_statement::
-    update_statement (connection& conn,
-                      const string& s,
-                      binding& cond,
-                      binding& data)
-        : statement (conn),
-          cond_ (cond),
-          cond_version_ (0),
-          data_ (data),
-          data_version_ (0)
+    update_statement (connection& conn, const string& s, binding& param)
+        : statement (conn), param_ (param), param_version_ (0)
     {
       conn_.clear ();
 
@@ -319,15 +312,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
 
-      if (data_version_ != data_.version || cond_version_ != cond_.version)
+      if (param_version_ != param_.version)
       {
-        // Here we assume that cond_.bind is a suffix of data_.bind.
-        //
-        if (mysql_stmt_bind_param (stmt_, data_.bind))
+        if (mysql_stmt_bind_param (stmt_, param_.bind))
           translate_error (conn_, stmt_);
 
-        cond_version_ = cond_.version;
-        data_version_ = data_.version;
+        param_version_ = param_.version;
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -353,8 +343,8 @@ namespace odb
     }
 
     delete_statement::
-    delete_statement (connection& conn, const string& s, binding& cond)
-        : statement (conn), cond_ (cond), cond_version_ (0)
+    delete_statement (connection& conn, const string& s, binding& param)
+        : statement (conn), param_ (param), param_version_ (0)
     {
       conn_.clear ();
 
@@ -370,12 +360,12 @@ namespace odb
       if (mysql_stmt_reset (stmt_))
         translate_error (conn_, stmt_);
 
-      if (cond_version_ != cond_.version)
+      if (param_version_ != param_.version)
       {
-        if (mysql_stmt_bind_param (stmt_, cond_.bind))
+        if (mysql_stmt_bind_param (stmt_, param_.bind))
           translate_error (conn_, stmt_);
 
-        cond_version_ = cond_.version;
+        param_version_ = param_.version;
       }
 
       if (mysql_stmt_execute (stmt_))

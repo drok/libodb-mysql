@@ -55,12 +55,12 @@ namespace odb
 
       select_statement (connection& conn,
                         const std::string& statement,
-                        binding& cond,
-                        binding& data);
+                        binding& param,
+                        binding& result);
 
       select_statement (connection& conn,
                         const std::string& statement,
-                        binding& data);
+                        binding& result);
 
       enum result
       {
@@ -119,11 +119,11 @@ namespace odb
       std::size_t rows_;
       std::size_t size_;
 
-      binding* cond_;
-      std::size_t cond_version_;
+      binding* param_;
+      std::size_t param_version_;
 
-      binding& data_;
-      std::size_t data_version_;
+      binding& result_;
+      std::size_t result_version_;
     };
 
     class LIBODB_MYSQL_EXPORT insert_statement: public statement
@@ -134,7 +134,7 @@ namespace odb
 
       insert_statement (connection& conn,
                         const std::string& statement,
-                        binding& data);
+                        binding& param);
 
       // Return true if successful and false if the row is a duplicate.
       // All other errors are reported by throwing exceptions.
@@ -150,8 +150,8 @@ namespace odb
       insert_statement& operator= (const insert_statement&);
 
     private:
-      binding& data_;
-      std::size_t data_version_;
+      binding& param_;
+      std::size_t param_version_;
     };
 
     class LIBODB_MYSQL_EXPORT update_statement: public statement
@@ -160,12 +160,11 @@ namespace odb
       virtual
       ~update_statement ();
 
-      // Asssumes that cond.bind is a suffix of data.bind.
+      // Asssumes that param.bind is a suffix of data.bind.
       //
       update_statement (connection& conn,
                         const std::string& statement,
-                        binding& cond,
-                        binding& data);
+                        binding& param);
       void
       execute ();
 
@@ -174,11 +173,8 @@ namespace odb
       update_statement& operator= (const update_statement&);
 
     private:
-      binding& cond_;
-      std::size_t cond_version_;
-
-      binding& data_;
-      std::size_t data_version_;
+      binding& param_;
+      std::size_t param_version_;
     };
 
     class LIBODB_MYSQL_EXPORT delete_statement: public statement
@@ -189,7 +185,7 @@ namespace odb
 
       delete_statement (connection& conn,
                         const std::string& statement,
-                        binding& cond);
+                        binding& param);
 
       unsigned long long
       execute ();
@@ -199,8 +195,8 @@ namespace odb
       delete_statement& operator= (const delete_statement&);
 
     private:
-      binding& cond_;
-      std::size_t cond_version_;
+      binding& param_;
+      std::size_t param_version_;
     };
   }
 }
