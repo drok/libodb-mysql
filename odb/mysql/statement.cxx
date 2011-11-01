@@ -5,8 +5,6 @@
 
 #include <cassert>
 
-#include <odb/exceptions.hxx> // object_not_persistent
-
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/statement.hxx>
 #include <odb/mysql/connection.hxx>
@@ -304,7 +302,7 @@ namespace odb
         translate_error (conn_, stmt_);
     }
 
-    void update_statement::
+    unsigned long long update_statement::
     execute ()
     {
       conn_.clear ();
@@ -325,13 +323,10 @@ namespace odb
 
       my_ulonglong r (mysql_stmt_affected_rows (stmt_));
 
-      if (r > 0)
-        return;
-
-      if (r == 0)
-        throw object_not_persistent ();
-      else
+      if (r == static_cast<my_ulonglong> (-1))
         translate_error (conn_, stmt_);
+
+      return static_cast<unsigned long long> (r);
     }
 
     // delete_statement
