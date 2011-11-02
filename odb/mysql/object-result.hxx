@@ -60,7 +60,7 @@ namespace odb
 
     private:
       void
-      fetch ();
+      fetch (bool next = true);
 
     private:
       details::shared_ptr<select_statement> statement_;

@@ -146,7 +146,7 @@ namespace odb
     }
 
     select_statement::result select_statement::
-    fetch ()
+    fetch (bool next)
     {
       if (result_version_ != result_.version)
       {
@@ -161,6 +161,12 @@ namespace odb
           translate_error (conn_, stmt_);
 
         result_version_ = result_.version;
+      }
+
+      if (!next && rows_ != 0)
+      {
+        assert (cached_);
+        mysql_stmt_data_seek (stmt_, static_cast<my_ulonglong> (rows_ - 1));
       }
 
       int r (mysql_stmt_fetch (stmt_));

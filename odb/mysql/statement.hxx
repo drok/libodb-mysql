@@ -97,8 +97,12 @@ namespace odb
         return rows_;
       }
 
+      // Fetch next or current row depending on the next argument.
+      // Note that fetching of the current row is only supported
+      // if the result is cached.
+      //
       result
-      fetch ();
+      fetch (bool next = true);
 
       void
       refetch ();

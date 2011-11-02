@@ -36,10 +36,17 @@ namespace odb
 
     template <typename T>
     void object_result_impl<T>::
-    load (object_type& obj, bool)
+    load (object_type& obj, bool f)
     {
       if (count_ > statement_->fetched ())
         fetch ();
+      else if (f && statement_->cached ())
+      {
+        // We have to re-load the image in case it has been overwritten
+        // between the last time we fetched and this call to load().
+        //
+        fetch (false);
+      }
 
       // This is a top-level call so the statements cannot be locked.
       //
@@ -79,6 +86,13 @@ namespace odb
     {
       if (count_ > statement_->fetched ())
         fetch ();
+      else if (statement_->cached ())
+      {
+        // We have to re-load the image in case it has been overwritten
+        // between the last time we fetched and this call to load_id().
+        //
+        fetch (false);
+      }
 
       return object_traits::id (statements_.image ());
     }
@@ -104,7 +118,7 @@ namespace odb
 
     template <typename T>
     void object_result_impl<T>::
-    fetch ()
+    fetch (bool next)
     {
       // If the result is cached, the image can grow between calls
       // to fetch() as a result of other statements execution.
@@ -122,9 +136,9 @@ namespace odb
         }
       }
 
-      while (!this->end_ && count_ > statement_->fetched ())
+      while (!this->end_ && (!next || count_ > statement_->fetched ()))
       {
-        select_statement::result r (statement_->fetch ());
+        select_statement::result r (statement_->fetch (next));
 
         switch (r)
         {
@@ -132,7 +146,7 @@ namespace odb
           {
             // Don't re-fetch data we are skipping.
             //
-            if (count_ != statement_->fetched ())
+            if (next && count_ != statement_->fetched ())
               continue;
 
             typename object_traits::image_type& im (statements_.image ());
@@ -161,6 +175,11 @@ namespace odb
             break;
           }
         }
+
+        // If we are refetching the current row, then we are done.
+        //
+        if (!next)
+          break;
       }
     }
 
