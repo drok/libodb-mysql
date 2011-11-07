@@ -3,6 +3,8 @@
 // copyright : Copyright (c) 2009-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <odb/tracer.hxx>
+
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
@@ -41,6 +43,12 @@ namespace odb
         odb::transaction_impl::connection_ = connection_.get ();
       }
 
+      {
+        odb::tracer* t;
+        if ((t = connection_->tracer ()) || (t = database_.tracer ()))
+          t->execute (*connection_, "BEGIN");
+      }
+
       if (mysql_real_query (connection_->handle (), "begin", 5) != 0)
         translate_error (*connection_);
     }
@@ -49,6 +57,12 @@ namespace odb
     commit ()
     {
       connection_->clear ();
+
+      {
+        odb::tracer* t;
+        if ((t = connection_->tracer ()) || (t = database_.tracer ()))
+          t->execute (*connection_, "COMMIT");
+      }
 
       if (mysql_real_query (connection_->handle (), "commit", 6) != 0)
         translate_error (*connection_);
@@ -62,6 +76,12 @@ namespace odb
     rollback ()
     {
       connection_->clear ();
+
+      {
+        odb::tracer* t;
+        if ((t = connection_->tracer ()) || (t = database_.tracer ()))
+          t->execute (*connection_, "ROLLBACK");
+      }
 
       if (mysql_real_query (connection_->handle (), "rollback", 8) != 0)
         translate_error (*connection_);

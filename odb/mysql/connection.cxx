@@ -97,6 +97,17 @@ namespace odb
     {
       clear ();
 
+      {
+        odb::tracer* t;
+        if ((t = transaction_tracer ()) ||
+            (t = tracer ()) ||
+            (t = database ().tracer ()))
+        {
+          string str (s, n);
+          t->execute (*this, str.c_str ());
+        }
+      }
+
       if (mysql_real_query (handle_, s, static_cast<unsigned long> (n)))
         translate_error (*this);
 

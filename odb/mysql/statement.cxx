@@ -5,9 +5,12 @@
 
 #include <cassert>
 
+#include <odb/tracer.hxx>
+
 #include <odb/mysql/mysql.hxx>
-#include <odb/mysql/statement.hxx>
+#include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
+#include <odb/mysql/statement.hxx>
 #include <odb/mysql/error.hxx>
 
 using namespace std;
@@ -20,20 +23,45 @@ namespace odb
     //
 
     statement::
-    statement (connection& conn)
-        : conn_ (conn), stmt_ (conn_.alloc_stmt_handle ())
+    statement (connection& conn, const string& text)
+        : conn_ (conn), text_ (text), stmt_ (conn_.alloc_stmt_handle ())
     {
+      conn_.clear ();
 
+      if (mysql_stmt_prepare (stmt_, text_.c_str (), text_.size ()) != 0)
+        translate_error (conn_, stmt_);
+
+      {
+        odb::tracer* t;
+        if ((t = conn_.transaction_tracer ()) ||
+            (t = conn_.tracer ()) ||
+            (t = conn_.database ().tracer ()))
+          t->prepare (conn_, *this);
+      }
     }
 
     statement::
     ~statement ()
     {
+      {
+        odb::tracer* t;
+        if ((t = conn_.transaction_tracer ()) ||
+            (t = conn_.tracer ()) ||
+            (t = conn_.database ().tracer ()))
+          t->deallocate (conn_, *this);
+      }
+
       // Let the connection handle the release of the statement (it
       // may delay the actual freeing if it will mess up the currently
       // active statement).
       //
       conn_.free_stmt_handle (stmt_);
+    }
+
+    const char* statement::
+    text () const
+    {
+      return text_.c_str ();
     }
 
     void statement::
@@ -64,7 +92,7 @@ namespace odb
                       const string& s,
                       binding& param,
                       binding& result)
-        : statement (conn),
+        : statement (conn, s),
           end_ (false),
           cached_ (false),
           rows_ (0),
@@ -73,15 +101,11 @@ namespace odb
           result_ (result),
           result_version_ (0)
     {
-      conn_.clear ();
-
-      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        translate_error (conn_, stmt_);
     }
 
     select_statement::
     select_statement (connection& conn, const string& s, binding& result)
-        : statement (conn),
+        : statement (conn, s),
           end_ (false),
           cached_ (false),
           rows_ (0),
@@ -89,10 +113,6 @@ namespace odb
           result_ (result),
           result_version_ (0)
     {
-      conn_.clear ();
-
-      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        translate_error (conn_, stmt_);
     }
 
     void select_statement::
@@ -115,6 +135,14 @@ namespace odb
           translate_error (conn_, stmt_);
 
         param_version_ = param_->version;
+      }
+
+      {
+        odb::tracer* t;
+        if ((t = conn_.transaction_tracer ()) ||
+            (t = conn_.tracer ()) ||
+            (t = conn_.database ().tracer ()))
+          t->execute (conn_, *this);
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -249,12 +277,8 @@ namespace odb
 
     insert_statement::
     insert_statement (connection& conn, const string& s, binding& param)
-        : statement (conn), param_ (param), param_version_ (0)
+        : statement (conn, s), param_ (param), param_version_ (0)
     {
-      conn_.clear ();
-
-      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        translate_error (conn_, stmt_);
     }
 
     bool insert_statement::
@@ -271,6 +295,14 @@ namespace odb
           translate_error (conn_, stmt_);
 
         param_version_ = param_.version;
+      }
+
+      {
+        odb::tracer* t;
+        if ((t = conn_.transaction_tracer ()) ||
+            (t = conn_.tracer ()) ||
+            (t = conn_.database ().tracer ()))
+          t->execute (conn_, *this);
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -300,12 +332,8 @@ namespace odb
 
     update_statement::
     update_statement (connection& conn, const string& s, binding& param)
-        : statement (conn), param_ (param), param_version_ (0)
+        : statement (conn, s), param_ (param), param_version_ (0)
     {
-      conn_.clear ();
-
-      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        translate_error (conn_, stmt_);
     }
 
     unsigned long long update_statement::
@@ -322,6 +350,14 @@ namespace odb
           translate_error (conn_, stmt_);
 
         param_version_ = param_.version;
+      }
+
+      {
+        odb::tracer* t;
+        if ((t = conn_.transaction_tracer ()) ||
+            (t = conn_.tracer ()) ||
+            (t = conn_.database ().tracer ()))
+          t->execute (conn_, *this);
       }
 
       if (mysql_stmt_execute (stmt_))
@@ -345,12 +381,8 @@ namespace odb
 
     delete_statement::
     delete_statement (connection& conn, const string& s, binding& param)
-        : statement (conn), param_ (param), param_version_ (0)
+        : statement (conn, s), param_ (param), param_version_ (0)
     {
-      conn_.clear ();
-
-      if (mysql_stmt_prepare (stmt_, s.c_str (), s.size ()) != 0)
-        translate_error (conn_, stmt_);
     }
 
     unsigned long long delete_statement::
@@ -367,6 +399,14 @@ namespace odb
           translate_error (conn_, stmt_);
 
         param_version_ = param_.version;
+      }
+
+      {
+        odb::tracer* t;
+        if ((t = conn_.transaction_tracer ()) ||
+            (t = conn_.tracer ()) ||
+            (t = conn_.database ().tracer ()))
+          t->execute (conn_, *this);
       }
 
       if (mysql_stmt_execute (stmt_))

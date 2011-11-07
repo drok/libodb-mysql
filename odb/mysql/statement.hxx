@@ -12,7 +12,7 @@
 #include <cstddef>  // std::size_t
 
 #include <odb/forward.hxx>
-#include <odb/details/shared-ptr.hxx>
+#include <odb/statement.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
@@ -27,11 +27,20 @@ namespace odb
   {
     class connection;
 
-    class LIBODB_MYSQL_EXPORT statement: public details::shared_base
+    class LIBODB_MYSQL_EXPORT statement: public odb::statement
     {
     public:
       virtual
       ~statement () = 0;
+
+      MYSQL_STMT*
+      handle () const
+      {
+        return stmt_;
+      }
+
+      virtual const char*
+      text () const;
 
       // Cancel the statement execution (e.g., result fetching) so
       // that another statement can be executed on the connection.
@@ -40,10 +49,11 @@ namespace odb
       cancel ();
 
     protected:
-      statement (connection&);
+      statement (connection&, const std::string& text);
 
     protected:
       connection& conn_;
+      const std::string text_;
       auto_handle<MYSQL_STMT> stmt_;
     };
 

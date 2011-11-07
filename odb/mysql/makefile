@@ -17,6 +17,7 @@ query.cxx                \
 query-const-expr.cxx     \
 statement.cxx            \
 statements-base.cxx      \
+tracer.cxx               \
 transaction.cxx          \
 transaction-impl.cxx     \
 traits.cxx

@@ -17,6 +17,7 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
+#include <odb/mysql/tracer.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
 
@@ -175,6 +176,25 @@ namespace odb
     public:
       connection_ptr
       connection ();
+
+      // SQL statement tracing.
+      //
+    public:
+      typedef mysql::tracer tracer_type;
+
+      void
+      tracer (tracer_type& t)
+      {
+        odb::database::tracer (t);
+      }
+
+      void
+      tracer (tracer_type* t)
+      {
+        odb::database::tracer (t);
+      }
+
+      using odb::database::tracer;
 
     public:
       virtual

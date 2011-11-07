@@ -17,6 +17,7 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
+#include <odb/mysql/tracer.hxx>
 #include <odb/mysql/transaction-impl.hxx>
 #include <odb/mysql/auto-handle.hxx>
 
@@ -61,6 +62,25 @@ namespace odb
 
       virtual unsigned long long
       execute (const char* statement, std::size_t length);
+
+      // SQL statement tracing.
+      //
+    public:
+      typedef mysql::tracer tracer_type;
+
+      void
+      tracer (tracer_type& t)
+      {
+        odb::connection::tracer (t);
+      }
+
+      void
+      tracer (tracer_type* t)
+      {
+        odb::connection::tracer (t);
+      }
+
+      using odb::connection::tracer;
 
     public:
       bool
