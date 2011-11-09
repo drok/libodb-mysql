@@ -167,7 +167,7 @@ namespace odb
         if (insert_one_ == 0)
           insert_one_.reset (
             new (details::shared) insert_statement_type (
-              conn_, insert_one_text_, data_image_binding_));
+              conn_, insert_one_text_, data_image_binding_, false));
 
         return *insert_one_;
       }
@@ -181,7 +181,8 @@ namespace odb
               conn_,
               select_all_text_,
               cond_image_binding_,
-              data_image_binding_));
+              data_image_binding_,
+              false));
 
         return *select_all_;
       }
@@ -192,7 +193,7 @@ namespace odb
         if (delete_all_ == 0)
           delete_all_.reset (
             new (details::shared) delete_statement_type (
-              conn_, delete_all_text_, cond_image_binding_));
+              conn_, delete_all_text_, cond_image_binding_, false));
 
         return *delete_all_;
       }

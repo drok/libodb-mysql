@@ -302,7 +302,8 @@ namespace odb
             new (details::shared) insert_statement_type (
               conn_,
               object_traits::persist_statement,
-              insert_image_binding_));
+              insert_image_binding_,
+              false));
 
         return *persist_;
       }
@@ -316,7 +317,8 @@ namespace odb
               conn_,
               object_traits::find_statement,
               id_image_binding_,
-              select_image_binding_));
+              select_image_binding_,
+              false));
 
         return *find_;
       }
@@ -329,7 +331,8 @@ namespace odb
             new (details::shared) update_statement_type (
               conn_,
               object_traits::update_statement,
-              update_image_binding_));
+              update_image_binding_,
+              false));
 
         return *update_;
       }
@@ -342,7 +345,8 @@ namespace odb
             new (details::shared) delete_statement_type (
               conn_,
               object_traits::erase_statement,
-              id_image_binding_));
+              id_image_binding_,
+              false));
 
         return *erase_;
       }
@@ -356,7 +360,8 @@ namespace odb
             new (details::shared) delete_statement_type (
               conn_,
               object_traits::optimistic_erase_statement,
-              od_.id_image_binding_));
+              od_.id_image_binding_,
+              false));
         }
 
         return *od_.erase_;
@@ -554,7 +559,8 @@ namespace odb
             new (details::shared) insert_statement_type (
               conn_,
               object_traits::persist_statement,
-              insert_image_binding_));
+              insert_image_binding_,
+              false));
 
         return *persist_;
       }

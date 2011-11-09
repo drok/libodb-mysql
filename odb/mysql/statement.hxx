@@ -50,10 +50,16 @@ namespace odb
 
     protected:
       statement (connection&, const std::string& text);
+      statement (connection&, const char* text, bool copy_text);
+
+    private:
+      void
+      init (std::size_t text_size);
 
     protected:
       connection& conn_;
-      const std::string text_;
+      std::string text_copy_;
+      const char* text_;
       auto_handle<MYSQL_STMT> stmt_;
     };
 
@@ -64,13 +70,24 @@ namespace odb
       ~select_statement ();
 
       select_statement (connection& conn,
-                        const std::string& statement,
+                        const std::string& text,
                         binding& param,
                         binding& result);
 
       select_statement (connection& conn,
-                        const std::string& statement,
+                        const char* text,
+                        binding& param,
+                        binding& result,
+                        bool copy_text = true);
+
+      select_statement (connection& conn,
+                        const std::string& text,
                         binding& result);
+
+      select_statement (connection& conn,
+                        const char* text,
+                        binding& result,
+                        bool copy_text = true);
 
       enum result
       {
@@ -147,8 +164,13 @@ namespace odb
       ~insert_statement ();
 
       insert_statement (connection& conn,
-                        const std::string& statement,
+                        const std::string& text,
                         binding& param);
+
+      insert_statement (connection& conn,
+                        const char* text,
+                        binding& param,
+                        bool copy_text = true);
 
       // Return true if successful and false if the row is a duplicate.
       // All other errors are reported by throwing exceptions.
@@ -174,11 +196,14 @@ namespace odb
       virtual
       ~update_statement ();
 
-      // Asssumes that param.bind is a suffix of data.bind.
-      //
       update_statement (connection& conn,
-                        const std::string& statement,
+                        const std::string& text,
                         binding& param);
+
+      update_statement (connection& conn,
+                        const char* text,
+                        binding& param,
+                        bool copy_text = true);
 
       unsigned long long
       execute ();
@@ -199,8 +224,13 @@ namespace odb
       ~delete_statement ();
 
       delete_statement (connection& conn,
-                        const std::string& statement,
+                        const std::string& text,
                         binding& param);
+
+      delete_statement (connection& conn,
+                        const char* text,
+                        binding& param,
+                        bool copy_text = true);
 
       unsigned long long
       execute ();

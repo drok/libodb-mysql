@@ -3,6 +3,7 @@
 // copyright : Copyright (c) 2005-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <cstring> // std::strlen
 #include <cassert>
 
 #include <odb/tracer.hxx>
@@ -24,11 +25,40 @@ namespace odb
 
     statement::
     statement (connection& conn, const string& text)
-        : conn_ (conn), text_ (text), stmt_ (conn_.alloc_stmt_handle ())
+        : conn_ (conn), text_copy_ (text), text_ (text_copy_.c_str ())
     {
+      init (text_copy_.size ());
+    }
+
+    statement::
+    statement (connection& conn, const char* text, bool copy)
+        : conn_ (conn)
+    {
+      size_t n;
+
+      if (copy)
+      {
+        text_copy_ = text;
+        text_ = text_copy_.c_str ();
+        n = text_copy_.size ();
+      }
+      else
+      {
+        text_ = text;
+        n = strlen (text_);
+      }
+
+      init (n);
+    }
+
+    void statement::
+    init (size_t text_size)
+    {
+      stmt_.reset (conn_.alloc_stmt_handle ());
+
       conn_.clear ();
 
-      if (mysql_stmt_prepare (stmt_, text_.c_str (), text_.size ()) != 0)
+      if (mysql_stmt_prepare (stmt_, text_, text_size) != 0)
         translate_error (conn_, stmt_);
 
       {
@@ -61,7 +91,7 @@ namespace odb
     const char* statement::
     text () const
     {
-      return text_.c_str ();
+      return text_;
     }
 
     void statement::
@@ -89,10 +119,10 @@ namespace odb
 
     select_statement::
     select_statement (connection& conn,
-                      const string& s,
+                      const string& t,
                       binding& param,
                       binding& result)
-        : statement (conn, s),
+        : statement (conn, t),
           end_ (false),
           cached_ (false),
           rows_ (0),
@@ -104,8 +134,40 @@ namespace odb
     }
 
     select_statement::
-    select_statement (connection& conn, const string& s, binding& result)
-        : statement (conn, s),
+    select_statement (connection& conn,
+                      const char* t,
+                      binding& param,
+                      binding& result,
+                      bool ct)
+        : statement (conn, t, ct),
+          end_ (false),
+          cached_ (false),
+          rows_ (0),
+          param_ (&param),
+          param_version_ (0),
+          result_ (result),
+          result_version_ (0)
+    {
+    }
+
+    select_statement::
+    select_statement (connection& conn, const string& t, binding& result)
+        : statement (conn, t),
+          end_ (false),
+          cached_ (false),
+          rows_ (0),
+          param_ (0),
+          result_ (result),
+          result_version_ (0)
+    {
+    }
+
+    select_statement::
+    select_statement (connection& conn,
+                      const char* t,
+                      binding& result,
+                      bool ct)
+        : statement (conn, t, ct),
           end_ (false),
           cached_ (false),
           rows_ (0),
@@ -276,8 +338,17 @@ namespace odb
     }
 
     insert_statement::
-    insert_statement (connection& conn, const string& s, binding& param)
-        : statement (conn, s), param_ (param), param_version_ (0)
+    insert_statement (connection& conn, const string& t, binding& param)
+        : statement (conn, t), param_ (param), param_version_ (0)
+    {
+    }
+
+    insert_statement::
+    insert_statement (connection& conn,
+                      const char* t,
+                      binding& param,
+                      bool ct)
+        : statement (conn, t, ct), param_ (param), param_version_ (0)
     {
     }
 
@@ -331,8 +402,17 @@ namespace odb
     }
 
     update_statement::
-    update_statement (connection& conn, const string& s, binding& param)
-        : statement (conn, s), param_ (param), param_version_ (0)
+    update_statement (connection& conn, const string& t, binding& param)
+        : statement (conn, t), param_ (param), param_version_ (0)
+    {
+    }
+
+    update_statement::
+    update_statement (connection& conn,
+                      const char* t,
+                      binding& param,
+                      bool ct)
+        : statement (conn, t, ct), param_ (param), param_version_ (0)
     {
     }
 
@@ -380,8 +460,17 @@ namespace odb
     }
 
     delete_statement::
-    delete_statement (connection& conn, const string& s, binding& param)
-        : statement (conn, s), param_ (param), param_version_ (0)
+    delete_statement (connection& conn, const string& t, binding& param)
+        : statement (conn, t), param_ (param), param_version_ (0)
+    {
+    }
+
+    delete_statement::
+    delete_statement (connection& conn,
+                      const char* t,
+                      binding& param,
+                      bool ct)
+        : statement (conn, t, ct), param_ (param), param_version_ (0)
     {
     }
 
