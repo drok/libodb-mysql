@@ -1,10 +1,10 @@
-// file      : odb/mysql/errors.hxx
+// file      : odb/mysql/error.hxx
 // author    : Boris Kolpackov <boris@codesynthesis.com>
 // copyright : Copyright (c) 2005-2011 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#ifndef ODB_MYSQL_ERRORS_HXX
-#define ODB_MYSQL_ERRORS_HXX
+#ifndef ODB_MYSQL_ERROR_HXX
+#define ODB_MYSQL_ERROR_HXX
 
 #include <odb/pre.hxx>
 
@@ -33,4 +33,4 @@ namespace odb
 
 #include <odb/post.hxx>
 
-#endif // ODB_MYSQL_ERRORS_HXX
+#endif // ODB_MYSQL_ERROR_HXX
