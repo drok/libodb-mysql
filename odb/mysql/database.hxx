@@ -21,8 +21,6 @@
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
 
-#include <odb/details/shared-ptr.hxx>
-
 #include <odb/mysql/details/export.hxx>
 
 namespace odb

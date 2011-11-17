@@ -13,8 +13,6 @@
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 
-#include <odb/details/shared-ptr.hxx>
-
 #include <odb/mysql/details/export.hxx>
 
 namespace odb
