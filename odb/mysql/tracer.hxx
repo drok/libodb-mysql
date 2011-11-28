@@ -10,6 +10,7 @@
 
 #include <odb/tracer.hxx>
 
+#include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
 #include <odb/mysql/details/export.hxx>
 
@@ -17,7 +18,7 @@ namespace odb
 {
   namespace mysql
   {
-    class LIBODB_EXPORT tracer: private odb::tracer
+    class LIBODB_MYSQL_EXPORT tracer: private odb::tracer
     {
     public:
       virtual
