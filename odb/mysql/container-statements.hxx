@@ -157,6 +157,18 @@ namespace odb
         return data_image_truncated_;
       }
 
+      binding&
+      select_image_binding ()
+      {
+        return select_image_binding_;
+      }
+
+      my_bool*
+      select_image_truncated ()
+      {
+        return select_image_truncated_;
+      }
+
       //
       // Statements.
       //
@@ -181,7 +193,7 @@ namespace odb
               conn_,
               select_all_text_,
               cond_image_binding_,
-              data_image_binding_,
+              select_image_binding_,
               false));
 
         return *select_all_;
@@ -212,14 +224,18 @@ namespace odb
       std::size_t cond_image_version_;
       std::size_t cond_id_binding_version_;
       binding cond_image_binding_;
-      MYSQL_BIND* cond_image_bind_;
 
       data_image_type data_image_;
       std::size_t data_image_version_;
       std::size_t data_id_binding_version_;
+
       binding data_image_binding_;
-      MYSQL_BIND* data_image_bind_;
       my_bool* data_image_truncated_;
+
+      // Skips the id from data_image_binding.
+      //
+      binding select_image_binding_;
+      my_bool* select_image_truncated_;
 
       const char* insert_one_text_;
       const char* select_all_text_;
@@ -247,8 +263,8 @@ namespace odb
       container_statements_impl& operator= (const container_statements_impl&);
 
     private:
-      MYSQL_BIND cond_image_bind_array_[traits::cond_column_count];
-      MYSQL_BIND data_image_bind_array_[traits::data_column_count];
+      MYSQL_BIND cond_image_bind_[traits::cond_column_count];
+      MYSQL_BIND data_image_bind_[traits::data_column_count];
       my_bool data_image_truncated_array_[traits::data_column_count];
     };
   }
