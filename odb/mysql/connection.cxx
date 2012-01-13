@@ -93,7 +93,7 @@ namespace odb
     }
 
     unsigned long long connection::
-    execute (const char* s, std::size_t n)
+    execute (const char* s, size_t n)
     {
       clear ();
 
