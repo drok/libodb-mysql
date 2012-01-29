@@ -1,5 +1,4 @@
 # file      : build/import/libmysqlclient_r/configuration-rules.make
-# author    : Boris Kolpackov <boris@kolpackov.net>
 # copyright : Copyright (c) 2009-2011 Boris Kolpackov
 # license   : GNU GPL v2; see accompanying LICENSE file
 
