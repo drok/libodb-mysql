@@ -150,12 +150,6 @@ namespace odb
         return data_image_binding_;
       }
 
-      my_bool*
-      data_image_truncated ()
-      {
-        return data_image_truncated_;
-      }
-
       binding&
       select_image_binding ()
       {
@@ -229,7 +223,6 @@ namespace odb
       std::size_t data_id_binding_version_;
 
       binding data_image_binding_;
-      my_bool* data_image_truncated_;
 
       // Skips the id from data_image_binding.
       //
@@ -264,7 +257,8 @@ namespace odb
     private:
       MYSQL_BIND cond_image_bind_[traits::cond_column_count];
       MYSQL_BIND data_image_bind_[traits::data_column_count];
-      my_bool data_image_truncated_array_[traits::data_column_count];
+      my_bool select_image_truncated_array_[traits::data_column_count -
+                                            traits::id_column_count];
     };
   }
 }
