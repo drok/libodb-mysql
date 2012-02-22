@@ -58,7 +58,7 @@ namespace odb
       object_traits::callback (db, obj, callback_event::pre_load);
 
       typename object_traits::image_type& i (statements_.image ());
-      object_traits::init (obj, i, db);
+      object_traits::init (obj, i, &db);
 
       // Initialize the id image and binding and load the rest of the object
       // (containers, etc).
@@ -239,7 +239,7 @@ namespace odb
       odb::database& db (this->database ());
 
       object_traits::callback (db, obj, callback_event::pre_load);
-      object_traits::init (obj, statements_.image (), db);
+      object_traits::init (obj, statements_.image (), &db);
       object_traits::callback (db, obj, callback_event::post_load);
     }
 
