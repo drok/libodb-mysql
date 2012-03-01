@@ -8,10 +8,12 @@
 #include <odb/pre.hxx>
 
 #include <string>
-#include <memory> // std::auto_ptr
+#include <memory> // std::auto_ptr, std::unique_ptr
 #include <iosfwd> // std::ostream
 
 #include <odb/database.hxx>
+#include <odb/details/config.hxx>       // ODB_CXX11
+#include <odb/details/transfer-ptr.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
@@ -42,8 +44,8 @@ namespace odb
                 const char* socket = 0,
                 const char* charset = 0,
                 unsigned long client_flags = 0,
-                std::auto_ptr<connection_factory> =
-                  std::auto_ptr<connection_factory> (0));
+                details::transfer_ptr<connection_factory> =
+                  details::transfer_ptr<connection_factory> ());
 
       database (const std::string& user,
                 const std::string& passwd,
@@ -53,8 +55,8 @@ namespace odb
                 const std::string* socket = 0,
                 const std::string& charset = "",
                 unsigned long client_flags = 0,
-                std::auto_ptr<connection_factory> =
-                  std::auto_ptr<connection_factory> (0));
+                details::transfer_ptr<connection_factory> =
+                  details::transfer_ptr<connection_factory> ());
 
       database (const std::string& user,
                 const std::string* passwd,
@@ -64,8 +66,8 @@ namespace odb
                 const std::string* socket = 0,
                 const std::string& charset = "",
                 unsigned long client_flags = 0,
-                std::auto_ptr<connection_factory> =
-                  std::auto_ptr<connection_factory> (0));
+                details::transfer_ptr<connection_factory> =
+                  details::transfer_ptr<connection_factory> ());
 
       database (const std::string& user,
                 const std::string& passwd,
@@ -75,8 +77,8 @@ namespace odb
                 const std::string& socket,
                 const std::string& charset = "",
                 unsigned long client_flags = 0,
-                std::auto_ptr<connection_factory> =
-                  std::auto_ptr<connection_factory> (0));
+                details::transfer_ptr<connection_factory> =
+                  details::transfer_ptr<connection_factory> ());
 
       database (const std::string& user,
                 const std::string* passwd,
@@ -86,8 +88,8 @@ namespace odb
                 const std::string& socket,
                 const std::string& charset = "",
                 unsigned long client_flags = 0,
-                std::auto_ptr<connection_factory> =
-                  std::auto_ptr<connection_factory> (0));
+                details::transfer_ptr<connection_factory> =
+                  details::transfer_ptr<connection_factory> ());
 
       // Extract the database parameters from the command line. The
       // following options are recognized:
@@ -110,12 +112,11 @@ namespace odb
                 bool erase = false,
                 const std::string& charset = "",
                 unsigned long client_flags = 0,
-                std::auto_ptr<connection_factory> =
-                  std::auto_ptr<connection_factory> (0));
+                details::transfer_ptr<connection_factory> =
+                  details::transfer_ptr<connection_factory> ());
 
       static void
       print_usage (std::ostream&);
-
 
     public:
       const char*
@@ -212,7 +213,12 @@ namespace odb
       const char* socket_;
       std::string charset_;
       unsigned long client_flags_;
+
+#ifdef ODB_CXX11
+      std::unique_ptr<connection_factory> factory_;
+#else
       std::auto_ptr<connection_factory> factory_;
+#endif
     };
   }
 }

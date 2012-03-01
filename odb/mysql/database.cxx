@@ -17,6 +17,8 @@ namespace odb
 {
   namespace mysql
   {
+    using odb::details::transfer_ptr;
+
     database::
     ~database ()
     {
@@ -31,7 +33,7 @@ namespace odb
               const char* socket,
               const char* charset,
               unsigned long client_flags,
-              auto_ptr<connection_factory> factory)
+              transfer_ptr<connection_factory> factory)
         : user_ (user ? user : ""),
           passwd_str_ (passwd ? passwd : ""),
           passwd_ (passwd ? passwd_str_.c_str () : 0),
@@ -42,7 +44,7 @@ namespace odb
           socket_ (socket ? socket_str_.c_str () : 0),
           charset_ (charset == 0 ? "" : charset),
           client_flags_ (client_flags),
-          factory_ (factory)
+          factory_ (factory.transfer ())
     {
       if (factory_.get () == 0)
         factory_.reset (new connection_pool_factory ());
@@ -59,7 +61,7 @@ namespace odb
               const string* socket,
               const string& charset,
               unsigned long client_flags,
-              auto_ptr<connection_factory> factory)
+              transfer_ptr<connection_factory> factory)
         : user_ (user),
           passwd_str_ (passwd),
           passwd_ (passwd_str_.c_str ()),
@@ -70,7 +72,7 @@ namespace odb
           socket_ (socket ? socket_str_.c_str () : 0),
           charset_ (charset),
           client_flags_ (client_flags),
-          factory_ (factory)
+          factory_ (factory.transfer ())
     {
       if (factory_.get () == 0)
         factory_.reset (new connection_pool_factory ());
@@ -87,7 +89,7 @@ namespace odb
               const string* socket,
               const string& charset,
               unsigned long client_flags,
-              auto_ptr<connection_factory> factory)
+              transfer_ptr<connection_factory> factory)
         : user_ (user),
           passwd_str_ (passwd ? *passwd : ""),
           passwd_ (passwd ? passwd_str_.c_str () : 0),
@@ -98,7 +100,7 @@ namespace odb
           socket_ (socket ? socket_str_.c_str () : 0),
           charset_ (charset),
           client_flags_ (client_flags),
-          factory_ (factory)
+          factory_ (factory.transfer ())
     {
       if (factory_.get () == 0)
         factory_.reset (new connection_pool_factory ());
@@ -115,7 +117,7 @@ namespace odb
               const string& socket,
               const string& charset,
               unsigned long client_flags,
-              auto_ptr<connection_factory> factory)
+              transfer_ptr<connection_factory> factory)
         : user_ (user),
           passwd_str_ (passwd),
           passwd_ (passwd_str_.c_str ()),
@@ -126,7 +128,7 @@ namespace odb
           socket_ (socket_str_.c_str ()),
           charset_ (charset),
           client_flags_ (client_flags),
-          factory_ (factory)
+          factory_ (factory.transfer ())
     {
       if (factory_.get () == 0)
         factory_.reset (new connection_pool_factory ());
@@ -143,7 +145,7 @@ namespace odb
               const string& socket,
               const string& charset,
               unsigned long client_flags,
-              auto_ptr<connection_factory> factory)
+              transfer_ptr<connection_factory> factory)
         : user_ (user),
           passwd_str_ (passwd ? *passwd : ""),
           passwd_ (passwd ? passwd_str_.c_str () : 0),
@@ -154,7 +156,7 @@ namespace odb
           socket_ (socket_str_.c_str ()),
           charset_ (charset),
           client_flags_ (client_flags),
-          factory_ (factory)
+          factory_ (factory.transfer ())
     {
       if (factory_.get () == 0)
         factory_.reset (new connection_pool_factory ());
@@ -168,12 +170,12 @@ namespace odb
               bool erase,
               const string& charset,
               unsigned long client_flags,
-              auto_ptr<connection_factory> factory)
+              transfer_ptr<connection_factory> factory)
         : passwd_ (0),
           socket_ (0),
           charset_ (charset),
           client_flags_ (client_flags),
-          factory_ (factory)
+          factory_ (factory.transfer ())
     {
       using namespace details;
 
