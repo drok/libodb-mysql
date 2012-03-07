@@ -21,6 +21,8 @@ namespace odb
     object_result_impl<T>::
     ~object_result_impl ()
     {
+      if (!this->end_)
+        statement_->free_result ();
     }
 
     template <typename T>
@@ -115,6 +117,9 @@ namespace odb
         this->end_ = count_ > statement_->result_size ();
       else
         fetch ();
+
+      if (this->end_)
+        statement_->free_result ();
     }
 
     template <typename T>
@@ -193,7 +198,10 @@ namespace odb
         statement_->cache ();
 
         if (count_ >= statement_->result_size ())
+        {
+          statement_->free_result ();
           this->end_ = true;
+        }
       }
     }
 
@@ -215,6 +223,8 @@ namespace odb
     object_result_impl_no_id<T>::
     ~object_result_impl_no_id ()
     {
+      if (!this->end_)
+        statement_->free_result ();
     }
 
     template <typename T>
@@ -260,6 +270,9 @@ namespace odb
         this->end_ = count_ > statement_->result_size ();
       else
         fetch ();
+
+      if (this->end_)
+        statement_->free_result ();
     }
 
     template <typename T>
@@ -333,7 +346,10 @@ namespace odb
         statement_->cache ();
 
         if (count_ >= statement_->result_size ())
+        {
+          statement_->free_result ();
           this->end_ = true;
+        }
       }
     }
 

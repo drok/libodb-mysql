@@ -104,16 +104,7 @@ namespace odb
     select_statement::
     ~select_statement ()
     {
-      if (cached_ || conn_.active () == this)
-      {
-        try
-        {
-          free_result ();
-        }
-        catch (...)
-        {
-        }
-      }
+      assert (freed_);
     }
 
     select_statement::
@@ -124,6 +115,7 @@ namespace odb
         : statement (conn, t),
           end_ (false),
           cached_ (false),
+          freed_ (true),
           rows_ (0),
           param_ (&param),
           param_version_ (0),
@@ -141,6 +133,7 @@ namespace odb
         : statement (conn, t, ct),
           end_ (false),
           cached_ (false),
+          freed_ (true),
           rows_ (0),
           param_ (&param),
           param_version_ (0),
@@ -154,6 +147,7 @@ namespace odb
         : statement (conn, t),
           end_ (false),
           cached_ (false),
+          freed_ (true),
           rows_ (0),
           param_ (0),
           result_ (result),
@@ -169,6 +163,7 @@ namespace odb
         : statement (conn, t, ct),
           end_ (false),
           cached_ (false),
+          freed_ (true),
           rows_ (0),
           param_ (0),
           result_ (result),
@@ -179,10 +174,9 @@ namespace odb
     void select_statement::
     execute ()
     {
-      conn_.clear ();
+      assert (freed_);
 
-      if (cached_)
-        free_result ();
+      conn_.clear ();
 
       end_ = false;
       rows_ = 0;
@@ -209,6 +203,7 @@ namespace odb
       if (mysql_stmt_execute (stmt_))
         translate_error (conn_, stmt_);
 
+      freed_ = false;
       conn_.active (this);
     }
 
@@ -306,15 +301,19 @@ namespace odb
     void select_statement::
     free_result ()
     {
-      end_ = true;
-      cached_ = false;
-      rows_ = 0;
+      if (!freed_)
+      {
+        if (mysql_stmt_free_result (stmt_))
+          translate_error (conn_, stmt_);
 
-      if (mysql_stmt_free_result (stmt_))
-        translate_error (conn_, stmt_);
+        if (conn_.active () == this)
+          conn_.active (0);
 
-      if (conn_.active () == this)
-        conn_.active (0);
+        end_ = true;
+        cached_ = false;
+        freed_ = true;
+        rows_ = 0;
+      }
     }
 
     void select_statement::

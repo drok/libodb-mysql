@@ -146,6 +146,7 @@ namespace odb
     private:
       bool end_;
       bool cached_;
+      bool freed_;
       std::size_t rows_;
       std::size_t size_;
 
@@ -154,6 +155,19 @@ namespace odb
 
       binding& result_;
       std::size_t result_version_;
+    };
+
+    struct LIBODB_MYSQL_EXPORT auto_result
+    {
+      explicit auto_result (select_statement& s): s_ (s) {}
+      ~auto_result () {s_.free_result ();}
+
+    private:
+      auto_result (const auto_result&);
+      auto_result& operator= (const auto_result&);
+
+    private:
+      select_statement& s_;
     };
 
     class LIBODB_MYSQL_EXPORT insert_statement: public statement
