@@ -81,6 +81,8 @@ namespace odb
     connection::
     ~connection ()
     {
+      active_ = 0;
+
       if (stmt_handles_.size () > 0)
         free_stmt_handles ();
     }
