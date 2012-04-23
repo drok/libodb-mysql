@@ -1,29 +1,29 @@
-// file      : odb/mysql/view-result.txx
+// file      : odb/mysql/no-id-object-result.txx
 // copyright : Copyright (c) 2009-2012 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
 #include <odb/callback.hxx>
-#include <odb/exceptions.hxx>
+#include <odb/exceptions.hxx> // result_not_cached
 
-#include <odb/mysql/view-statements.hxx>
+#include <odb/mysql/no-id-object-statements.hxx>
 
 namespace odb
 {
   namespace mysql
   {
     template <typename T>
-    view_result_impl<T>::
-    ~view_result_impl ()
+    no_id_object_result_impl<T>::
+    ~no_id_object_result_impl ()
     {
       if (!this->end_)
         statement_->free_result ();
     }
 
     template <typename T>
-    view_result_impl<T>::
-    view_result_impl (const query&,
-                      details::shared_ptr<select_statement> statement,
-                      statements_type& statements)
+    no_id_object_result_impl<T>::
+    no_id_object_result_impl (const query&,
+                              details::shared_ptr<select_statement> statement,
+                              statements_type& statements)
         : base_type (statements.connection ().database ()),
           statement_ (statement),
           statements_ (statements),
@@ -32,28 +32,28 @@ namespace odb
     }
 
     template <typename T>
-    void view_result_impl<T>::
-    load (view_type& view)
+    void no_id_object_result_impl<T>::
+    load (object_type& obj)
     {
       if (count_ > statement_->fetched ())
         fetch ();
 
       odb::database& db (this->database ());
 
-      view_traits::callback (db, view, callback_event::pre_load);
-      view_traits::init (view, statements_.image (), &db);
-      view_traits::callback (db, view, callback_event::post_load);
+      object_traits::callback (db, obj, callback_event::pre_load);
+      object_traits::init (obj, statements_.image (), &db);
+      object_traits::callback (db, obj, callback_event::post_load);
     }
 
     template <typename T>
-    void view_result_impl<T>::
+    void no_id_object_result_impl<T>::
     next ()
     {
       this->current (pointer_type ());
 
       // If we are cached, simply increment the position and
       // postpone the actual row fetching until later. This way
-      // if the same view is loaded in between iteration, the
+      // if the same object is loaded in between iteration, the
       // image won't be messed up.
       //
       count_++;
@@ -68,7 +68,7 @@ namespace odb
     }
 
     template <typename T>
-    void view_result_impl<T>::
+    void no_id_object_result_impl<T>::
     fetch ()
     {
       // If the result is cached, the image can grow between calls
@@ -76,13 +76,13 @@ namespace odb
       //
       if (statement_->cached ())
       {
-        typename view_traits::image_type& im (statements_.image ());
+        typename object_traits::image_type& im (statements_.image ());
 
-        if (im.version != statements_.image_version ())
+        if (im.version != statements_.select_image_version ())
         {
-          binding& b (statements_.image_binding ());
-          view_traits::bind (b.bind, im);
-          statements_.image_version (im.version);
+          binding& b (statements_.select_image_binding ());
+          object_traits::bind (b.bind, im, statement_select);
+          statements_.select_image_version (im.version);
           b.version++;
         }
       }
@@ -100,16 +100,17 @@ namespace odb
             if (count_ != statement_->fetched ())
               continue;
 
-            typename view_traits::image_type& im (statements_.image ());
+            typename object_traits::image_type& im (statements_.image ());
 
-            if (view_traits::grow (im, statements_.image_truncated ()))
+            if (object_traits::grow (
+                  im, statements_.select_image_truncated ()))
               im.version++;
 
-            if (im.version != statements_.image_version ())
+            if (im.version != statements_.select_image_version ())
             {
-              binding& b (statements_.image_binding ());
-              view_traits::bind (b.bind, im);
-              statements_.image_version (im.version);
+              binding& b (statements_.select_image_binding ());
+              object_traits::bind (b.bind, im, statement_select);
+              statements_.select_image_version (im.version);
               b.version++;
               statement_->refetch ();
             }
@@ -129,7 +130,7 @@ namespace odb
     }
 
     template <typename T>
-    void view_result_impl<T>::
+    void no_id_object_result_impl<T>::
     cache ()
     {
       if (!statement_->cached ())
@@ -145,7 +146,7 @@ namespace odb
     }
 
     template <typename T>
-    std::size_t view_result_impl<T>::
+    std::size_t no_id_object_result_impl<T>::
     size ()
     {
       if (!statement_->cached ())

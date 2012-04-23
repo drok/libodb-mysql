@@ -4,22 +4,22 @@
 
 include $(dir $(lastword $(MAKEFILE_LIST)))../../build/bootstrap.make
 
-cxx :=                   \
-connection.cxx           \
-connection-factory.cxx   \
-database.cxx             \
-enum.cxx                 \
-error.cxx                \
-exceptions.cxx           \
-object-statements.cxx    \
-query.cxx                \
-query-const-expr.cxx     \
-statement.cxx            \
-statements-base.cxx      \
-tracer.cxx               \
-transaction.cxx          \
-transaction-impl.cxx     \
-traits.cxx
+cxx :=                       \
+connection.cxx               \
+connection-factory.cxx       \
+database.cxx                 \
+enum.cxx                     \
+error.cxx                    \
+exceptions.cxx               \
+query.cxx                    \
+query-const-expr.cxx         \
+simple-object-statements.cxx \
+statement.cxx                \
+statements-base.cxx          \
+tracer.cxx                   \
+traits.cxx                   \
+transaction.cxx              \
+transaction-impl.cxx
 
 cli_tun := details/options.cli
 cxx_tun := $(cxx)

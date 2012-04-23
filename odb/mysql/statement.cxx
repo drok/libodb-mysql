@@ -259,7 +259,8 @@ namespace odb
       {
       case 0:
         {
-          rows_++;
+          if (next)
+            rows_++;
           return success;
         }
       case MYSQL_NO_DATA:
@@ -269,7 +270,8 @@ namespace odb
         }
       case MYSQL_DATA_TRUNCATED:
         {
-          rows_++;
+          if (next)
+            rows_++;
           return truncated;
         }
       default:

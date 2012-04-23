@@ -1,4 +1,4 @@
-// file      : odb/mysql/object-statements.ixx
+// file      : odb/mysql/simple-object-statements.ixx
 // copyright : Copyright (c) 2005-2012 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 

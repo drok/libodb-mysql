@@ -11,8 +11,8 @@
 
 #include <odb/forward.hxx>
 
-#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
+#include <odb/mysql/mysql-types.hxx>
 
 #include <odb/mysql/details/export.hxx>
 
@@ -23,6 +23,8 @@ namespace odb
     class LIBODB_MYSQL_EXPORT binding
     {
     public:
+      binding (): bind (0), count (0), version (0) {}
+
       binding (MYSQL_BIND* b, std::size_t n)
           : bind (b), count (n), version (0)
       {
