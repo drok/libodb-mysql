@@ -36,7 +36,7 @@
 
 // Check that we have compatible ODB version.
 //
-#if ODB_VERSION != 10801
+#if ODB_VERSION != 20000
 #  error incompatible odb interface version detected
 #endif
 
@@ -49,8 +49,8 @@
 // libodb-mysql version: odb interface version plus the bugfix
 // version.
 //
-#define LIBODB_MYSQL_VERSION     1089901
-#define LIBODB_MYSQL_VERSION_STR "1.9.0.a1"
+#define LIBODB_MYSQL_VERSION     2000000
+#define LIBODB_MYSQL_VERSION_STR "2.0.0"
 
 #include <odb/post.hxx>
 
