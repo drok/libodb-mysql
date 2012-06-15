@@ -82,4 +82,26 @@ else
   AC_MSG_RESULT([no])
   $3
 fi
+
+# Check if the THR_KEY_mysys pthread key symbol is visible.
+#
+libmysqlclient_thr_key_visible=no
+
+if test x"$libmysqlclient_found" = xyes -a x"$1" = xposix; then
+
+CXX_LIBTOOL_LINK_IFELSE(
+AC_LANG_SOURCE([[
+#include <pthread.h>
+extern pthread_key_t THR_KEY_mysys;
+int
+main ()
+{
+  return pthread_getspecific (THR_KEY_mysys) != 0;
+}
+]]),
+[
+libmysqlclient_thr_key_visible=yes
+])
+fi
+
 ])dnl

@@ -80,6 +80,7 @@ $(out_base)/details/config.h: | $(out_base)/details/.
 	@echo '#define ODB_MYSQL_DETAILS_CONFIG_H'                      >>$@
 	@echo ''                                                        >>$@
 	@echo '#define LIBODB_MYSQL_INCLUDE_LONG 1'                     >>$@
+	@echo '#define LIBODB_MYSQL_THR_KEY_VISIBLE 1'			>>$@
 	@echo ''                                                        >>$@
 	@echo '#endif /* ODB_MYSQL_DETAILS_CONFIG_H */'                 >>$@
 

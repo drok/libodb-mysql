@@ -2,20 +2,21 @@
 // copyright : Copyright (c) 2009-2012 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <odb/details/config.hxx> // ODB_THREADS_*
+#include <odb/details/config.hxx>       // ODB_THREADS_*
+#include <odb/mysql/details/config.hxx> // LIBODB_MYSQL_THR_KEY_VISIBLE
 
-#ifdef ODB_THREADS_POSIX
+#if defined(ODB_THREADS_POSIX) && defined(LIBODB_MYSQL_THR_KEY_VISIBLE)
 #  include <pthread.h>
 #endif
 
 #include <cstdlib> // abort
 
+#include <odb/details/tls.hxx>
+#include <odb/details/lock.hxx>
+
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/connection-factory.hxx>
 #include <odb/mysql/exceptions.hxx>
-
-#include <odb/details/tls.hxx>
-#include <odb/details/lock.hxx>
 
 // This key is in the mysql client library. We use it to resolve the
 // following problem: Some pthread implementations zero-out slots that
@@ -32,7 +33,7 @@
 // 1. MySQL doesn't use the destructor itself.
 // 2. Nobody else tried to call mysql_thread_end() before us.
 //
-#ifdef ODB_THREADS_POSIX
+#if defined(ODB_THREADS_POSIX) && defined(LIBODB_MYSQL_THR_KEY_VISIBLE)
 extern pthread_key_t THR_KEY_mysys;
 #endif
 
@@ -64,7 +65,7 @@ namespace odb
 
             init_ = true;
 
-#ifdef ODB_THREADS_POSIX
+#if defined(ODB_THREADS_POSIX) && defined(LIBODB_MYSQL_THR_KEY_VISIBLE)
             value_ = pthread_getspecific (THR_KEY_mysys);
 #endif
           }
@@ -74,7 +75,7 @@ namespace odb
         {
           if (init_)
           {
-#ifdef ODB_THREADS_POSIX
+#if defined(ODB_THREADS_POSIX) && defined(LIBODB_MYSQL_THR_KEY_VISIBLE)
             if (pthread_getspecific (THR_KEY_mysys) == 0)
               pthread_setspecific (THR_KEY_mysys, value_);
 #endif
@@ -84,7 +85,7 @@ namespace odb
 
       private:
         bool init_;
-#ifdef ODB_THREADS_POSIX
+#if defined(ODB_THREADS_POSIX) && defined(LIBODB_MYSQL_THR_KEY_VISIBLE)
         void* value_;
 #endif
 #endif // ODB_THREADS_NONE
@@ -96,21 +97,31 @@ namespace odb
       {
         mysql_process_init ()
         {
-          if (mysql_library_init (0 ,0, 0))
-            abort ();
-
+          // Force allocation of our thread-specific key before THR_KEY_mysys
+          // in MySQL. This will (hopefully) get us the desired order of TLS
+          // destructor calls (i.e., our destructor before zeroing-out the
+          // THR_KEY_mysys value). This is pretty much the only way (except
+          // maybe guessing the THR_KEY_mysys value) to get clean thread
+          // termination if THR_KEY_mysys symbol is hidden, as is the case
+          // in the Fedora build of libmysqlclient. See also the comment
+          // at the beginning of this file.
+          //
           main_thread_init_ = true;
           tls_get (mysql_thread_init_);
           main_thread_init_ = false;
+
+          if (mysql_library_init (0 ,0, 0))
+            abort ();
         }
 
         ~mysql_process_init ()
         {
+          mysql_library_end ();
+
           // Finalize the main thread now in case TLS destruction
           // doesn't happen for the main thread.
           //
           tls_free (mysql_thread_init_);
-          mysql_library_end ();
         }
       };
 

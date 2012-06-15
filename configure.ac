@@ -43,6 +43,10 @@ case $libmysqlclient_include in
     ;;
 esac
 
+if test x"$libmysqlclient_thr_key_visible" = xyes; then
+  AC_DEFINE([LIBODB_MYSQL_THR_KEY_VISIBLE], [1], ["THR_KEY_mysys is visible."])
+fi
+
 # Check for libodb.
 #
 LIBODB([],[AC_MSG_ERROR([libodb is not found; consider using --with-libodb=DIR])])
