@@ -21,6 +21,18 @@ AC_MSG_CHECKING([for lib$libmysqlclient_name])
 save_LIBS="$LIBS"
 LIBS="-l$libmysqlclient_name $LIBS"
 
+# Some distributions (e.g., Fedora) hide the library in the mysql/
+# subdirectory.
+#
+libmysqlclient_paths="none /usr/lib/mysql /usr/lib64/mysql"
+
+for path in $libmysqlclient_paths; do
+
+if test x"path" != xnone; then
+  save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS -L$path"
+fi
+
 CXX_LIBTOOL_LINK_IFELSE(
 AC_LANG_SOURCE([[
 #ifdef _WIN32
@@ -44,7 +56,9 @@ libmysqlclient_found=yes
 libmysqlclient_include=long
 ])
 
-if test x"$libmysqlclient_found" = xno; then
+if test x"$libmysqlclient_found" = xyes; then
+  break;
+fi
 
 CXX_LIBTOOL_LINK_IFELSE(
 AC_LANG_SOURCE([[
@@ -69,7 +83,15 @@ libmysqlclient_found=yes
 libmysqlclient_include=short
 ])
 
+if test x"$libmysqlclient_found" = xyes; then
+  break;
 fi
+
+if test x"path" != xnone; then
+  LDFLAGS="$save_LDFLAGS"
+fi
+
+done
 
 if test x"$libmysqlclient_found" = xno; then
   LIBS="$save_LIBS"
