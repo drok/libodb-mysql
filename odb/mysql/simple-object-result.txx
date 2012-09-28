@@ -189,7 +189,7 @@ namespace odb
     void object_result_impl<T>::
     cache ()
     {
-      if (!statement_->cached ())
+      if (!this->end_ && !statement_->cached ())
       {
         statement_->cache ();
 
@@ -205,10 +205,17 @@ namespace odb
     std::size_t object_result_impl<T>::
     size ()
     {
-      if (!statement_->cached ())
-        throw result_not_cached ();
+      if (!this->end_)
+      {
+        if (!statement_->cached ())
+          throw result_not_cached ();
 
-      return statement_->result_size ();
+        return statement_->result_size ();
+      }
+      else
+        // If count is not zero, then it is one past the result size.
+        //
+        return count_ == 0 ? 0 : count_ - 1;
     }
   }
 }
