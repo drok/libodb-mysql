@@ -32,7 +32,7 @@ namespace odb
       statement_cache (connection& conn): conn_ (conn) {}
 
       template <typename T>
-      typename object_traits<T>::statements_type&
+      typename object_traits_impl<T, id_mysql>::statements_type&
       find_object ();
 
 

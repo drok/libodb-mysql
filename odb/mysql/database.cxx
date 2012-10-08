@@ -34,7 +34,8 @@ namespace odb
               const char* charset,
               unsigned long client_flags,
               transfer_ptr<connection_factory> factory)
-        : user_ (user ? user : ""),
+        : odb::database (id_mysql),
+          user_ (user ? user : ""),
           passwd_str_ (passwd ? passwd : ""),
           passwd_ (passwd ? passwd_str_.c_str () : 0),
           db_ (db ? db : ""),
@@ -62,7 +63,8 @@ namespace odb
               const string& charset,
               unsigned long client_flags,
               transfer_ptr<connection_factory> factory)
-        : user_ (user),
+        : odb::database (id_mysql),
+          user_ (user),
           passwd_str_ (passwd),
           passwd_ (passwd_str_.c_str ()),
           db_ (db),
@@ -90,7 +92,8 @@ namespace odb
               const string& charset,
               unsigned long client_flags,
               transfer_ptr<connection_factory> factory)
-        : user_ (user),
+        : odb::database (id_mysql),
+          user_ (user),
           passwd_str_ (passwd ? *passwd : ""),
           passwd_ (passwd ? passwd_str_.c_str () : 0),
           db_ (db),
@@ -118,7 +121,8 @@ namespace odb
               const string& charset,
               unsigned long client_flags,
               transfer_ptr<connection_factory> factory)
-        : user_ (user),
+        : odb::database (id_mysql),
+          user_ (user),
           passwd_str_ (passwd),
           passwd_ (passwd_str_.c_str ()),
           db_ (db),
@@ -146,7 +150,8 @@ namespace odb
               const string& charset,
               unsigned long client_flags,
               transfer_ptr<connection_factory> factory)
-        : user_ (user),
+        : odb::database (id_mysql),
+          user_ (user),
           passwd_str_ (passwd ? *passwd : ""),
           passwd_ (passwd ? passwd_str_.c_str () : 0),
           db_ (db),
@@ -171,7 +176,8 @@ namespace odb
               const string& charset,
               unsigned long client_flags,
               transfer_ptr<connection_factory> factory)
-        : passwd_ (0),
+        : odb::database (id_mysql),
+          passwd_ (0),
           socket_ (0),
           charset_ (charset),
           client_flags_ (client_flags),

@@ -23,7 +23,7 @@ namespace odb
 
     template <typename T>
     polymorphic_object_result_impl<T>::
-    polymorphic_object_result_impl (const query&,
+    polymorphic_object_result_impl (const query_base&,
                                     details::shared_ptr<select_statement> st,
                                     statements_type& sts)
         : base_type (sts.connection ().database ()),
@@ -218,7 +218,7 @@ namespace odb
     {
       // Derived type version.
       //
-      typedef object_traits<T> traits;
+      typedef object_traits_impl<T, id_mysql> traits;
 
       static bool
       rebind (typename traits::statements_type& sts)
@@ -243,7 +243,7 @@ namespace odb
     {
       // Root type version.
       //
-      typedef object_traits<R> traits;
+      typedef object_traits_impl<R, id_mysql> traits;
 
       static bool
       rebind (typename traits::statements_type& sts)

@@ -18,6 +18,7 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
+#include <odb/mysql/query.hxx>
 #include <odb/mysql/tracer.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
@@ -166,6 +167,191 @@ namespace odb
       {
         return client_flags_;
       }
+
+      // Object persistence API.
+      //
+    public:
+
+      // Make the object persistent.
+      //
+      template <typename T>
+      typename object_traits<T>::id_type
+      persist (T& object);
+
+      template <typename T>
+      typename object_traits<T>::id_type
+      persist (T* obj_ptr);
+
+      template <typename T, template <typename> class P>
+      typename object_traits<T>::id_type
+      persist (const P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      typename object_traits<T>::id_type
+      persist (const P<T, A1>& obj_ptr);
+
+      template <typename T, template <typename> class P>
+      typename object_traits<T>::id_type
+      persist (P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      typename object_traits<T>::id_type
+      persist (P<T, A1>& obj_ptr);
+
+      template <typename T>
+      typename object_traits<T>::id_type
+      persist (const typename object_traits<T>::pointer_type& obj_ptr);
+
+      // Load an object. Throw object_not_persistent if not found.
+      //
+      template <typename T>
+      typename object_traits<T>::pointer_type
+      load (const typename object_traits<T>::id_type& id);
+
+      template <typename T>
+      void
+      load (const typename object_traits<T>::id_type& id, T& object);
+
+      // Reload an object.
+      //
+      template <typename T>
+      void
+      reload (T& object);
+
+      template <typename T>
+      void
+      reload (T* obj_ptr);
+
+      template <typename T, template <typename> class P>
+      void
+      reload (const P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      void
+      reload (const P<T, A1>& obj_ptr);
+
+      template <typename T, template <typename> class P>
+      void
+      reload (P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      void
+      reload (P<T, A1>& obj_ptr);
+
+      template <typename T>
+      void
+      reload (const typename object_traits<T>::pointer_type& obj_ptr);
+
+      // Loan an object if found. Return NULL/false if not found.
+      //
+      template <typename T>
+      typename object_traits<T>::pointer_type
+      find (const typename object_traits<T>::id_type& id);
+
+      template <typename T>
+      bool
+      find (const typename object_traits<T>::id_type& id, T& object);
+
+      // Update the state of a modified objects.
+      //
+      template <typename T>
+      void
+      update (T& object);
+
+      template <typename T>
+      void
+      update (T* obj_ptr);
+
+      template <typename T, template <typename> class P>
+      void
+      update (const P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      void
+      update (const P<T, A1>& obj_ptr);
+
+      template <typename T, template <typename> class P>
+      void
+      update (P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      void
+      update (P<T, A1>& obj_ptr);
+
+      template <typename T>
+      void
+      update (const typename object_traits<T>::pointer_type& obj_ptr);
+
+      // Make the object transient. Throw object_not_persistent if not
+      // found.
+      //
+      template <typename T>
+      void
+      erase (const typename object_traits<T>::id_type& id);
+
+      template <typename T>
+      void
+      erase (T& object);
+
+      template <typename T>
+      void
+      erase (T* obj_ptr);
+
+      template <typename T, template <typename> class P>
+      void
+      erase (const P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      void
+      erase (const P<T, A1>& obj_ptr);
+
+      template <typename T, template <typename> class P>
+      void
+      erase (P<T>& obj_ptr);
+
+      template <typename T, typename A1, template <typename, typename> class P>
+      void
+      erase (P<T, A1>& obj_ptr);
+
+      template <typename T>
+      void
+      erase (const typename object_traits<T>::pointer_type& obj_ptr);
+
+      // Erase multiple objects matching a query predicate.
+      //
+      template <typename T>
+      unsigned long long
+      erase_query ();
+
+      template <typename T>
+      unsigned long long
+      erase_query (const char*);
+
+      template <typename T>
+      unsigned long long
+      erase_query (const std::string&);
+
+      template <typename T>
+      unsigned long long
+      erase_query (const mysql::query<T>&);
+
+      // Query API.
+      //
+      template <typename T>
+      result<T>
+      query (bool cache = true);
+
+      template <typename T>
+      result<T>
+      query (const char*, bool cache = true);
+
+      template <typename T>
+      result<T>
+      query (const std::string&, bool cache = true);
+
+      template <typename T>
+      result<T>
+      query (const mysql::query<T>&, bool cache = true);
 
     public:
       virtual transaction_impl*
