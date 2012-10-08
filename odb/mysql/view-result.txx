@@ -51,6 +51,9 @@ namespace odb
     {
       this->current (pointer_type ());
 
+      if (this->end_)
+        return;
+
       // If we are cached, simply increment the position and
       // postpone the actual row fetching until later. This way
       // if the same view is loaded in between iteration, the
@@ -136,9 +139,10 @@ namespace odb
       {
         statement_->cache ();
 
-        if (count_ >= statement_->result_size ())
+        if (count_ == statement_->result_size ())
         {
           statement_->free_result ();
+          count_++; // One past the result size.
           this->end_ = true;
         }
       }
@@ -156,9 +160,7 @@ namespace odb
         return statement_->result_size ();
       }
       else
-        // If count is not zero, then it is one past the result size.
-        //
-        return count_ == 0 ? 0 : count_ - 1;
+        return count_ - 1; // One past the result size.
     }
   }
 }
