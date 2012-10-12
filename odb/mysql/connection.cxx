@@ -83,6 +83,10 @@ namespace odb
     {
       active_ = 0;
 
+      // Destroy prepared query statements before freeing the connections.
+      //
+      prepared_map_.clear ();
+
       if (stmt_handles_.size () > 0)
         free_stmt_handles ();
     }

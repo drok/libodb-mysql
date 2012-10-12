@@ -15,6 +15,7 @@
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
+#include <odb/mysql/query.hxx>
 #include <odb/mysql/tracer.hxx>
 #include <odb/mysql/transaction-impl.hxx>
 #include <odb/mysql/auto-handle.hxx>
@@ -60,6 +61,21 @@ namespace odb
 
       virtual unsigned long long
       execute (const char* statement, std::size_t length);
+
+      // Query preparation.
+      //
+    public:
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const char*);
+
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const std::string&);
+
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const query<T>&);
 
       // SQL statement tracing.
       //
@@ -182,6 +198,8 @@ namespace odb
     };
   }
 }
+
+#include <odb/mysql/connection.ixx>
 
 #include <odb/post.hxx>
 

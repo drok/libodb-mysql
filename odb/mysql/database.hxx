@@ -353,6 +353,22 @@ namespace odb
       result<T>
       query (const mysql::query<T>&, bool cache = true);
 
+      // Query preparation.
+      //
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const char*);
+
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const std::string&);
+
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const mysql::query<T>&);
+
+      // Transactions.
+      //
     public:
       virtual transaction_impl*
       begin ();

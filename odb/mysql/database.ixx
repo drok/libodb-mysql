@@ -2,6 +2,8 @@
 // copyright : Copyright (c) 2009-2012 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <odb/mysql/transaction.hxx>
+
 namespace odb
 {
   namespace mysql
@@ -397,6 +399,30 @@ namespace odb
         r.cache ();
 
       return r;
+    }
+
+    template <typename T>
+    inline prepared_query<T> database::
+    prepare_query (const char* n, const char* q)
+    {
+      return prepare_query<T> (n, mysql::query<T> (q));
+    }
+
+    template <typename T>
+    inline prepared_query<T> database::
+    prepare_query (const char* n, const std::string& q)
+    {
+      return prepare_query<T> (n, mysql::query<T> (q));
+    }
+
+    template <typename T>
+    inline prepared_query<T> database::
+    prepare_query (const char* n, const mysql::query<T>& q)
+    {
+      // Throws if not in transaction.
+      //
+      mysql::connection& c (transaction::current ().connection ());
+      return c.prepare_query (n, q);
     }
   }
 }
