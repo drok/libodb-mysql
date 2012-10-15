@@ -20,11 +20,24 @@ namespace odb
     }
 
     template <typename T>
+    void view_result_impl<T>::
+    invalidate ()
+    {
+      if (!this->end_)
+      {
+        statement_->free_result ();
+        this->end_ = true;
+      }
+
+      statement_.reset ();
+    }
+
+    template <typename T>
     view_result_impl<T>::
     view_result_impl (const query_base&,
                       details::shared_ptr<select_statement> statement,
                       statements_type& statements)
-        : base_type (statements.connection ().database ()),
+        : base_type (statements.connection ()),
           statement_ (statement),
           statements_ (statements),
           count_ (0)
@@ -38,11 +51,9 @@ namespace odb
       if (count_ > statement_->fetched ())
         fetch ();
 
-      odb::database& db (this->database ());
-
-      view_traits::callback (db, view, callback_event::pre_load);
-      view_traits::init (view, statements_.image (), &db);
-      view_traits::callback (db, view, callback_event::post_load);
+      view_traits::callback (this->db_, view, callback_event::pre_load);
+      view_traits::init (view, statements_.image (), &this->db_);
+      view_traits::callback (this->db_, view, callback_event::post_load);
     }
 
     template <typename T>

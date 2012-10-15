@@ -55,6 +55,14 @@ namespace odb
     void transaction_impl::
     commit ()
     {
+      // Invalidate query results.
+      //
+      connection_->invalidate_results ();
+
+      // Cancel and clear the active statement if any. This normally
+      // should happen automatically, however, if an exception is
+      // thrown, this may not be the case.
+      //
       connection_->clear ();
 
       {
@@ -68,12 +76,20 @@ namespace odb
 
       // Release the connection.
       //
-      //connection_.reset ();
+      connection_.reset ();
     }
 
     void transaction_impl::
     rollback ()
     {
+      // Invalidate query results.
+      //
+      connection_->invalidate_results ();
+
+      // Cancel and clear the active statement if any. This normally
+      // should happen automatically, however, if an exception is
+      // thrown, this may not be the case.
+      //
       connection_->clear ();
 
       {
@@ -87,7 +103,7 @@ namespace odb
 
       // Release the connection.
       //
-      //connection_.reset ();
+      connection_.reset ();
     }
   }
 }

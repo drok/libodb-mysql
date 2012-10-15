@@ -173,6 +173,9 @@ namespace odb
       clear_ ();
 
     private:
+      friend class transaction_impl; // invalidate_results()
+
+    private:
       // Needed to break the circular connection-database dependency
       // (odb::connection has the odb::database member).
       //

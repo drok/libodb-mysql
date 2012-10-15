@@ -85,7 +85,8 @@ namespace odb
 
       // Destroy prepared query statements before freeing the connections.
       //
-      prepared_map_.clear ();
+      recycle ();
+      clear_prepared_map ();
 
       if (stmt_handles_.size () > 0)
         free_stmt_handles ();
