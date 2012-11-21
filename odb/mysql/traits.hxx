@@ -420,7 +420,6 @@ namespace odb
     {
     public:
       typedef const char* value_type;
-      typedef const char* query_type;
       typedef details::buffer image_type;
 
       static void
@@ -434,66 +433,78 @@ namespace odb
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_string>:
       c_string_value_traits
     {
+      typedef const char* query_type;
     };
 
     template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_decimal>:
       c_string_value_traits
     {
+      typedef const char* query_type;
     };
 
     template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_enum>:
       c_string_value_traits
     {
+      typedef const char* query_type;
     };
 
     template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_set>:
       c_string_value_traits
     {
+      typedef const char* query_type;
     };
 
     template <std::size_t N>
     struct default_value_traits<char[N], id_string>: c_string_value_traits
     {
+      typedef char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<const char[N], id_string>:
       c_string_value_traits
     {
+      typedef const char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<char[N], id_decimal>: c_string_value_traits
     {
+      typedef char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<const char[N], id_decimal>:
       c_string_value_traits
     {
+      typedef const char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<char[N], id_enum>: c_string_value_traits
     {
+      typedef char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<const char[N], id_enum>: c_string_value_traits
     {
+      typedef const char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<char[N], id_set>: c_string_value_traits
     {
+      typedef char query_type[N];
     };
 
     template <std::size_t N>
     struct default_value_traits<const char[N], id_set>: c_string_value_traits
     {
+      typedef const char query_type[N];
     };
 
     // std::vector<char> (buffer) specialization.
@@ -566,7 +577,7 @@ namespace odb
     {
     public:
       typedef char* value_type;
-      typedef const char* query_type;
+      typedef char query_type[N];
       typedef details::buffer image_type;
 
       static void
@@ -604,7 +615,7 @@ namespace odb
     {
     public:
       typedef unsigned char* value_type;
-      typedef const unsigned char* query_type;
+      typedef unsigned char query_type[N];
       typedef details::buffer image_type;
 
       static void
