@@ -49,8 +49,8 @@
 // libodb-mysql version: odb interface version plus the bugfix
 // version.
 //
-#define LIBODB_MYSQL_VERSION     2010000
-#define LIBODB_MYSQL_VERSION_STR "2.1.0"
+#define LIBODB_MYSQL_VERSION     2010100
+#define LIBODB_MYSQL_VERSION_STR "2.1.1"
 
 #include <odb/post.hxx>
 
