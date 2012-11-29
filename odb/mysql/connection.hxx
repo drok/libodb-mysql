@@ -9,7 +9,6 @@
 
 #include <vector>
 
-#include <odb/forward.hxx>
 #include <odb/connection.hxx>
 
 #include <odb/mysql/mysql.hxx>

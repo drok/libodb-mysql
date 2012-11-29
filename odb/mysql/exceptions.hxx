@@ -12,6 +12,7 @@
 #include <odb/exceptions.hxx>
 
 #include <odb/mysql/version.hxx>
+#include <odb/mysql/forward.hxx>
 
 #include <odb/mysql/details/export.hxx>
 
@@ -66,6 +67,12 @@ namespace odb
     private:
       std::string what_;
     };
+
+    namespace core
+    {
+      using mysql::database_exception;
+      using mysql::cli_exception;
+    }
   }
 }
 

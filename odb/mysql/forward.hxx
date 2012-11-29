@@ -13,6 +13,13 @@ namespace odb
 {
   namespace mysql
   {
+    namespace core
+    {
+      using namespace odb::common;
+    }
+
+    //
+    //
     class database;
     class connection;
     typedef details::shared_ptr<connection> connection_ptr;
@@ -20,6 +27,15 @@ namespace odb
     class statement;
     class transaction;
     class tracer;
+
+    namespace core
+    {
+      using mysql::database;
+      using mysql::connection;
+      using mysql::connection_ptr;
+      using mysql::transaction;
+      using mysql::statement;
+    }
 
     // Implementation details.
     //

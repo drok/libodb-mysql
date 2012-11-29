@@ -10,11 +10,11 @@
 #include <string>
 #include <cstddef>  // std::size_t
 
-#include <odb/forward.hxx>
 #include <odb/statement.hxx>
 
 #include <odb/mysql/mysql.hxx>
 #include <odb/mysql/version.hxx>
+#include <odb/mysql/forward.hxx>
 #include <odb/mysql/binding.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/auto-handle.hxx>

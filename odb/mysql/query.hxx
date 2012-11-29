@@ -1965,6 +1965,11 @@ namespace odb
       {
       }
     };
+
+    namespace core
+    {
+      using mysql::query;
+    }
   }
 
   // Derive odb::query from odb::mysql::query so that it can be
