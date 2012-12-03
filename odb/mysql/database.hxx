@@ -333,7 +333,11 @@ namespace odb
 
       template <typename T>
       unsigned long long
-      erase_query (const mysql::query<T>&);
+      erase_query (const mysql::query_base&);
+
+      template <typename T>
+      unsigned long long
+      erase_query (const odb::query_base&);
 
       // Query API.
       //
@@ -351,7 +355,11 @@ namespace odb
 
       template <typename T>
       result<T>
-      query (const mysql::query<T>&, bool cache = true);
+      query (const mysql::query_base&, bool cache = true);
+
+      template <typename T>
+      result<T>
+      query (const odb::query_base&, bool cache = true);
 
       // Query preparation.
       //
@@ -365,7 +373,11 @@ namespace odb
 
       template <typename T>
       prepared_query<T>
-      prepare_query (const char* name, const mysql::query<T>&);
+      prepare_query (const char* name, const mysql::query_base&);
+
+      template <typename T>
+      prepared_query<T>
+      prepare_query (const char* name, const odb::query_base&);
 
       // Transactions.
       //
