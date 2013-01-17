@@ -409,6 +409,11 @@ namespace odb
       using odb::database::tracer;
 
     public:
+      // Database id constant (useful for meta-programming).
+      //
+      static const odb::database_id database_id = id_mysql;
+
+    public:
       virtual
       ~database ();
 
