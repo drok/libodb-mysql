@@ -410,7 +410,7 @@ namespace odb
     {
     };
 
-    // const char* specialization
+    // char*/const char* specialization
     //
     // Specialization for const char* which only supports initialization
     // of an image from the value but not the other way around. This way
@@ -430,82 +430,178 @@ namespace odb
     };
 
     template <>
+    struct LIBODB_MYSQL_EXPORT default_value_traits<char*, id_string>:
+      c_string_value_traits {};
+
+    template <>
+    struct LIBODB_MYSQL_EXPORT default_value_traits<char*, id_decimal>:
+      c_string_value_traits {};
+
+    template <>
+    struct LIBODB_MYSQL_EXPORT default_value_traits<char*, id_enum>:
+      c_string_value_traits {};
+
+    template <>
+    struct LIBODB_MYSQL_EXPORT default_value_traits<char*, id_set>:
+      c_string_value_traits {};
+
+    template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_string>:
-      c_string_value_traits
-    {
-      typedef const char* query_type;
-    };
+      c_string_value_traits {};
 
     template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_decimal>:
-      c_string_value_traits
-    {
-      typedef const char* query_type;
-    };
+      c_string_value_traits {};
 
     template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_enum>:
-      c_string_value_traits
-    {
-      typedef const char* query_type;
-    };
+      c_string_value_traits {};
 
     template <>
     struct LIBODB_MYSQL_EXPORT default_value_traits<const char*, id_set>:
-      c_string_value_traits
+      c_string_value_traits {};
+
+    // char[N] specializations.
+    //
+    struct LIBODB_MYSQL_EXPORT c_array_value_traits_base
     {
-      typedef const char* query_type;
+      static void
+      set_value (char* const& v,
+                 const details::buffer& b,
+                 std::size_t n,
+                 bool is_null,
+                 std::size_t N);
+
+      static void
+      set_image (details::buffer& b,
+                 std::size_t& n,
+                 bool& is_null,
+                 const char* v,
+                 std::size_t N);
     };
 
     template <std::size_t N>
-    struct default_value_traits<char[N], id_string>: c_string_value_traits
+    struct c_array_value_traits
     {
+      typedef char* value_type;
       typedef char query_type[N];
+      typedef details::buffer image_type;
+
+      static void
+      set_value (char* const& v,
+                 const details::buffer& b,
+                 std::size_t n,
+                 bool is_null)
+      {
+        c_array_value_traits_base::set_value (v, b, n, is_null, N);
+      }
+
+      static void
+      set_image (details::buffer& b,
+                 std::size_t& n,
+                 bool& is_null,
+                 const char* v)
+      {
+        c_array_value_traits_base::set_image (b, n, is_null, v, N);
+      }
     };
 
     template <std::size_t N>
-    struct default_value_traits<const char[N], id_string>:
-      c_string_value_traits
+    struct default_value_traits<char[N], id_string>: c_array_value_traits<N>
+    {};
+
+    template <std::size_t N>
+    struct default_value_traits<char[N], id_decimal>: c_array_value_traits<N>
+    {};
+
+    template <std::size_t N>
+    struct default_value_traits<char[N], id_enum>: c_array_value_traits<N>
+    {};
+
+    template <std::size_t N>
+    struct default_value_traits<char[N], id_set>: c_array_value_traits<N>
+    {};
+
+    // std::array<char, N> (string) specialization.
+    //
+#ifdef ODB_CXX11
+    template <std::size_t N>
+    struct std_array_value_traits
     {
-      typedef const char query_type[N];
+      typedef std::array<char, N> value_type;
+      typedef std::array<char, N> query_type;
+      typedef details::buffer image_type;
+
+      static void
+      set_value (value_type& v,
+                 const details::buffer& b,
+                 std::size_t n,
+                 bool is_null)
+      {
+        c_array_value_traits_base::set_value (v.data (), b, n, is_null, N);
+      }
+
+      static void
+      set_image (details::buffer& b,
+                 std::size_t& n,
+                 bool& is_null,
+                 const value_type& v)
+      {
+        c_array_value_traits_base::set_image (b, n, is_null, v.data (), N);
+      }
     };
 
     template <std::size_t N>
-    struct default_value_traits<char[N], id_decimal>: c_string_value_traits
-    {
-      typedef char query_type[N];
-    };
+    struct default_value_traits<std::array<char, N>, id_string>:
+      std_array_value_traits<N> {};
 
     template <std::size_t N>
-    struct default_value_traits<const char[N], id_decimal>:
-      c_string_value_traits
-    {
-      typedef const char query_type[N];
-    };
+    struct default_value_traits<std::array<char, N>, id_decimal>:
+      std_array_value_traits<N> {};
 
     template <std::size_t N>
-    struct default_value_traits<char[N], id_enum>: c_string_value_traits
-    {
-      typedef char query_type[N];
-    };
+    struct default_value_traits<std::array<char, N>, id_enum>:
+      std_array_value_traits<N> {};
 
     template <std::size_t N>
-    struct default_value_traits<const char[N], id_enum>: c_string_value_traits
+    struct default_value_traits<std::array<char, N>, id_set>:
+      std_array_value_traits<N> {};
+#endif
+
+    // char specialization.
+    //
+    struct LIBODB_MYSQL_EXPORT char_value_traits
     {
-      typedef const char query_type[N];
+      typedef char value_type;
+      typedef char query_type;
+      typedef details::buffer image_type;
+
+      static void
+      set_value (char& v,
+                 const details::buffer& b,
+                 std::size_t n,
+                 bool is_null)
+      {
+        c_array_value_traits_base::set_value (&v, b, n, is_null, 1);
+      }
+
+      static void
+      set_image (details::buffer& b,
+                 std::size_t& n,
+                 bool& is_null,
+                 char v)
+      {
+        c_array_value_traits_base::set_image (b, n, is_null, &v, 1);
+      }
     };
 
-    template <std::size_t N>
-    struct default_value_traits<char[N], id_set>: c_string_value_traits
-    {
-      typedef char query_type[N];
-    };
+    template <>
+    struct LIBODB_MYSQL_EXPORT default_value_traits<char, id_string>:
+      char_value_traits {};
 
-    template <std::size_t N>
-    struct default_value_traits<const char[N], id_set>: c_string_value_traits
-    {
-      typedef const char query_type[N];
-    };
+    template <>
+    struct LIBODB_MYSQL_EXPORT default_value_traits<char, id_enum>:
+      char_value_traits {};
 
     // std::vector<char> (buffer) specialization.
     //
@@ -827,6 +923,12 @@ namespace odb
     };
 
     template <>
+    struct default_type_traits<char*>
+    {
+      static const database_type_id db_type_id = id_string;
+    };
+
+    template <>
     struct default_type_traits<const char*>
     {
       static const database_type_id db_type_id = id_string;
@@ -838,14 +940,20 @@ namespace odb
       static const database_type_id db_type_id = id_string;
     };
 
-    template <std::size_t N>
-    struct default_type_traits<const char[N]>
+    template <>
+    struct default_type_traits<char>
     {
       static const database_type_id db_type_id = id_string;
     };
 
     // Binary types.
     //
+    template <std::size_t N>
+    struct default_type_traits<unsigned char[N]>
+    {
+      static const database_type_id db_type_id = id_blob;
+    };
+
     template <>
     struct default_type_traits<std::vector<char> >
     {
