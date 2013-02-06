@@ -33,8 +33,8 @@ if test x"path" != xnone; then
   LDFLAGS="$LDFLAGS -L$path"
 fi
 
-CXX_LIBTOOL_LINK_IFELSE(
-AC_LANG_SOURCE([[
+CXX_LIBTOOL_LINK_IFELSE([
+AC_LANG_SOURCE([
 #ifdef _WIN32
 #  include <winsock2.h>
 #endif
@@ -50,7 +50,7 @@ main ()
   mysql_stmt_close (stmt);
   mysql_close (&handle);
 }
-]]),
+])],
 [
 libmysqlclient_found=yes
 libmysqlclient_include=long
@@ -60,8 +60,8 @@ if test x"$libmysqlclient_found" = xyes; then
   break;
 fi
 
-CXX_LIBTOOL_LINK_IFELSE(
-AC_LANG_SOURCE([[
+CXX_LIBTOOL_LINK_IFELSE([
+AC_LANG_SOURCE([
 #ifdef _WIN32
 #  include <winsock2.h>
 #endif
@@ -77,7 +77,7 @@ main ()
   mysql_stmt_close (stmt);
   mysql_close (&handle);
 }
-]]),
+])],
 [
 libmysqlclient_found=yes
 libmysqlclient_include=short
@@ -111,8 +111,8 @@ libmysqlclient_thr_key_visible=no
 
 if test x"$libmysqlclient_found" = xyes -a x"$1" = xposix; then
 
-CXX_LIBTOOL_LINK_IFELSE(
-AC_LANG_SOURCE([[
+CXX_LIBTOOL_LINK_IFELSE([
+AC_LANG_SOURCE([
 #include <pthread.h>
 extern pthread_key_t THR_KEY_mysys;
 int
@@ -120,7 +120,7 @@ main ()
 {
   return pthread_getspecific (THR_KEY_mysys) != 0;
 }
-]]),
+])],
 [
 libmysqlclient_thr_key_visible=yes
 ])
