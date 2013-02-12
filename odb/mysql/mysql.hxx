@@ -10,7 +10,13 @@
 #include <odb/mysql/mysql-types.hxx>
 
 #ifdef _WIN32
-#  include <winsock2.h>
+#  ifndef NOMINMAX // No min and max macros.
+#    define NOMINMAX
+#    include <winsock2.h>
+#    undef NOMINMAX
+#  else
+#    include <winsock2.h>
+#  endif
 #endif
 
 #ifdef LIBODB_MYSQL_INCLUDE_SHORT
