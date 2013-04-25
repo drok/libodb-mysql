@@ -3,10 +3,14 @@
 // license   : GNU GPL v2; see accompanying LICENSE file
 
 #include <sstream>
+#include <cstring> // std::memset
 
+#include <odb/mysql/mysql.hxx>
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection.hxx>
 #include <odb/mysql/connection-factory.hxx>
+#include <odb/mysql/transaction.hxx>
+#include <odb/mysql/statement.hxx>
 #include <odb/mysql/exceptions.hxx>
 
 #include <odb/mysql/details/options.hxx>
@@ -238,6 +242,109 @@ namespace odb
     {
       connection_ptr c (factory_->connect ());
       return c.release ();
+    }
+
+    const database::schema_version_info& database::
+    load_schema_version (const string& name) const
+    {
+      schema_version_info& svi (schema_version_map_[name]);
+
+      // Construct the SELECT statement text.
+      //
+      string text ("SELECT `version`, `migration` FROM ");
+
+      if (!svi.version_table.empty ())
+        text += svi.version_table; // Already quoted.
+      else if (!schema_version_table_.empty ())
+        text += schema_version_table_; // Already quoted.
+      else
+        text += "`schema_version`";
+
+      text += " WHERE `name` = ?";
+
+      // Bind parameters and results.
+      //
+      unsigned long psize[1] = {static_cast<unsigned long> (name.size ())};
+      my_bool pnull[1] = {0};
+      MYSQL_BIND pbind[1];
+      binding param (pbind, 1);
+
+      memset (pbind, 0, sizeof (pbind));
+
+      pbind[0].buffer_type = MYSQL_TYPE_STRING;
+      pbind[0].buffer = const_cast<char*> (name.c_str ());
+      pbind[0].buffer_length = psize[0];
+      pbind[0].length = &psize[0];
+      pbind[0].is_null = &pnull[0];
+
+      param.version++;
+
+      signed char migration;
+      my_bool rnull[2];
+      MYSQL_BIND rbind[2];
+      binding result (rbind, 2);
+
+      memset (rbind, 0, sizeof (rbind));
+
+      rbind[0].buffer_type = MYSQL_TYPE_LONGLONG;
+      rbind[0].is_unsigned = 1;
+      rbind[0].buffer = &svi.version;
+      rbind[0].is_null = &rnull[0];
+
+      rbind[1].buffer_type = MYSQL_TYPE_TINY;
+      rbind[1].is_unsigned = 0;
+      rbind[1].buffer = &migration;
+      rbind[1].is_null = &rnull[1];
+
+      result.version++;
+
+      // If we are not in transaction, MySQL will use an implicit one
+      // (i.e., autocommit mode), which suits us just fine.
+      //
+      connection_ptr cp;
+      if (!transaction::has_current ())
+        cp = factory_->connect ();
+
+      mysql::connection& c (
+        cp != 0 ? *cp : transaction::current ().connection ());
+
+      try
+      {
+        select_statement st (c, text.c_str (), param, result, false);
+        st.execute ();
+        auto_result ar (st);
+
+        switch (st.fetch ())
+        {
+        case select_statement::success:
+          {
+            svi.migration = migration != 0;
+            assert (st.fetch () == select_statement::no_data);
+            break;
+          }
+        case select_statement::no_data:
+          {
+            svi.version = 0; // No schema.
+            break;
+          }
+        case select_statement::truncated:
+          {
+            assert (false);
+            break;
+          }
+        }
+      }
+      catch (const database_exception& e)
+      {
+        // Detect the case where there is no version table.
+        //
+        if (e.error () == ER_NO_SUCH_TABLE)
+          svi.version = 0; // No schema.
+        else
+          throw;
+      }
+
+      return svi;
     }
   }
 }
