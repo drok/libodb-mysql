@@ -9,6 +9,7 @@
 
 #include <cstddef> // std::size_t
 
+#include <odb/schema-version.hxx>
 #include <odb/polymorphic-object-result.hxx>
 
 #include <odb/details/shared-ptr.hxx>
@@ -16,6 +17,7 @@
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx> // query_base
 #include <odb/mysql/statement.hxx>
+#include <odb/mysql/traits-calls.hxx>
 
 namespace odb
 {
@@ -47,7 +49,8 @@ namespace odb
 
       polymorphic_object_result_impl (const query_base&,
                                       details::shared_ptr<select_statement>,
-                                      statements_type&);
+                                      statements_type&,
+                                      const schema_version_migration*);
 
       virtual void
       load (object_type*, bool fetch);
@@ -79,6 +82,7 @@ namespace odb
     private:
       details::shared_ptr<select_statement> statement_;
       statements_type& statements_;
+      object_traits_calls<object_type> tc_;
       std::size_t count_;
     };
   }

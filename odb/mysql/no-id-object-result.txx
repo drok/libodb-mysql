@@ -36,10 +36,12 @@ namespace odb
     no_id_object_result_impl<T>::
     no_id_object_result_impl (const query_base&,
                               details::shared_ptr<select_statement> statement,
-                              statements_type& statements)
+                              statements_type& statements,
+                              const schema_version_migration* svm)
         : base_type (statements.connection ()),
           statement_ (statement),
           statements_ (statements),
+          tc_ (svm),
           count_ (0)
     {
     }
@@ -52,7 +54,7 @@ namespace odb
         fetch ();
 
       object_traits::callback (this->db_, obj, callback_event::pre_load);
-      object_traits::init (obj, statements_.image (), &this->db_);
+      tc_.init (obj, statements_.image (), &this->db_);
       object_traits::callback (this->db_, obj, callback_event::post_load);
     }
 
@@ -95,7 +97,7 @@ namespace odb
         if (im.version != statements_.select_image_version ())
         {
           binding& b (statements_.select_image_binding ());
-          object_traits::bind (b.bind, im, statement_select);
+          tc_.bind (b.bind, im, statement_select);
           statements_.select_image_version (im.version);
           b.version++;
         }
@@ -116,14 +118,13 @@ namespace odb
 
             typename object_traits::image_type& im (statements_.image ());
 
-            if (object_traits::grow (
-                  im, statements_.select_image_truncated ()))
+            if (tc_.grow (im, statements_.select_image_truncated ()))
               im.version++;
 
             if (im.version != statements_.select_image_version ())
             {
               binding& b (statements_.select_image_binding ());
-              object_traits::bind (b.bind, im, statement_select);
+              tc_.bind (b.bind, im, statement_select);
               statements_.select_image_version (im.version);
               b.version++;
               statement_->refetch ();

@@ -36,10 +36,12 @@ namespace odb
     view_result_impl<T>::
     view_result_impl (const query_base&,
                       details::shared_ptr<select_statement> statement,
-                      statements_type& statements)
+                      statements_type& statements,
+                      const schema_version_migration* svm)
         : base_type (statements.connection ()),
           statement_ (statement),
           statements_ (statements),
+          tc_ (svm),
           count_ (0)
     {
     }
@@ -52,7 +54,7 @@ namespace odb
         fetch ();
 
       view_traits::callback (this->db_, view, callback_event::pre_load);
-      view_traits::init (view, statements_.image (), &this->db_);
+      tc_.init (view, statements_.image (), &this->db_);
       view_traits::callback (this->db_, view, callback_event::post_load);
     }
 
@@ -95,7 +97,7 @@ namespace odb
         if (im.version != statements_.image_version ())
         {
           binding& b (statements_.image_binding ());
-          view_traits::bind (b.bind, im);
+          tc_.bind (b.bind, im);
           statements_.image_version (im.version);
           b.version++;
         }
@@ -116,13 +118,13 @@ namespace odb
 
             typename view_traits::image_type& im (statements_.image ());
 
-            if (view_traits::grow (im, statements_.image_truncated ()))
+            if (tc_.grow (im, statements_.image_truncated ()))
               im.version++;
 
             if (im.version != statements_.image_version ())
             {
               binding& b (statements_.image_binding ());
-              view_traits::bind (b.bind, im);
+              tc_.bind (b.bind, im);
               statements_.image_version (im.version);
               b.version++;
               statement_->refetch ();

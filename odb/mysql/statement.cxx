@@ -2,7 +2,7 @@
 // copyright : Copyright (c) 2005-2013 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
-#include <cstring> // std::strlen
+#include <cstring> // std::strlen, std::memmove, std::memset
 #include <cassert>
 
 #include <odb/tracer.hxx>
@@ -23,19 +23,36 @@ namespace odb
     //
 
     statement::
-    statement (connection_type& conn, const string& text)
-        : conn_ (conn), text_copy_ (text), text_ (text_copy_.c_str ())
+    statement (connection_type& conn,
+               const string& text,
+               statement_kind sk,
+               const binding* process,
+               bool optimize)
+        : conn_ (conn)
     {
-      init (text_copy_.size ());
+      if (process == 0)
+      {
+        text_copy_ = text;
+        text_ = text_copy_.c_str ();
+      }
+      else
+        text_ = text.c_str (); // Temporary, see init().
+
+      init (text.size (), sk, process, optimize);
     }
 
     statement::
-    statement (connection_type& conn, const char* text, bool copy)
+    statement (connection_type& conn,
+               const char* text,
+               statement_kind sk,
+               const binding* process,
+               bool optimize,
+               bool copy)
         : conn_ (conn)
     {
       size_t n;
 
-      if (copy)
+      if (process == 0 && copy)
       {
         text_copy_ = text;
         text_ = text_copy_.c_str ();
@@ -43,16 +60,55 @@ namespace odb
       }
       else
       {
-        text_ = text;
+        text_ = text; // Potentially temporary, see init().
         n = strlen (text_);
       }
 
-      init (n);
+      init (n, sk, process, optimize);
     }
 
     void statement::
-    init (size_t text_size)
+    init (size_t text_size,
+          statement_kind sk,
+          const binding* proc,
+          bool optimize)
     {
+      if (proc != 0)
+      {
+        switch (sk)
+        {
+        case statement_select:
+          process_select (text_,
+                          &proc->bind->buffer, proc->count, sizeof (MYSQL_BIND),
+                          '`', '`',
+                          optimize,
+                          text_copy_);
+          break;
+        case statement_insert:
+          process_insert (text_,
+                          &proc->bind->buffer, proc->count, sizeof (MYSQL_BIND),
+                          '?',
+                          text_copy_);
+          break;
+        case statement_update:
+          process_update (text_,
+                          &proc->bind->buffer, proc->count, sizeof (MYSQL_BIND),
+                          '?',
+                          text_copy_);
+          break;
+        case statement_delete:
+          assert (false);
+        }
+
+        text_ = text_copy_.c_str ();
+        text_size = text_copy_.size ();
+      }
+
+      // Empty statement.
+      //
+      if (*text_ == '\0')
+        return;
+
       stmt_.reset (conn_.alloc_stmt_handle ());
 
       conn_.clear ();
@@ -66,6 +122,61 @@ namespace odb
             (t = conn_.tracer ()) ||
             (t = conn_.database ().tracer ()))
           t->prepare (conn_, *this);
+      }
+    }
+
+    size_t statement::
+    process_bind (MYSQL_BIND* b, size_t n)
+    {
+      size_t shifts (0);
+      for (MYSQL_BIND* e (b + n); b != e;)
+      {
+        if (b->buffer == 0)
+        {
+          // It is possible that this array has already been processed
+          // (shared among multiple statements).
+          //
+          if (b->length != 0)
+          {
+            n -= e - b;
+            break;
+          }
+
+          e--;
+
+          // Shift the rest of the entries to the left.
+          //
+          memmove (b, b + 1, (e - b) * sizeof (MYSQL_BIND));
+
+          // Store the original position of the NULL entry at the end.
+          //
+          e->buffer = 0;
+          e->length = reinterpret_cast<unsigned long*> (b + shifts);
+
+          shifts++;
+          continue;
+        }
+
+        b++;
+      }
+
+      return n - shifts;
+    }
+
+    void statement::
+    restore_bind (MYSQL_BIND* b, size_t n)
+    {
+      for (MYSQL_BIND* e (b + n - 1); e->buffer == 0 && e->length != 0;)
+      {
+        MYSQL_BIND* p (reinterpret_cast<MYSQL_BIND*> (e->length));
+
+        // Shift the entries from the specified position to the right.
+        //
+        memmove (p + 1, p, (e - p) * sizeof (MYSQL_BIND));
+
+        // Restore the original NULL entry.
+        //
+        memset (p, 0, sizeof (MYSQL_BIND));
       }
     }
 
@@ -109,10 +220,14 @@ namespace odb
 
     select_statement::
     select_statement (connection_type& conn,
-                      const string& t,
+                      const string& text,
+                      bool process,
+                      bool optimize,
                       binding& param,
                       binding& result)
-        : statement (conn, t),
+        : statement (conn,
+                     text, statement_select,
+                     (process ? &result : 0), optimize),
           end_ (false),
           cached_ (false),
           freed_ (true),
@@ -126,11 +241,16 @@ namespace odb
 
     select_statement::
     select_statement (connection_type& conn,
-                      const char* t,
+                      const char* text,
+                      bool process,
+                      bool optimize,
                       binding& param,
                       binding& result,
-                      bool ct)
-        : statement (conn, t, ct),
+                      bool copy_text)
+        : statement (conn,
+                     text, statement_select,
+                     (process ? &result : 0), optimize,
+                     copy_text),
           end_ (false),
           cached_ (false),
           freed_ (true),
@@ -143,8 +263,14 @@ namespace odb
     }
 
     select_statement::
-    select_statement (connection_type& conn, const string& t, binding& result)
-        : statement (conn, t),
+    select_statement (connection_type& conn,
+                      const string& text,
+                      bool process,
+                      bool optimize,
+                      binding& result)
+        : statement (conn,
+                     text, statement_select,
+                     (process ? &result : 0), optimize),
           end_ (false),
           cached_ (false),
           freed_ (true),
@@ -157,10 +283,15 @@ namespace odb
 
     select_statement::
     select_statement (connection_type& conn,
-                      const char* t,
+                      const char* text,
+                      bool process,
+                      bool optimize,
                       binding& result,
-                      bool ct)
-        : statement (conn, t, ct),
+                      bool copy_text)
+        : statement (conn,
+                     text, statement_select,
+                     (process ? &result : 0), optimize,
+                     copy_text),
           end_ (false),
           cached_ (false),
           freed_ (true),
@@ -186,6 +317,8 @@ namespace odb
 
       if (param_ != 0 && param_version_ != param_->version)
       {
+        // For now cannot have NULL entries.
+        //
         if (mysql_stmt_bind_param (stmt_, param_->bind))
           translate_error (conn_, stmt_);
 
@@ -234,15 +367,20 @@ namespace odb
     {
       if (result_version_ != result_.version)
       {
+        size_t count (process_bind (result_.bind, result_.count));
+
         // Make sure that the number of columns in the result returned by
         // the database matches the number that we expect. A common cause
         // of this assertion is a native view with a number of data members
         // not matching the number of columns in the SELECT-list.
         //
-        assert (mysql_stmt_field_count (stmt_) == result_.count);
+        assert (mysql_stmt_field_count (stmt_) == count);
 
         if (mysql_stmt_bind_result (stmt_, result_.bind))
           translate_error (conn_, stmt_);
+
+        if (count != result_.count)
+          restore_bind (result_.bind, result_.count);
 
         result_version_ = result_.version;
       }
@@ -287,16 +425,23 @@ namespace odb
     {
       // Re-fetch columns that were truncated.
       //
+      unsigned int col (0);
       for (size_t i (0); i < result_.count; ++i)
       {
-        if (*result_.bind[i].error)
-        {
-          *result_.bind[i].error = 0;
+        MYSQL_BIND& b (result_.bind[i]);
 
-          if (mysql_stmt_fetch_column (
-                stmt_, result_.bind + i, static_cast<unsigned int> (i), 0))
+        if (b.buffer == 0) // Skip NULL entries.
+          continue;
+
+        if (*b.error)
+        {
+          *b.error = 0;
+
+          if (mysql_stmt_fetch_column (stmt_, &b, col, 0))
             translate_error (conn_, stmt_);
         }
+
+        col++;
       }
     }
 
@@ -338,17 +483,30 @@ namespace odb
     }
 
     insert_statement::
-    insert_statement (connection_type& conn, const string& t, binding& param)
-        : statement (conn, t), param_ (param), param_version_ (0)
+    insert_statement (connection_type& conn,
+                      const string& text,
+                      bool process,
+                      binding& param)
+        : statement (conn,
+                     text, statement_insert,
+                     (process ? &param : 0), false),
+          param_ (param),
+          param_version_ (0)
     {
     }
 
     insert_statement::
     insert_statement (connection_type& conn,
-                      const char* t,
+                      const char* text,
+                      bool process,
                       binding& param,
-                      bool ct)
-        : statement (conn, t, ct), param_ (param), param_version_ (0)
+                      bool copy_text)
+        : statement (conn,
+                     text, statement_insert,
+                     (process ? &param : 0), false,
+                     copy_text),
+          param_ (param),
+          param_version_ (0)
     {
     }
 
@@ -362,8 +520,13 @@ namespace odb
 
       if (param_version_ != param_.version)
       {
+        size_t count (process_bind (param_.bind, param_.count));
+
         if (mysql_stmt_bind_param (stmt_, param_.bind))
           translate_error (conn_, stmt_);
+
+        if (count != param_.count)
+          restore_bind (param_.bind, param_.count);
 
         param_version_ = param_.version;
       }
@@ -402,17 +565,30 @@ namespace odb
     }
 
     update_statement::
-    update_statement (connection_type& conn, const string& t, binding& param)
-        : statement (conn, t), param_ (param), param_version_ (0)
+    update_statement (connection_type& conn,
+                      const string& text,
+                      bool process,
+                      binding& param)
+        : statement (conn,
+                     text, statement_update,
+                     (process ? &param : 0), false),
+          param_ (param),
+          param_version_ (0)
     {
     }
 
     update_statement::
     update_statement (connection_type& conn,
-                      const char* t,
+                      const char* text,
+                      bool process,
                       binding& param,
-                      bool ct)
-        : statement (conn, t, ct), param_ (param), param_version_ (0)
+                      bool copy_text)
+        : statement (conn,
+                     text, statement_update,
+                     (process ? &param : 0), false,
+                     copy_text),
+          param_ (param),
+          param_version_ (0)
     {
     }
 
@@ -426,8 +602,13 @@ namespace odb
 
       if (param_version_ != param_.version)
       {
+        size_t count (process_bind (param_.bind, param_.count));
+
         if (mysql_stmt_bind_param (stmt_, param_.bind))
           translate_error (conn_, stmt_);
+
+        if (count != param_.count)
+          restore_bind (param_.bind, param_.count);
 
         param_version_ = param_.version;
       }
@@ -460,17 +641,28 @@ namespace odb
     }
 
     delete_statement::
-    delete_statement (connection_type& conn, const string& t, binding& param)
-        : statement (conn, t), param_ (param), param_version_ (0)
+    delete_statement (connection_type& conn,
+                      const string& text,
+                      binding& param)
+        : statement (conn,
+                     text, statement_delete,
+                     0, false),
+          param_ (param),
+          param_version_ (0)
     {
     }
 
     delete_statement::
     delete_statement (connection_type& conn,
-                      const char* t,
+                      const char* text,
                       binding& param,
-                      bool ct)
-        : statement (conn, t, ct), param_ (param), param_version_ (0)
+                      bool copy_text)
+        : statement (conn,
+                     text, statement_delete,
+                     0, false,
+                     copy_text),
+          param_ (param),
+          param_version_ (0)
     {
     }
 
@@ -484,6 +676,8 @@ namespace odb
 
       if (param_version_ != param_.version)
       {
+        // Cannot have NULL entries for now.
+        //
         if (mysql_stmt_bind_param (stmt_, param_.bind))
           translate_error (conn_, stmt_);
 

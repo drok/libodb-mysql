@@ -50,6 +50,17 @@ namespace odb
         return conn_;
       }
 
+      // A statement can be empty. This is used to handle situations
+      // where a SELECT or UPDATE statement ends up not having any
+      // columns after processing. An empty statement cannot be
+      // executed.
+      //
+      bool
+      empty () const
+      {
+        return stmt_ == 0;
+      }
+
       // Cancel the statement execution (e.g., result fetching) so
       // that another statement can be executed on the connection.
       //
@@ -57,12 +68,39 @@ namespace odb
       cancel ();
 
     protected:
-      statement (connection_type&, const std::string& text);
-      statement (connection_type&, const char* text, bool copy_text);
+      // We keep two versions to take advantage of std::string COW.
+      //
+      statement (connection_type&,
+                 const std::string& text,
+                 statement_kind,
+                 const binding* process,
+                 bool optimize);
+
+      statement (connection_type&,
+                 const char* text,
+                 statement_kind,
+                 const binding* process,
+                 bool optimize,
+                 bool copy_text);
+
+      // Process the bind array so that all non-NULL entries are at
+      // the beginning. Return the actual number of bound columns.
+      //
+      static std::size_t
+      process_bind (MYSQL_BIND*, std::size_t n);
+
+      // Restore the original locations of the NULL entries in the bind
+      // array.
+      //
+      static void
+      restore_bind (MYSQL_BIND*, std::size_t n);
 
     private:
       void
-      init (std::size_t text_size);
+      init (std::size_t text_size,
+            statement_kind,
+            const binding* process,
+            bool optimize);
 
     protected:
       connection_type& conn_;
@@ -79,21 +117,29 @@ namespace odb
 
       select_statement (connection_type& conn,
                         const std::string& text,
+                        bool process_text,
+                        bool optimize_text,
                         binding& param,
                         binding& result);
 
       select_statement (connection_type& conn,
                         const char* text,
+                        bool process_text,
+                        bool optimize_text,
                         binding& param,
                         binding& result,
                         bool copy_text = true);
 
       select_statement (connection_type& conn,
                         const std::string& text,
+                        bool process_text,
+                        bool optimize_text,
                         binding& result);
 
       select_statement (connection_type& conn,
                         const char* text,
+                        bool process_text,
+                        bool optimize_text,
                         binding& result,
                         bool copy_text = true);
 
@@ -187,10 +233,12 @@ namespace odb
 
       insert_statement (connection_type& conn,
                         const std::string& text,
+                        bool process_text,
                         binding& param);
 
       insert_statement (connection_type& conn,
                         const char* text,
+                        bool process_text,
                         binding& param,
                         bool copy_text = true);
 
@@ -220,10 +268,12 @@ namespace odb
 
       update_statement (connection_type& conn,
                         const std::string& text,
+                        bool process_text,
                         binding& param);
 
       update_statement (connection_type& conn,
                         const char* text,
+                        bool process_text,
                         binding& param,
                         bool copy_text = true);
 
