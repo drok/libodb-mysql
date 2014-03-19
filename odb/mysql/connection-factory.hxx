@@ -113,7 +113,7 @@ namespace odb
       connection_pool_factory& operator= (const connection_pool_factory&);
 
     protected:
-      class pooled_connection: public connection
+      class LIBODB_MYSQL_EXPORT pooled_connection: public connection
       {
       public:
         pooled_connection (database_type&);
