@@ -336,6 +336,13 @@ namespace odb
       if (mysql_stmt_execute (stmt_))
         translate_error (conn_, stmt_);
 
+      // This flag appears to be cleared once we start processing the
+      // result, so we have to cache it for free_result() below.
+      //
+#if MYSQL_VERSION_ID >= 50503
+      out_params_ = (conn_.handle ()->server_status & SERVER_PS_OUT_PARAMS);
+#endif
+
       freed_ = false;
       conn_.active (this);
     }
@@ -450,8 +457,76 @@ namespace odb
     {
       if (!freed_)
       {
+        // If this is a stored procedure call, then we have multiple
+        // results. The first is the rowset that is the result of the
+        // procedure (actually, it can be several rowsets if, for
+        // example, the procedure executes multiple SELECT statements,
+        // but we don't support this). This result we have just handled.
+        // Next, there could be another rowset with just one row which
+        // contains the output variable values (OUT and INOUT; actually,
+        // if the procedure does not have any SELECT statements, then
+        // this will be the first result and we have just handled it).
+        // Finally, the last result is always the stored procedure status
+        // (not clear how to get this value; all MySQL sample code simply
+        // ignores it).
+        //
+        // So what we need to do here is read and ignore these other
+        // results since otherwise MySQL won't let us execute any
+        // subsequent statements. Calling mysql_stmt_next_result()
+        // until it tells us there is no more results seems to do
+        // the trick.
+        //
+        // mysql_stmt_next_result() is only available since 5.5.3.
+        // Checking the source code reveals that it does call
+        // mysql_next_result() (which is available prior to 5.5.3)
+        // but also does some other house keeping. So it is not
+        // clear if it is possible to emulate the below logic for
+        // prior MySQL versions.
+        //
+
+        // Handling OUT parameters requires a special Voodoo dance:
+        // we have to fetch the row itself and we have to call fetch
+        // again and get MYSQL_NO_DATA. Without doing these exact
+        // steps the server simply drops the connection. Go figure.
+        //
+#if MYSQL_VERSION_ID >= 50503
+        if (out_params_)
+        {
+          if (mysql_stmt_fetch (stmt_) != MYSQL_NO_DATA)
+            translate_error (conn_, stmt_);
+        }
+#endif
+
         if (mysql_stmt_free_result (stmt_))
           translate_error (conn_, stmt_);
+
+#if MYSQL_VERSION_ID >= 50503
+        {
+          int s;
+          while ((s = mysql_stmt_next_result (stmt_)) == 0)
+          {
+            if (mysql_stmt_field_count (stmt_) != 0)
+            {
+              // The same Voodoo dance as above.
+              //
+              if (conn_.handle ()->server_status & SERVER_PS_OUT_PARAMS)
+              {
+                if (mysql_stmt_fetch (stmt_))
+                  translate_error (conn_, stmt_);
+
+                if (mysql_stmt_fetch (stmt_) != MYSQL_NO_DATA)
+                  translate_error (conn_, stmt_);
+              }
+
+              if (mysql_stmt_free_result (stmt_))
+                translate_error (conn_, stmt_);
+            }
+          }
+
+          if (s != -1)
+            translate_error (conn_, stmt_);
+        }
+#endif
 
         if (conn_.active () == this)
           conn_.active (0);
@@ -468,7 +543,7 @@ namespace odb
     {
       // If we cached the result, don't free it just yet.
       //
-      if (!cached_)
+      if (!cached_ || end_)
         free_result ();
       else
         conn_.active (0);

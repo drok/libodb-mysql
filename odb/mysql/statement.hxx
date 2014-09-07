@@ -205,6 +205,10 @@ namespace odb
       std::size_t rows_;
       std::size_t size_;
 
+#if MYSQL_VERSION_ID >= 50503
+      bool out_params_;
+#endif
+
       binding* param_;
       std::size_t param_version_;
 
