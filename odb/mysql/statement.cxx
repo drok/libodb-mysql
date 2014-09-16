@@ -113,9 +113,6 @@ namespace odb
 
       conn_.clear ();
 
-      if (mysql_stmt_prepare (stmt_, text_, text_size) != 0)
-        translate_error (conn_, stmt_);
-
       {
         odb::tracer* t;
         if ((t = conn_.transaction_tracer ()) ||
@@ -123,6 +120,9 @@ namespace odb
             (t = conn_.database ().tracer ()))
           t->prepare (conn_, *this);
       }
+
+      if (mysql_stmt_prepare (stmt_, text_, text_size) != 0)
+        translate_error (conn_, stmt_);
     }
 
     size_t statement::
