@@ -183,19 +183,22 @@ namespace odb
     statement::
     ~statement ()
     {
+      if (stmt_ != 0)
       {
-        odb::tracer* t;
-        if ((t = conn_.transaction_tracer ()) ||
-            (t = conn_.tracer ()) ||
-            (t = conn_.database ().tracer ()))
-          t->deallocate (conn_, *this);
-      }
+        {
+          odb::tracer* t;
+          if ((t = conn_.transaction_tracer ()) ||
+              (t = conn_.tracer ()) ||
+              (t = conn_.database ().tracer ()))
+            t->deallocate (conn_, *this);
+        }
 
-      // Let the connection handle the release of the statement (it
-      // may delay the actual freeing if it will mess up the currently
-      // active statement).
-      //
-      conn_.free_stmt_handle (stmt_);
+        // Let the connection handle the release of the statement (it
+        // may delay the actual freeing if it will mess up the currently
+        // active statement).
+        //
+        conn_.free_stmt_handle (stmt_);
+      }
     }
 
     const char* statement::
