@@ -564,12 +564,14 @@ namespace odb
     insert_statement (connection_type& conn,
                       const string& text,
                       bool process,
-                      binding& param)
+                      binding& param,
+                      binding* returning)
         : statement (conn,
                      text, statement_insert,
                      (process ? &param : 0), false),
           param_ (param),
-          param_version_ (0)
+          param_version_ (0),
+          returning_ (returning)
     {
     }
 
@@ -578,13 +580,15 @@ namespace odb
                       const char* text,
                       bool process,
                       binding& param,
+                      binding* returning,
                       bool copy_text)
         : statement (conn,
                      text, statement_insert,
                      (process ? &param : 0), false,
                      copy_text),
           param_ (param),
-          param_version_ (0)
+          param_version_ (0),
+          returning_ (returning)
     {
     }
 
@@ -625,13 +629,35 @@ namespace odb
           translate_error (conn_, stmt_);
       }
 
-      return true;
-    }
+      if (returning_ != 0)
+      {
+        unsigned long long i (mysql_stmt_insert_id (stmt_));
 
-    unsigned long long insert_statement::
-    id ()
-    {
-      return static_cast<unsigned long long> (mysql_stmt_insert_id (stmt_));
+        MYSQL_BIND& b (returning_->bind[0]);
+        void* v (b.buffer);
+
+        switch (b.buffer_type)
+        {
+        case MYSQL_TYPE_TINY:
+          *static_cast<unsigned char*> (v) = static_cast<unsigned char> (i);
+          break;
+        case MYSQL_TYPE_SHORT:
+          *static_cast<unsigned short*> (v) = static_cast<unsigned short> (i);
+          break;
+        case MYSQL_TYPE_LONG:
+          *static_cast<unsigned int*> (v) = static_cast<unsigned int> (i);
+          break;
+        case MYSQL_TYPE_LONGLONG:
+          *static_cast<unsigned long long*> (v) = i;
+          break;
+        default:
+          assert (false); // Auto id column type is not an integer.
+        }
+
+        *b.is_null = false;
+      }
+
+      return true;
     }
 
     // update_statement

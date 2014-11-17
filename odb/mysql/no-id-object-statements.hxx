@@ -88,6 +88,7 @@ namespace odb
               object_traits::persist_statement,
               object_traits::versioned, // Process if versioned.
               insert_image_binding_,
+              0,
               false));
 
         return *persist_;

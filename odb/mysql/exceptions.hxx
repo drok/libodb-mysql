@@ -49,6 +49,9 @@ namespace odb
       virtual const char*
       what () const throw ();
 
+      virtual database_exception*
+      clone () const;
+
     private:
       unsigned int error_;
       std::string sqlstate_;
@@ -63,6 +66,9 @@ namespace odb
 
       virtual const char*
       what () const throw ();
+
+      virtual cli_exception*
+      clone () const;
 
     private:
       std::string what_;

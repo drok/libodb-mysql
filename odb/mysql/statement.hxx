@@ -238,12 +238,14 @@ namespace odb
       insert_statement (connection_type& conn,
                         const std::string& text,
                         bool process_text,
-                        binding& param);
+                        binding& param,
+                        binding* returning);
 
       insert_statement (connection_type& conn,
                         const char* text,
                         bool process_text,
                         binding& param,
+                        binding* returning,
                         bool copy_text = true);
 
       // Return true if successful and false if the row is a duplicate.
@@ -252,9 +254,6 @@ namespace odb
       bool
       execute ();
 
-      unsigned long long
-      id ();
-
     private:
       insert_statement (const insert_statement&);
       insert_statement& operator= (const insert_statement&);
@@ -262,6 +261,8 @@ namespace odb
     private:
       binding& param_;
       std::size_t param_version_;
+
+      binding* returning_;
     };
 
     class LIBODB_MYSQL_EXPORT update_statement: public statement
