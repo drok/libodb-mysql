@@ -15,11 +15,11 @@ namespace odb
 {
   namespace mysql
   {
-    void
+    static void
     translate_error (connection& c,
                      unsigned int e,
                      const string& sqlstate,
-                     const string& message)
+                     string msg)
     {
       switch (e)
       {
@@ -44,7 +44,13 @@ namespace odb
         }
       default:
         {
-          throw database_exception (e, sqlstate, message);
+          // Get rid of a trailing newline if there is one.
+          //
+          string::size_type n (msg.size ());
+          if (n != 0 && msg[n - 1] == '\n')
+            msg.resize (n - 1);
+
+          throw database_exception (e, sqlstate, msg);
         }
       }
     }
