@@ -623,7 +623,10 @@ namespace odb
 
       if (mysql_stmt_execute (stmt_))
       {
-        if (mysql_stmt_errno (stmt_) == ER_DUP_ENTRY)
+        // An auto-assigned object id should never cause a duplicate
+        // primary key.
+        //
+        if (returning_ == 0 && mysql_stmt_errno (stmt_) == ER_DUP_ENTRY)
           return false;
         else
           translate_error (conn_, stmt_);
