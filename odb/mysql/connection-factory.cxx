@@ -128,41 +128,22 @@ namespace odb
       static mysql_process_init mysql_process_init_;
     }
 
-    //
-    // connection_factory
-    //
-
-    connection_factory::
-    ~connection_factory ()
-    {
-    }
-
-    //
     // new_connection_factory
     //
-
     connection_ptr new_connection_factory::
     connect ()
     {
       tls_get (mysql_thread_init_);
 
-      return connection_ptr (new (shared) connection (*db_));
+      return connection_ptr (new (shared) connection (*this));
     }
 
-    void new_connection_factory::
-    database (database_type& db)
-    {
-      db_ = &db;
-    }
-
-    //
     // connection_pool_factory
     //
-
     connection_pool_factory::pooled_connection_ptr connection_pool_factory::
     create ()
     {
-      return pooled_connection_ptr (new (shared) pooled_connection (*db_));
+      return pooled_connection_ptr (new (shared) pooled_connection (*this));
     }
 
     connection_pool_factory::
@@ -205,7 +186,7 @@ namespace odb
             c = connections_.back ();
             connections_.pop_back ();
 
-            c->pool_ = this;
+            c->callback_ = &c->cb_;
             in_use_++;
             break;
           }
@@ -218,7 +199,7 @@ namespace odb
             // can return immediately.
             //
             c = create ();
-            c->pool_ = this;
+            c->callback_ = &c->cb_;
             in_use_++;
             return c;
           }
@@ -244,7 +225,12 @@ namespace odb
     {
       tls_get (mysql_thread_init_);
 
-      db_ = &db;
+      bool first (db_ == 0);
+
+      connection_factory::database (db);
+
+      if (!first)
+        return;
 
       if (min_ > 0)
       {
@@ -259,7 +245,7 @@ namespace odb
     release (pooled_connection* c)
     {
       c->clear ();
-      c->pool_ = 0;
+      c->callback_ = 0;
 
       lock l (mutex_);
 
@@ -289,28 +275,26 @@ namespace odb
     //
 
     connection_pool_factory::pooled_connection::
-    pooled_connection (database_type& db)
-        : connection (db), pool_ (0)
+    pooled_connection (connection_pool_factory& f)
+        : connection (f)
     {
-      callback_.arg = this;
-      callback_.zero_counter = &zero_counter;
-      shared_base::callback_ = &callback_;
+      cb_.arg = this;
+      cb_.zero_counter = &zero_counter;
     }
 
     connection_pool_factory::pooled_connection::
-    pooled_connection (database_type& db, MYSQL* handle)
-        : connection (db, handle), pool_ (0)
+    pooled_connection (connection_pool_factory& f, MYSQL* handle)
+        : connection (f, handle)
     {
-      callback_.arg = this;
-      callback_.zero_counter = &zero_counter;
-      shared_base::callback_ = &callback_;
+      cb_.arg = this;
+      cb_.zero_counter = &zero_counter;
     }
 
     bool connection_pool_factory::pooled_connection::
     zero_counter (void* arg)
     {
       pooled_connection* c (static_cast<pooled_connection*> (arg));
-      return c->pool_ ? c->pool_->release (c) : true;
+      return static_cast<connection_pool_factory&> (c->factory_).release (c);
     }
   }
 }

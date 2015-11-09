@@ -29,6 +29,7 @@ namespace odb
   namespace mysql
   {
     class statement_cache;
+    class connection_factory;
 
     class connection;
     typedef details::shared_ptr<connection> connection_ptr;
@@ -42,14 +43,11 @@ namespace odb
       virtual
       ~connection ();
 
-      connection (database_type&);
-      connection (database_type&, MYSQL* handle);
+      connection (connection_factory&);
+      connection (connection_factory&, MYSQL* handle);
 
       database_type&
-      database ()
-      {
-        return db_;
-      }
+      database ();
 
     public:
       virtual transaction_impl*
@@ -179,11 +177,6 @@ namespace odb
       friend class transaction_impl; // invalidate_results()
 
     private:
-      // Needed to break the circular connection-database dependency
-      // (odb::connection has the odb::database member).
-      //
-      database_type& db_;
-
       bool failed_;
 
       MYSQL mysql_;
@@ -201,6 +194,33 @@ namespace odb
       //
       typedef std::vector<MYSQL_STMT*> stmt_handles;
       stmt_handles stmt_handles_;
+    };
+
+    class LIBODB_MYSQL_EXPORT connection_factory:
+      public odb::connection_factory
+    {
+    public:
+      typedef mysql::database database_type;
+
+      virtual void
+      database (database_type&);
+
+      database_type&
+      database () {return *db_;}
+
+      virtual connection_ptr
+      connect () = 0;
+
+      virtual
+      ~connection_factory ();
+
+      connection_factory (): db_ (0) {}
+
+      // Needed to break the circular connection_factory-database dependency
+      // (odb::connection_factory has the odb::database member).
+      //
+    protected:
+      database_type* db_;
     };
   }
 }

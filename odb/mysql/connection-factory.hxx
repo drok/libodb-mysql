@@ -25,42 +25,17 @@ namespace odb
 {
   namespace mysql
   {
-    class LIBODB_MYSQL_EXPORT connection_factory
-    {
-    public:
-      virtual connection_ptr
-      connect () = 0;
-
-    public:
-      typedef mysql::database database_type;
-
-      virtual void
-      database (database_type&) = 0;
-
-      virtual
-      ~connection_factory ();
-    };
-
     class LIBODB_MYSQL_EXPORT new_connection_factory: public connection_factory
     {
     public:
-      new_connection_factory ()
-          : db_ (0)
-      {
-      }
+      new_connection_factory () {}
 
       virtual connection_ptr
       connect ();
 
-      virtual void
-      database (database_type&);
-
     private:
       new_connection_factory (const new_connection_factory&);
       new_connection_factory& operator= (const new_connection_factory&);
-
-    private:
-      database_type* db_;
     };
 
     class LIBODB_MYSQL_EXPORT connection_pool_factory:
@@ -91,7 +66,6 @@ namespace odb
             ping_ (ping),
             in_use_ (0),
             waiters_ (0),
-            db_ (0),
             cond_ (mutex_)
       {
         // max_connections == 0 means unlimited.
@@ -116,8 +90,8 @@ namespace odb
       class LIBODB_MYSQL_EXPORT pooled_connection: public connection
       {
       public:
-        pooled_connection (database_type&);
-        pooled_connection (database_type&, MYSQL*);
+        pooled_connection (connection_pool_factory&);
+        pooled_connection (connection_pool_factory&, MYSQL*);
 
       private:
         static bool
@@ -126,11 +100,7 @@ namespace odb
       private:
         friend class connection_pool_factory;
 
-        shared_base::refcount_callback callback_;
-
-        // NULL pool value indicates that the connection is not in use.
-        //
-        connection_pool_factory* pool_;
+        shared_base::refcount_callback cb_;
       };
 
       friend class pooled_connection;
@@ -158,7 +128,6 @@ namespace odb
       std::size_t in_use_;  // Number of connections currently in use.
       std::size_t waiters_; // Number of threads waiting for a connection.
 
-      database_type* db_;
       connections connections_;
 
       details::mutex mutex_;

@@ -2,12 +2,34 @@
 // copyright : Copyright (c) 2009-2015 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#include <utility> // move()
+
 #include <odb/mysql/transaction.hxx>
 
 namespace odb
 {
   namespace mysql
   {
+#ifdef ODB_CXX11
+    inline database::
+    database (database&& db) // Has to be inline.
+        : odb::database (std::move (db)),
+          user_ (std::move (db.user_)),
+          passwd_str_ (std::move (db.passwd_str_)),
+          passwd_ (db.passwd_ != 0 ? passwd_str_.c_str () : 0),
+          db_ (std::move (db.db_)),
+          host_ (std::move (db.host_)),
+          port_ (db.port_),
+          socket_str_ (std::move (db.socket_str_)),
+          socket_ (db.socket_ != 0 ? socket_str_.c_str () : 0),
+          charset_ (std::move (db.charset_)),
+          client_flags_ (db.client_flags_),
+          factory_ (std::move (db.factory_))
+    {
+      factory_->database (*this); // New database instance.
+    }
+#endif
+
     inline connection_ptr database::
     connection ()
     {

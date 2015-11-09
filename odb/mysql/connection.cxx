@@ -20,21 +20,20 @@ namespace odb
   namespace mysql
   {
     connection::
-    connection (database_type& db)
-        : odb::connection (db),
-          db_ (db),
-          failed_ (false),
-          active_ (0)
+    connection (connection_factory& cf)
+        : odb::connection (cf), failed_ (false), active_ (0)
     {
       if (mysql_init (&mysql_) == 0)
         throw bad_alloc ();
 
       handle_.reset (&mysql_);
 
-      if (*db_.charset () != '\0')
+      database_type& db (database ());
+
+      if (*db.charset () != '\0')
         // Can only fail if we pass an unknown option.
         //
-        mysql_options (handle_, MYSQL_SET_CHARSET_NAME, db_.charset ());
+        mysql_options (handle_, MYSQL_SET_CHARSET_NAME, db.charset ());
 
       // Force the CLIENT_FOUND_ROWS flag so that UPDATE returns the
       // number of found rows, not the number of changed rows. This
@@ -68,9 +67,8 @@ namespace odb
     }
 
     connection::
-    connection (database_type& db, MYSQL* handle)
-        : odb::connection (db),
-          db_ (db),
+    connection (connection_factory& cf, MYSQL* handle)
+        : odb::connection (cf),
           failed_ (false),
           handle_ (handle),
           active_ (0),
@@ -202,6 +200,20 @@ namespace odb
       }
 
       stmt_handles_.clear ();
+    }
+
+    // connection_factory
+    //
+    connection_factory::
+    ~connection_factory ()
+    {
+    }
+
+    void connection_factory::
+    database (database_type& db)
+    {
+      odb::connection_factory::db_ = &db;
+      db_ = &db;
     }
   }
 }
