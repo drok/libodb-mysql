@@ -10,6 +10,7 @@
 #include <string>
 
 #include <odb/exceptions.hxx>
+#include <odb/details/config.hxx> // ODB_NOTHROW_NOEXCEPT
 
 #include <odb/mysql/version.hxx>
 #include <odb/mysql/forward.hxx>
@@ -26,7 +27,7 @@ namespace odb
                           const std::string& sqlstate,
                           const std::string& message);
 
-      ~database_exception () throw ();
+      ~database_exception () ODB_NOTHROW_NOEXCEPT;
 
       unsigned int
       error () const
@@ -47,7 +48,7 @@ namespace odb
       }
 
       virtual const char*
-      what () const throw ();
+      what () const ODB_NOTHROW_NOEXCEPT;
 
       virtual database_exception*
       clone () const;
@@ -62,10 +63,10 @@ namespace odb
     struct LIBODB_MYSQL_EXPORT cli_exception: odb::exception
     {
       cli_exception (const std::string& what);
-      ~cli_exception () throw ();
+      ~cli_exception () ODB_NOTHROW_NOEXCEPT;
 
       virtual const char*
-      what () const throw ();
+      what () const ODB_NOTHROW_NOEXCEPT;
 
       virtual cli_exception*
       clone () const;
