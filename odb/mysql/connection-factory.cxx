@@ -33,6 +33,8 @@
 // 1. MySQL doesn't use the destructor itself.
 // 2. Nobody else tried to call mysql_thread_end() before us.
 //
+// Note: in 5.7 the key has been made static and is no longer accessible.
+//
 #if defined(ODB_THREADS_POSIX) && defined(LIBODB_MYSQL_THR_KEY_VISIBLE)
 extern pthread_key_t THR_KEY_mysys;
 #endif
