@@ -1,5 +1,5 @@
 // file      : odb/mysql/section-statements.hxx
-// copyright : Copyright (c) 2005-2015 Code Synthesis Tools CC
+// copyright : Copyright (c) 2005-2017 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
 #ifndef ODB_MYSQL_SECTION_STATEMENTS_HXX
