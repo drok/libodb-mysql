@@ -1,0 +1,64 @@
+// file      : odb/mysql/version-build2.hxx.in
+// copyright : Copyright (c) 2005-2017 Code Synthesis Tools CC
+// license   : GNU GPL v2; see accompanying LICENSE file
+
+#ifndef LIBODB_MYSQL_VERSION // Note: using the version macro itself.
+
+// Note: using build2 standard versioning scheme. The numeric version format
+// is AAABBBCCCDDDE where:
+//
+// AAA - major version number
+// BBB - minor version number
+// CCC - bugfix version number
+// DDD - alpha / beta (DDD + 500) version number
+// E   - final (0) / snapshot (1)
+//
+// When DDDE is not 0, 1 is subtracted from AAABBBCCC. For example:
+//
+// Version      AAABBBCCCDDDE
+//
+// 0.1.0        0000010000000
+// 0.1.2        0000010010000
+// 1.2.3        0010020030000
+// 2.2.0-a.1    0020019990010
+// 3.0.0-b.2    0029999995020
+// 2.2.0-a.1.z  0020019990011
+//
+#define LIBODB_MYSQL_VERSION       $libodb-mysql.version.project_number$ULL
+#define LIBODB_MYSQL_VERSION_STR   "$libodb-mysql.version.project$"
+#define LIBODB_MYSQL_VERSION_ID    "$libodb-mysql.version.project_id$"
+
+#define LIBODB_MYSQL_VERSION_MAJOR $libodb-mysql.version.major$
+#define LIBODB_MYSQL_VERSION_MINOR $libodb-mysql.version.minor$
+#define LIBODB_MYSQL_VERSION_PATCH $libodb-mysql.version.patch$
+
+#define LIBODB_MYSQL_PRE_RELEASE   $libodb-mysql.version.pre_release$
+
+#define LIBODB_MYSQL_SNAPSHOT      $libodb-mysql.version.snapshot_sn$ULL
+#define LIBODB_MYSQL_SNAPSHOT_ID   "$libodb-mysql.version.snapshot_id$"
+
+#ifdef LIBODB_MYSQL_MARIADB
+#  include <mysql/mariadb_version.h>
+
+// We support MariaDB starting from 10.2.2 when the library started to be
+// named as as mariadb, rather than mysqlclient. Before that we just don't
+// distinguish it from the MySQL client library.
+//
+#  if !defined(MYSQL_VERSION_ID) || MYSQL_VERSION_ID < 100202
+#    error unexpected MariaDB version detected
+#  endif
+#else
+#  include <mysql/mysql_version.h>
+
+// Check that we have a compatible MySQL version (5.0.3 or later).
+//
+#  if !defined(MYSQL_VERSION_ID) || MYSQL_VERSION_ID < 50003
+#    error incompatible MySQL version detected
+#  endif
+#endif
+
+#include <odb/version.hxx>
+
+$libodb.check(LIBODB_VERSION, LIBODB_SNAPSHOT)$
+
+#endif // LIBODB_MYSQL_VERSION

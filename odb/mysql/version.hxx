@@ -2,6 +2,10 @@
 // copyright : Copyright (c) 2005-2017 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
+#ifdef LIBODB_MYSQL_BUILD2
+#  include <odb/mysql/version-build2.hxx>
+#else
+
 #ifndef ODB_MYSQL_VERSION_HXX
 #define ODB_MYSQL_VERSION_HXX
 
@@ -55,3 +59,4 @@
 #include <odb/post.hxx>
 
 #endif // ODB_MYSQL_VERSION_HXX
+#endif // LIBODB_MYSQL_BUILD2
