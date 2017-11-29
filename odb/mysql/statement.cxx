@@ -121,7 +121,9 @@ namespace odb
           t->prepare (conn_, *this);
       }
 
-      if (mysql_stmt_prepare (stmt_, text_, text_size) != 0)
+      if (mysql_stmt_prepare (stmt_,
+                              text_,
+                              static_cast<unsigned long> (text_size)) != 0)
         translate_error (conn_, stmt_);
     }
 
