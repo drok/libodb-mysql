@@ -52,7 +52,7 @@ libs{odb-mysql}: cxx.export.poptions += -DLIBODB_MYSQL_SHARED
 
 lib{odb-mysql}: cxx.export.libs = $int_libs
 
-details/:
+details/
 {
   if $cli.configured
   {
@@ -91,7 +91,7 @@ hxx{version}@./:             install = false
 hxx{version-build2}:         install = $install_include/version.hxx
 hxx{version-build2-stub}@./: install = $install_include/version-build2.hxx
 
-details/build2/:
+details/build2/
 {
   h{*}: install = false
 
