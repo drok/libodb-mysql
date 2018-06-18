@@ -60,7 +60,8 @@ details/
 
     cli.options += --include-with-brackets --include-prefix odb/mysql/details \
 --guard-prefix LIBODB_MYSQL_DETAILS --generate-file-scanner \
---cli-namespace odb::mysql::details::cli --long-usage --generate-specifier
+--cli-namespace odb::mysql::details::cli --long-usage --generate-specifier \
+--no-combined-flags
 
     # Include generated cli files into the distribution and don't remove them
     # when cleaning in src (so that clean results in a state identical to
