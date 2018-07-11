@@ -1,6 +1,7 @@
 : 1
 name: libodb-mysql
 version: 2.5.0-b.8.z
+project: odb
 summary: MySQL ODB runtime library
 license: GPLv2
 license: proprietary
