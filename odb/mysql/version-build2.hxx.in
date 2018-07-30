@@ -24,18 +24,18 @@
 // 3.0.0-b.2    0029999995020
 // 2.2.0-a.1.z  0020019990011
 //
-#define LIBODB_MYSQL_VERSION       $libodb-mysql.version.project_number$ULL
-#define LIBODB_MYSQL_VERSION_STR   "$libodb-mysql.version.project$"
-#define LIBODB_MYSQL_VERSION_ID    "$libodb-mysql.version.project_id$"
+#define LIBODB_MYSQL_VERSION       $libodb_mysql.version.project_number$ULL
+#define LIBODB_MYSQL_VERSION_STR   "$libodb_mysql.version.project$"
+#define LIBODB_MYSQL_VERSION_ID    "$libodb_mysql.version.project_id$"
 
-#define LIBODB_MYSQL_VERSION_MAJOR $libodb-mysql.version.major$
-#define LIBODB_MYSQL_VERSION_MINOR $libodb-mysql.version.minor$
-#define LIBODB_MYSQL_VERSION_PATCH $libodb-mysql.version.patch$
+#define LIBODB_MYSQL_VERSION_MAJOR $libodb_mysql.version.major$
+#define LIBODB_MYSQL_VERSION_MINOR $libodb_mysql.version.minor$
+#define LIBODB_MYSQL_VERSION_PATCH $libodb_mysql.version.patch$
 
-#define LIBODB_MYSQL_PRE_RELEASE   $libodb-mysql.version.pre_release$
+#define LIBODB_MYSQL_PRE_RELEASE   $libodb_mysql.version.pre_release$
 
-#define LIBODB_MYSQL_SNAPSHOT      $libodb-mysql.version.snapshot_sn$ULL
-#define LIBODB_MYSQL_SNAPSHOT_ID   "$libodb-mysql.version.snapshot_id$"
+#define LIBODB_MYSQL_SNAPSHOT      $libodb_mysql.version.snapshot_sn$ULL
+#define LIBODB_MYSQL_SNAPSHOT_ID   "$libodb_mysql.version.snapshot_id$"
 
 #ifdef LIBODB_MYSQL_MARIADB
 #  include <mysql/mariadb_version.h>
