@@ -40,8 +40,8 @@ namespace odb
       case CR_UNKNOWN_ERROR:
         {
           c.mark_failed ();
-          // Fall through.
         }
+        // Fall through.
       default:
         {
           // Get rid of a trailing newline if there is one.
