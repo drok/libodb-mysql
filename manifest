@@ -1,6 +1,6 @@
 : 1
 name: libodb-mysql
-version: 2.5.0-b.11
+version: 2.5.0-b.12.z
 project: odb
 summary: MySQL ODB runtime library
 license: GPLv2
@@ -16,8 +16,8 @@ build-email: odb-builds@codesynthesis.com
 #builds: all : -( +windows &gcc ) ; Unsupported by libmysqlclient.
 build-exclude: **/**-mingw32 ; Unsupported by libmysqlclient.
 requires: c++11
-depends: * build2 >= 0.8.0-
-depends: * bpkg >= 0.8.0-
+depends: * build2 >= 0.9.0
+depends: * bpkg >= 0.9.0
 #depends: libmysqlclient ^5.0.3 | libmariadb ^10.2.2
 depends: libmysqlclient ^5.0.3
-depends: libodb == 2.5.0-b.11
+depends: libodb [2.5.0-b.12.1 2.5.0-b.13)
