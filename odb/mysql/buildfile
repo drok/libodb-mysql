@@ -22,17 +22,14 @@ lib{odb-mysql}: {hxx ixx txx cxx}{* -version-build2} {hxx}{version-build2}   \
 # clean results in a state identical to distributed).
 #
 hxx{version-build2}: in{version-build2} $src_root/manifest
-hxx{version-build2}: dist  = true
-hxx{version-build2}: clean = ($src_root != $out_root)
+hxx{version-build2}:
+{
+  dist  = true
+  clean = ($src_root != $out_root)
+}
 
-# For pre-releases use the complete version to make sure they cannot be used
-# in place of another pre-release or the final version.
+# Build options.
 #
-if $version.pre_release
-  lib{odb-mysql}: bin.lib.version = @"-$version.project_id"
-else
-  lib{odb-mysql}: bin.lib.version = @"-$version.major.$version.minor"
-
 cxx.poptions =+ "-I$out_root" "-I$src_root" -DLIBODB_MYSQL_BUILD2
 
 if ($client_lib == 'mariadb')
@@ -41,8 +38,13 @@ if ($client_lib == 'mariadb')
 obja{*}: cxx.poptions += -DLIBODB_MYSQL_STATIC_BUILD
 objs{*}: cxx.poptions += -DLIBODB_MYSQL_SHARED_BUILD
 
-lib{odb-mysql}: cxx.export.poptions = "-I$out_root" "-I$src_root" \
-                                      -DLIBODB_MYSQL_BUILD2
+# Export options.
+#
+lib{odb-mysql}:
+{
+  cxx.export.poptions = "-I$out_root" "-I$src_root" -DLIBODB_MYSQL_BUILD2
+  cxx.export.libs = $int_libs
+}
 
 if ($client_lib == 'mariadb')
   lib{odb-mysql}: cxx.export.poptions += -DLIBODB_MYSQL_MARIADB
@@ -50,8 +52,17 @@ if ($client_lib == 'mariadb')
 liba{odb-mysql}: cxx.export.poptions += -DLIBODB_MYSQL_STATIC
 libs{odb-mysql}: cxx.export.poptions += -DLIBODB_MYSQL_SHARED
 
-lib{odb-mysql}: cxx.export.libs = $int_libs
+# For pre-releases use the complete version to make sure they cannot be used
+# in place of another pre-release or the final version. See the version module
+# for details on the version.* variable values.
+#
+if $version.pre_release
+  lib{odb-mysql}: bin.lib.version = @"-$version.project_id"
+else
+  lib{odb-mysql}: bin.lib.version = @"-$version.major.$version.minor"
 
+# Generated options parser.
+#
 details/
 {
   if $cli.configured
@@ -68,9 +79,12 @@ details/
     # distributed). But don't install their headers since they are only used
     # internally in the database implementation.
     #
-    cli.cxx{*}: dist    = true
-    cli.cxx{*}: clean   = ($src_root != $out_root)
-    cli.cxx{*}: install = false
+    cli.cxx{*}:
+    {
+      dist    = true
+      clean   = ($src_root != $out_root)
+      install = false
+    }
   }
   else
     # No install for the pre-generated case.
@@ -78,13 +92,16 @@ details/
     hxx{options}@./ ixx{options}@./: install = false
 }
 
-# Install into the odb/mysql/ subdirectory of, say, /usr/include/ recreating
-# subdirectories.
+# Install into the odb/mysql/ subdirectory of, say, /usr/include/
+# recreating subdirectories.
 #
 install_include = [dir_path] include/odb/mysql/
 
-{hxx ixx txx}{*}: install         = $install_include
-{hxx ixx txx}{*}: install.subdirs = true
+{hxx ixx txx}{*}:
+{
+  install         = $install_include
+  install.subdirs = true
+}
 
 # We want these to be picked up whether LIBODB_MYSQL_BUILD2 is defined or not.
 #
