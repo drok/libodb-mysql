@@ -13,7 +13,9 @@ doc-url: https://www.codesynthesis.com/products/odb/doc/manual.xhtml
 src-url: https://git.codesynthesis.com/cgit/odb/libodb-mysql/
 email: odb-users@codesynthesis.com
 build-email: odb-builds@codesynthesis.com
-builds: all : -( +windows &gcc ) ; MinGW GCC is not supported by libmysqlclient.
+builds: all
+builds: -( +windows &gcc ) ; MinGW GCC is not supported by libmysqlclient.
+builds: -gcc-9+            ; GCC 9 is not supported by libmysqlclient 8.0.15.
 requires: c++11
 depends: * build2 >= 0.10.0
 depends: * bpkg >= 0.10.0
