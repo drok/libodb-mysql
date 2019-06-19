@@ -5,7 +5,7 @@ project: odb
 summary: MySQL ODB runtime library
 license: GPLv2
 license: proprietary
-tags: c++, orm, mysql, database, relational, object, persistence, sql
+topics: C++, ORM, MySQL, MariaDB, SQL
 description-file: README
 changes-file: NEWS
 url: https://www.codesynthesis.com/products/odb/
