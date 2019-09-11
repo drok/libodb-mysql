@@ -19,4 +19,5 @@ depends: * build2 >= 0.11.0
 depends: * bpkg >= 0.11.0
 #depends: libmysqlclient >= 5.0.3 | libmariadb ^10.2.2
 depends: libmysqlclient >= 5.0.3
-depends: libodb [2.5.0-b.16.1 2.5.0-b.17)
+#depends: libodb [2.5.0-b.16.1 2.5.0-b.17)
+depends: libodb >= 2.5.0-b.15
