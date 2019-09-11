@@ -20,7 +20,9 @@ typedef char my_bool;
 
 // Starting with 8.0.11 MySQL renamed st_mysql_bind to MYSQL_BIND.
 //
-#if defined(LIBODB_MYSQL_MARIADB) || MYSQL_VERSION_ID < 80011
+#if !defined(LIBODB_MYSQL_MARIADB) && MYSQL_VERSION_ID >= 80011
+struct MYSQL_BIND;
+#else
 typedef struct st_mysql_bind MYSQL_BIND;
 #endif
 
