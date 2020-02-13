@@ -1,5 +1,4 @@
 // file      : odb/mysql/container-statements.hxx
-// copyright : Copyright (c) 2005-2019 Code Synthesis Tools CC
 // license   : GNU GPL v2; see accompanying LICENSE file
 
 #ifndef ODB_MYSQL_CONTAINER_STATEMENTS_HXX

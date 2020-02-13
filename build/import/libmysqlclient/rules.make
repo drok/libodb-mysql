@@ -1,5 +1,4 @@
 # file      : build/import/libmysqlclient/rules.make
-# copyright : Copyright (c) 2009-2019 Code Synthesis Tools CC
 # license   : GNU GPL v2; see accompanying LICENSE file
 
 $(dcf_root)/import/libmysqlclient/%: root := $(libmysqlclient_root)
