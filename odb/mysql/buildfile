@@ -1,15 +1,11 @@
 # file      : odb/mysql/buildfile
 # license   : GNU GPL v2; see accompanying LICENSE file
 
-client_lib = 'mysql'
-#client_lib = 'mariadb'
-
 import int_libs = libodb%lib{odb}
 
-if ($client_lib == 'mysql')
-  import int_libs += libmysqlclient%lib{mysqlclient}
-else
-  import int_libs += libmariadb%lib{mariadb}
+import int_libs += ($client_lib == 'mysql'            \
+                    ? libmysqlclient%lib{mysqlclient} \
+                    : libmariadb%lib{mariadb})
 
 lib{odb-mysql}: {hxx ixx txx cxx}{* -version-build2} {hxx}{version-build2}   \
         details/{hxx ixx txx cxx}{* -options} details/{hxx ixx cxx}{options} \
