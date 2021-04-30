@@ -601,7 +601,7 @@ namespace odb
     {
       // Throws if not in transaction.
       //
-      mysql::connection& c (transaction::current ().connection ());
+      mysql::connection& c (transaction::current ().connection (*this));
       return c.prepare_query<T> (n, q);
     }
 
