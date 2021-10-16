@@ -1,6 +1,6 @@
 : 1
 name: libodb-mysql
-version: 2.5.0-b.20.z
+version: 2.5.0-b.21
 project: odb
 summary: MySQL ODB runtime library
 license: GPL-2.0-only
@@ -21,4 +21,4 @@ depends: * build2 >= 0.13.0
 depends: * bpkg >= 0.13.0
 #depends: libmysqlclient >= 5.0.3 | libmariadb ^10.2.2
 depends: libmysqlclient >= 5.0.3
-depends: libodb [2.5.0-b.20.1 2.5.0-b.21)
+depends: libodb == 2.5.0-b.21
