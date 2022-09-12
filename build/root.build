@@ -1,6 +1,8 @@
 # file      : build/root.build
 # license   : GNU GPL v2; see accompanying LICENSE file
 
+config [bool] config.libodb_mysql.develop ?= false
+
 # Configure which database client library to use for build2 versions greater
 # than 0.12.0 and always use MySQL client library otherwise (due to the lack
 # of the project configuration variables support).
@@ -41,11 +43,3 @@ if ($cxx.target.system == 'win32-msvc')
 
 if ($cxx.class == 'msvc')
   cxx.coptions += /wd4251 /wd4275 /wd4800
-
-# Load the cli module but only if it's available. This way a distribution
-# that includes pre-generated files can be built without installing cli.
-# This is also the reason why we need to explicitly spell out individual
-# source file prerequisites instead of using the cli.cxx{} group (it won't
-# be there unless the module is configured).
-#
-using? cli
